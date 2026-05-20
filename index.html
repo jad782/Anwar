@@ -1,181 +1,412 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Al-Anwar">
-    <link rel="apple-touch-icon" href="icon-192.jpg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Al-Anwar" />
+    <link rel="apple-touch-icon" href="icon-192.jpg" />
     <title>تطبيق الأنوار الإسلامي</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-
+    <link rel="stylesheet" href="style.css" />
+    <link rel="manifest" href="manifest.json" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
     <div class="bg-circles"></div>
 
     <div class="top-bar">
-        <div class="top-icons">
-            <button class="icon-btn dark-btn" onclick="goToTab(3)"><i class="fa-solid fa-gear"></i></button>
-        </div>
-        <h1 class="page-title" id="page-title">الرئيسية</h1>
+      <div class="top-icons">
+        <button class="icon-btn dark-btn" onclick="goToTab(3)">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+      </div>
+      <h1 class="page-title" id="page-title">الرئيسية</h1>
     </div>
 
     <main class="content-area" id="content">
-        
-        <div id="tab-home" class="tab-section" style="display: block;">
-            
-            <div class="hero-section">
-                <div class="hero-right">
-                    <h2 class="greeting">وقت مبارك</h2>
-                    <button class="tasbeeh-pill" onclick="goToTab(2)">لُنسبّح الله</button>
-                    <div class="next-prayer-pill">
-                        <i class="fa-solid fa-mosque"></i>
-                        <span id="pill-countdown">جاري الحساب...</span>
-                    </div>
-                </div>
-                <div class="date-card-green">
-                    <h1 id="current-day">الأيام</h1>
-                    <div class="date-split">
-                        <div class="hijri"><span class="month" id="hijri-month">الشهر</span><strong class="day" id="hijri-day">0</strong><span class="year" id="hijri-year">0000</span></div>
-                        <div class="greg"><span class="month" id="greg-month">Month</span><strong class="day" id="greg-day">0</strong><span class="year" id="greg-year">0000</span></div>
-                    </div>
-                </div>
+      <div id="tab-home" class="tab-section" style="display: block">
+        <div class="hero-section">
+          <div class="hero-right">
+            <h2 class="greeting">وقت مبارك</h2>
+            <button class="tasbeeh-pill" onclick="goToTab(2)">
+              لُنسبّح الله
+            </button>
+            <div class="next-prayer-pill">
+              <i class="fa-solid fa-mosque"></i>
+              <span id="pill-countdown">جاري الحساب...</span>
             </div>
-
-            <div class="card" style="margin-bottom: 25px;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <h3 style="color:var(--dark-green); margin-bottom:5px;">وردك القرآني</h3>
-                        <p id="khatma-display" style="font-size:0.9rem; color:var(--text-muted);">لم تبدأ بعد</p>
-                    </div>
-                    <button onclick="startNewKhatma()" class="tasbeeh-pill" style="width:auto; padding:8px 20px;">بدء الختمة</button>
-                </div>
+          </div>
+          <div class="date-card-green">
+            <h1 id="current-day">الأيام</h1>
+            <div class="date-split">
+              <div class="hijri">
+                <span class="month" id="hijri-month">الشهر</span
+                ><strong class="day" id="hijri-day">0</strong
+                ><span class="year" id="hijri-year">0000</span>
+              </div>
+              <div class="greg">
+                <span class="month" id="greg-month">Month</span
+                ><strong class="day" id="greg-day">0</strong
+                ><span class="year" id="greg-year">0000</span>
+              </div>
             </div>
-
-            <div class="section-header">
-                <h3>أوقات الصلاة</h3>
-                <span class="location"><i class="fa-solid fa-location-dot"></i> إسطنبول، تركيا</span>
-            </div>
-
-            <div class="prayer-grid">
-                <div class="prayer-card" id="p-Fajr"><i class="fa-solid fa-cloud-moon"></i><span>الفجر</span><strong id="fajr-time">--:--</strong></div>
-                <div class="prayer-card" id="p-Sunrise"><i class="fa-solid fa-sun"></i><span>الشروق</span><strong id="sunrise-time">--:--</strong></div>
-                <div class="prayer-card" id="p-Dhuhr"><i class="fa-solid fa-sun"></i><span>الظهر</span><strong id="dhuhr-time">--:--</strong></div>
-                <div class="prayer-card active-prayer" id="p-Asr">
-                    <div class="active-prayer-header"><i class="fa-regular fa-sun"></i><span id="next-prayer-name-card">الصلاة</span><strong id="asr-time-active">--:--</strong></div>
-                    <div class="active-prayer-body"><span>متبقي على الأذان</span><h2 id="countdown-card" dir="ltr">--:--:--</h2></div>
-                </div>
-                <div class="prayer-card" id="p-Maghrib"><i class="fa-solid fa-cloud-sun"></i><span>المغرب</span><strong id="maghrib-time">--:--</strong></div>
-                <div class="prayer-card" id="p-Isha"><i class="fa-solid fa-moon"></i><span>العشاء</span><strong id="isha-time">--:--</strong></div>
-            </div>
-
-            <div class="section-header" style="margin-top: 25px;">
-                <h3>تطبيقاتك اليومية</h3>
-            </div>
-            <div class="apps-scroll">
-                <div class="app-item" onclick="goToTab(2)"><div class="app-icon" style="background:rgba(35,76,51,0.1); color:var(--dark-green);"><i class="fa-solid fa-ring"></i></div><span>المسبحة</span></div>
-                <div class="app-item" onclick="openQibla()"><div class="app-icon" style="background:rgba(46,35,76,0.1); color:#2E234C;"><i class="fa-solid fa-compass"></i></div><span>القبلة</span></div>
-                <div class="app-item" onclick="goToTab(2)"><div class="app-icon" style="background:rgba(35,76,51,0.1); color:var(--dark-green);"><i class="fa-solid fa-person-praying"></i></div><span>الأذكار</span></div>
-                <div class="app-item" onclick="goToTab(1)"><div class="app-icon" style="background:rgba(132,60,43,0.1); color:#843C2B;"><i class="fa-solid fa-book-quran"></i></div><span>المصحف</span></div>
-            </div>
-
-            <a href="https://wa.me/9665551517264?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%E2%80%8C%20%D8%A3%D9%88%D8%AF%20%D8%A7%D9%84%D8%AA%D8%A8%D8%B1%D8%B9" target="_blank" class="donate-card">
-                <div class="donate-icon"><i class="fa-brands fa-whatsapp"></i></div>
-                <div class="donate-text"><h4>ساهم في نشر التطبيق</h4><span>تبرع عبر واتساب · 0555 151 7264</span></div>
-                <i class="fa-solid fa-arrow-left" style="color:white;"></i>
-            </a>
-
-            <div id="khatma-view" style="display: none; margin-top:20px;">
-                <div class="reading-header">
-                    <button id="back-btn" onclick="closeKhatma()"><i class="fa-solid fa-arrow-right"></i> رجوع للرئيسية</button>
-                    <h2 id="khatma-surah-name" style="color: var(--dark-green);">الختمة</h2>
-                    <span id="khatma-page-number" style="background:var(--dark-green); color:var(--white); padding:3px 8px; border-radius:5px; font-size:0.8rem; font-weight:bold;">صفحة 1</span>
-                </div>
-                <div id="khatma-container" class="quran-text"></div>
-                <div class="page-nav">
-                    <button id="next-page-btn" onclick="nextKhatmaPage()">التالية <i class="fa-solid fa-arrow-left"></i></button>
-                    <button id="prev-page-btn" onclick="prevKhatmaPage()"><i class="fa-solid fa-arrow-right"></i> السابقة</button>
-                </div>
-            </div>
+          </div>
         </div>
 
-        <div id="tab-surahs" class="tab-section" style="display: none;">
-            <div id="surah-list"></div>
-            <div id="reading-view" style="display: none;">
-                <div class="reading-header">
-                    <button id="back-btn" onclick="closeSurah()"><i class="fa-solid fa-arrow-right"></i> رجوع</button>
-                    <h2 id="current-surah-name" style="color:var(--dark-green);">سورة</h2>
-                </div>
-                <div id="ayahs-container" class="quran-text"></div>
+        <div class="card" style="margin-bottom: 25px">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <div>
+              <h3 style="color: var(--dark-green); margin-bottom: 5px">
+                وردك القرآني
+              </h3>
+              <p
+                id="khatma-display"
+                style="font-size: 0.9rem; color: var(--text-muted)"
+              >
+                لم تبدأ بعد
+              </p>
             </div>
+            <button
+              onclick="startNewKhatma()"
+              class="tasbeeh-pill"
+              style="width: auto; padding: 8px 20px"
+            >
+              بدء الختمة
+            </button>
+          </div>
         </div>
 
-        <div id="tab-athkar" class="tab-section" style="display: none;">
-            <div class="card" style="text-align:center; margin-bottom:20px;">
-                <h3 style="color:var(--dark-green);">المسبحة الإلكترونية</h3>
-                <span id="misbaha-text" style="display:block; margin:15px 0; font-size:1.3rem; color:var(--text-main);">سُبْحَانَ اللَّهِ</span>
-                <div id="misbaha-count" style="font-size:3.5rem; font-weight:bold; color:var(--dark-green);">0</div>
-                <button onclick="countTasbeeh()" class="tasbeeh-pill" style="width:80%; margin:15px auto; padding:15px; font-size:1.2rem;">تسبيح</button>
-                <button onclick="resetTasbeeh()" style="background:none; border:none; color:var(--text-muted); cursor:pointer;"><i class="fa-solid fa-rotate-right"></i> تصفير</button>
-            </div>
-
-            <div id="athkar-categories-list">
-                <div class="athkar-cat-card" onclick="openAthkarCategory('morning')"><div class="athkar-cat-icon"><i class="fa-solid fa-sun"></i></div><h3>أذكار الصباح</h3><i class="fa-solid fa-chevron-left" style="color:var(--dark-green);"></i></div>
-                <div class="athkar-cat-card" onclick="openAthkarCategory('evening')"><div class="athkar-cat-icon"><i class="fa-solid fa-moon"></i></div><h3>أذكار المساء</h3><i class="fa-solid fa-chevron-left" style="color:var(--dark-green);"></i></div>
-                <div class="athkar-cat-card" onclick="openAthkarCategory('postPrayer')"><div class="athkar-cat-icon"><i class="fa-solid fa-person-praying"></i></div><h3>أذكار بعد الصلاة</h3><i class="fa-solid fa-chevron-left" style="color:var(--dark-green);"></i></div>
-                <div class="athkar-cat-card" onclick="openAthkarCategory('sleep')"><div class="athkar-cat-icon"><i class="fa-solid fa-bed"></i></div><h3>أذكار النوم</h3><i class="fa-solid fa-chevron-left" style="color:var(--dark-green);"></i></div>
-            </div>
-
-            <div id="athkar-reading-view" style="display: none;">
-                <div class="reading-header">
-                    <button id="back-btn" onclick="closeAthkarCategory()"><i class="fa-solid fa-arrow-right"></i> رجوع</button>
-                    <h2 id="current-athkar-title" style="color:var(--dark-green);">الأذكار</h2>
-                </div>
-                <div id="athkar-items-container"></div>
-            </div>
+        <div class="section-header">
+          <h3>أوقات الصلاة</h3>
+          <span class="location"
+            ><i class="fa-solid fa-location-dot"></i> إسطنبول، تركيا</span
+          >
         </div>
 
-        <div id="tab-settings" class="tab-section" style="display: none;">
-            <div class="card">
-                <div class="setting-item">
-                    <span>تفعيل تنبيهات الأذان</span>
-                    <label class="switch"><input type="checkbox" id="notifications-toggle"><span class="slider round"></span></label>
-                </div>
-                <div class="setting-item">
-                    <span>الوضع الليلي (Dark Mode)</span>
-                    <label class="switch"><input type="checkbox" id="dark-mode-toggle"><span class="slider round"></span></label>
-                </div>
-                <div class="setting-item">
-                    <span>حجم خط القراءة</span>
-                    <div style="display:flex; align-items:center; gap:15px;">
-                        <button id="decrease-font" class="font-btn">-</button>
-                        <span id="font-size-display" style="font-weight:bold; color:var(--dark-green);">22px</span>
-                        <button id="increase-font" class="font-btn">+</button>
-                    </div>
-                </div>
+        <div class="prayer-grid">
+          <div class="prayer-card" id="p-Fajr">
+            <i class="fa-solid fa-cloud-moon"></i><span>الفجر</span
+            ><strong id="fajr-time">--:--</strong>
+          </div>
+          <div class="prayer-card" id="p-Sunrise">
+            <i class="fa-solid fa-sun"></i><span>الشروق</span
+            ><strong id="sunrise-time">--:--</strong>
+          </div>
+          <div class="prayer-card" id="p-Dhuhr">
+            <i class="fa-solid fa-sun"></i><span>الظهر</span
+            ><strong id="dhuhr-time">--:--</strong>
+          </div>
+          <div class="prayer-card active-prayer" id="p-Asr">
+            <div class="active-prayer-header">
+              <i class="fa-regular fa-sun"></i
+              ><span id="next-prayer-name-card">الصلاة</span
+              ><strong id="asr-time-active">--:--</strong>
             </div>
+            <div class="active-prayer-body">
+              <span>متبقي على الأذان</span>
+              <h2 id="countdown-card" dir="ltr">--:--:--</h2>
+            </div>
+          </div>
+          <div class="prayer-card" id="p-Maghrib">
+            <i class="fa-solid fa-cloud-sun"></i><span>المغرب</span
+            ><strong id="maghrib-time">--:--</strong>
+          </div>
+          <div class="prayer-card" id="p-Isha">
+            <i class="fa-solid fa-moon"></i><span>العشاء</span
+            ><strong id="isha-time">--:--</strong>
+          </div>
         </div>
 
+        <div class="section-header" style="margin-top: 25px">
+          <h3>تطبيقاتك اليومية</h3>
+        </div>
+        <div class="apps-scroll">
+          <div class="app-item" onclick="goToTab(2)">
+            <div
+              class="app-icon"
+              style="
+                background: rgba(35, 76, 51, 0.1);
+                color: var(--dark-green);
+              "
+            >
+              <i class="fa-solid fa-ring"></i>
+            </div>
+            <span>المسبحة</span>
+          </div>
+          <div class="app-item" onclick="openQibla()">
+            <div
+              class="app-icon"
+              style="background: rgba(46, 35, 76, 0.1); color: #2e234c"
+            >
+              <i class="fa-solid fa-compass"></i>
+            </div>
+            <span>القبلة</span>
+          </div>
+          <div class="app-item" onclick="goToTab(2)">
+            <div
+              class="app-icon"
+              style="
+                background: rgba(35, 76, 51, 0.1);
+                color: var(--dark-green);
+              "
+            >
+              <i class="fa-solid fa-person-praying"></i>
+            </div>
+            <span>الأذكار</span>
+          </div>
+          <div class="app-item" onclick="goToTab(1)">
+            <div
+              class="app-icon"
+              style="background: rgba(132, 60, 43, 0.1); color: #843c2b"
+            >
+              <i class="fa-solid fa-book-quran"></i>
+            </div>
+            <span>المصحف</span>
+          </div>
+        </div>
+
+        <a
+          href="https://wa.me/9665551517264?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%E2%80%8C%20%D8%A3%D9%88%D8%AF%20%D8%A7%D9%84%D8%AA%D8%A8%D8%B1%D8%B9"
+          target="_blank"
+          class="donate-card"
+        >
+          <div class="donate-icon"><i class="fa-brands fa-whatsapp"></i></div>
+          <div class="donate-text">
+            <h4>ساهم في نشر التطبيق</h4>
+            <span>تبرع عبر واتساب · 0555 151 7264</span>
+          </div>
+          <i class="fa-solid fa-arrow-left" style="color: white"></i>
+        </a>
+
+        <div id="khatma-view" style="display: none; margin-top: 20px">
+          <div class="reading-header">
+            <button id="back-btn" onclick="closeKhatma()">
+              <i class="fa-solid fa-arrow-right"></i> رجوع للرئيسية
+            </button>
+            <h2 id="khatma-surah-name" style="color: var(--dark-green)">
+              الختمة
+            </h2>
+            <span
+              id="khatma-page-number"
+              style="
+                background: var(--dark-green);
+                color: var(--white);
+                padding: 3px 8px;
+                border-radius: 5px;
+                font-size: 0.8rem;
+                font-weight: bold;
+              "
+              >صفحة 1</span
+            >
+          </div>
+          <div id="khatma-container" class="quran-text"></div>
+          <div class="page-nav">
+            <button id="next-page-btn" onclick="nextKhatmaPage()">
+              التالية <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <button id="prev-page-btn" onclick="prevKhatmaPage()">
+              <i class="fa-solid fa-arrow-right"></i> السابقة
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-surahs" class="tab-section" style="display: none">
+        <div id="surah-list"></div>
+        <div id="reading-view" style="display: none">
+          <div class="reading-header">
+            <button id="back-btn" onclick="closeSurah()">
+              <i class="fa-solid fa-arrow-right"></i> رجوع
+            </button>
+            <h2 id="current-surah-name" style="color: var(--dark-green)">
+              سورة
+            </h2>
+          </div>
+          <div id="ayahs-container" class="quran-text"></div>
+        </div>
+      </div>
+
+      <div id="tab-athkar" class="tab-section" style="display: none">
+        <div class="card" style="text-align: center; margin-bottom: 20px">
+          <h3 style="color: var(--dark-green)">المسبحة الإلكترونية</h3>
+          <span
+            id="misbaha-text"
+            style="
+              display: block;
+              margin: 15px 0;
+              font-size: 1.3rem;
+              color: var(--text-main);
+            "
+            >سُبْحَانَ اللَّهِ</span
+          >
+          <div
+            id="misbaha-count"
+            style="
+              font-size: 3.5rem;
+              font-weight: bold;
+              color: var(--dark-green);
+            "
+          >
+            0
+          </div>
+          <button
+            onclick="countTasbeeh()"
+            class="tasbeeh-pill"
+            style="
+              width: 80%;
+              margin: 15px auto;
+              padding: 15px;
+              font-size: 1.2rem;
+            "
+          >
+            تسبيح
+          </button>
+          <button
+            onclick="resetTasbeeh()"
+            style="
+              background: none;
+              border: none;
+              color: var(--text-muted);
+              cursor: pointer;
+            "
+          >
+            <i class="fa-solid fa-rotate-right"></i> تصفير
+          </button>
+        </div>
+
+        <div id="athkar-categories-list">
+          <div class="athkar-cat-card" onclick="openAthkarCategory('morning')">
+            <div class="athkar-cat-icon"><i class="fa-solid fa-sun"></i></div>
+            <h3>أذكار الصباح</h3>
+            <i
+              class="fa-solid fa-chevron-left"
+              style="color: var(--dark-green)"
+            ></i>
+          </div>
+          <div class="athkar-cat-card" onclick="openAthkarCategory('evening')">
+            <div class="athkar-cat-icon"><i class="fa-solid fa-moon"></i></div>
+            <h3>أذكار المساء</h3>
+            <i
+              class="fa-solid fa-chevron-left"
+              style="color: var(--dark-green)"
+            ></i>
+          </div>
+          <div
+            class="athkar-cat-card"
+            onclick="openAthkarCategory('postPrayer')"
+          >
+            <div class="athkar-cat-icon">
+              <i class="fa-solid fa-person-praying"></i>
+            </div>
+            <h3>أذكار بعد الصلاة</h3>
+            <i
+              class="fa-solid fa-chevron-left"
+              style="color: var(--dark-green)"
+            ></i>
+          </div>
+          <div class="athkar-cat-card" onclick="openAthkarCategory('sleep')">
+            <div class="athkar-cat-icon"><i class="fa-solid fa-bed"></i></div>
+            <h3>أذكار النوم</h3>
+            <i
+              class="fa-solid fa-chevron-left"
+              style="color: var(--dark-green)"
+            ></i>
+          </div>
+        </div>
+
+        <div id="athkar-reading-view" style="display: none">
+          <div class="reading-header">
+            <button id="back-btn" onclick="closeAthkarCategory()">
+              <i class="fa-solid fa-arrow-right"></i> رجوع
+            </button>
+            <h2 id="current-athkar-title" style="color: var(--dark-green)">
+              الأذكار
+            </h2>
+          </div>
+          <div id="athkar-items-container"></div>
+        </div>
+      </div>
+
+      <div id="tab-settings" class="tab-section" style="display: none">
+        <div class="card">
+          <div class="setting-item">
+            <span>تفعيل تنبيهات الأذان</span>
+            <label class="switch"
+              ><input type="checkbox" id="notifications-toggle" /><span
+                class="slider round"
+              ></span
+            ></label>
+          </div>
+          <div class="setting-item">
+            <span>الوضع الليلي (Dark Mode)</span>
+            <label class="switch"
+              ><input type="checkbox" id="dark-mode-toggle" /><span
+                class="slider round"
+              ></span
+            ></label>
+          </div>
+          <div class="setting-item">
+            <span>حجم خط القراءة</span>
+            <div style="display: flex; align-items: center; gap: 15px">
+              <button id="decrease-font" class="font-btn">-</button>
+              <span
+                id="font-size-display"
+                style="font-weight: bold; color: var(--dark-green)"
+                >22px</span
+              >
+              <button id="increase-font" class="font-btn">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
 
     <nav class="bottom-nav">
-        <button class="nav-item active"><i class="fa-solid fa-house"></i><span>الرئيسية</span></button>
-        <button class="nav-item"><i class="fa-solid fa-book-open"></i><span>المصحف</span></button>
-        <button class="nav-item"><i class="fa-solid fa-quote-right"></i><span>الأذكار</span></button>
-        <button class="nav-item"><i class="fa-solid fa-gear"></i><span>الإعدادات</span></button>
+      <button class="nav-item active">
+        <i class="fa-solid fa-house"></i><span>الرئيسية</span>
+      </button>
+      <button class="nav-item">
+        <i class="fa-solid fa-book-open"></i><span>المصحف</span>
+      </button>
+      <button class="nav-item">
+        <i class="fa-solid fa-quote-right"></i><span>الأذكار</span>
+      </button>
+      <button class="nav-item">
+        <i class="fa-solid fa-gear"></i><span>الإعدادات</span>
+      </button>
     </nav>
 
     <div id="qibla-overlay" class="qibla-overlay">
-        <div class="qibla-modal">
-            <button class="close-qibla" onclick="closeQibla()"><i class="fa-solid fa-xmark"></i></button>
-            <h2 style="color:var(--dark-green); margin-bottom:20px;">اتجاه القبلة</h2>
-            <div class="compass-circle"><i class="fa-solid fa-arrow-up" id="compass-arrow"></i></div>
-            <p style="margin-top:20px; color:var(--text-muted); font-size:0.9rem;">قم بتدوير هاتفك بشكل مسطح.</p>
+      <div class="qibla-modal">
+        <button class="close-qibla" onclick="closeQibla()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <h2 style="color: var(--dark-green); margin-bottom: 20px">
+          اتجاه القبلة
+        </h2>
+        <div class="compass-circle">
+          <i class="fa-solid fa-arrow-up" id="compass-arrow"></i>
         </div>
+        <p
+          style="margin-top: 20px; color: var(--text-muted); font-size: 0.9rem"
+        >
+          قم بتدوير هاتفك بشكل مسطح.
+        </p>
+      </div>
     </div>
 
     <script src="app.js"></script>
-</body>
+  </body>
 </html>
