@@ -1,29 +1,47 @@
-const CACHE_NAME = 'quran-app-v1';
+// غير هذا الرقم كلما قمت بتحديث التطبيق (مثلاً v2, v3, v4)
+const CACHE_NAME = 'anwar-cache-v1'; 
+
 const urlsToCache = [
-    './index.html',
-    './style.css',
-    './app.js',
-    './manifest.json'
+  './',
+  './index.html',
+  './style.css',
+  './app.js',
+  './manifest.json',
+  './icon-192.jpg',
+  './icon-512.jpg'
 ];
 
-// تثبيت ملفات التطبيق في الذاكرة
+// تثبيت التحديث الجديد فوراً وإجبار التطبيق على قبوله
 self.addEventListener('install', event => {
+    self.skipWaiting(); 
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => {
-                console.log('Opened cache');
-                return cache.addAll(urlsToCache);
-            })
+        caches.open(CACHE_NAME).then(cache => {
+            return cache.addAll(urlsToCache);
+        })
     );
 });
 
-// جلب الملفات من الذاكرة إذا انقطع الإنترنت
+// مسح الذاكرة القديمة (Cache) عند تفعيل النسخة الجديدة
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cacheName => {
+                    if (cacheName !== CACHE_NAME) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+    self.clients.claim();
+});
+
+// استراتيجية (الشبكة أولاً): جلب الأكواد الجديدة من الإنترنت، وإذا لم يوجد إنترنت يعرض النسخة المخزنة
 self.addEventListener('fetch', event => {
     event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                // إذا وجد الملف في الكاش يرجعه، وإلا يجلبه من الإنترنت
-                return response || fetch(event.request);
-            })
+        fetch(event.request).catch(() => {
+            return caches.match(event.request);
+        })
     );
 });
