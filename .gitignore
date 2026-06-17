@@ -1,0 +1,18 @@
+# تبعيات وبناء (لا تُرفع)
+mobile/node_modules/
+mobile/www/
+mobile/android/build/
+mobile/android/app/build/
+mobile/android/.gradle/
+mobile/android/.idea/
+mobile/android/local.properties
+mobile/android/capacitor-cordova-android-plugins/build/
+mobile/recs.json
+
+# ملفات غير متعلّقة بالتطبيق
+*.pdf
+
+# نظام
+.DS_Store
+Thumbs.db
+*.log

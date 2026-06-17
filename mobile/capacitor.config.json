@@ -1,0 +1,11 @@
+{
+  "appId": "com.alanwar.quran",
+  "appName": "الأنوار",
+  "webDir": "www",
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon",
+      "iconColor": "#2C1810"
+    }
+  }
+}

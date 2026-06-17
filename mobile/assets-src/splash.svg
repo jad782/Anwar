@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2732" height="2732" viewBox="0 0 2732 2732">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#4A2C1A"/>
+      <stop offset="60%" stop-color="#2C1810"/>
+      <stop offset="100%" stop-color="#1A0E06"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F2D27A"/>
+      <stop offset="50%" stop-color="#D4A843"/>
+      <stop offset="100%" stop-color="#B8860B"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFE9A8" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#F2D27A" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#F2D27A" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="2732" height="2732" fill="url(#bg)"/>
+  <circle cx="1366" cy="1300" r="620" fill="url(#glow)"/>
+  <g transform="translate(854,940) scale(1.0)" fill="none" stroke="url(#gold)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="512" cy="150" rx="26" ry="20"/>
+    <path d="M512 168 v40"/>
+    <path d="M430 250 h164 l-30 -42 h-104 z" fill="url(#gold)" stroke="none"/>
+    <path d="M438 270 C 405 330 400 470 430 560 C 445 610 470 650 512 660 C 554 650 579 610 594 560 C 624 470 619 330 586 270 Z" fill="rgba(212,168,67,0.12)"/>
+    <path d="M470 280 C 450 380 450 520 482 630"/>
+    <path d="M554 280 C 574 380 574 520 542 630"/>
+    <path d="M512 272 v382"/>
+    <path d="M452 668 h120 l-22 56 h-76 z" fill="url(#gold)" stroke="none"/>
+  </g>
+  <path d="M1366 1320 c -34 36 -40 84 0 118 c 40 -34 34 -82 0 -118 z" fill="url(#gold)"/>
+  <text x="1366" y="2000" text-anchor="middle" font-family="Amiri, serif" font-size="190" font-weight="700" fill="url(#gold)">الأنوار</text>
+  <text x="1366" y="2120" text-anchor="middle" font-family="Cairo, sans-serif" font-size="70" fill="#9E8E78">تطبيق إسلامي متكامل</text>
+</svg>
