@@ -287,13 +287,42 @@ body.light-mode .ayah-number { background-image: url('data:image/svg+xml;utf8,<s
 .quran-text[data-bg="green"] .basmalah, .quran-text[data-bg="dark"] .basmalah { color: #D4A843; }
 .quran-text[data-bg="dark"] { background: #14110B; color: #EFE6D5; border-radius: 14px; padding: 16px; }
 
+/* ===== قائمة السور الأنيقة ===== */
+.msf-card { display: flex; align-items: center; gap: 14px; background: var(--white); border: 1px solid var(--border-color); border-radius: 18px; padding: 12px 16px; margin-bottom: 11px; cursor: pointer; transition: transform 0.15s, border-color 0.25s; box-shadow: 0 8px 20px rgba(0,0,0,0.22); }
+.msf-card:active { transform: scale(0.99); border-color: var(--accent-color); }
+.msf-star { width: 46px; height: 46px; min-width: 46px; display: flex; align-items: center; justify-content: center; color: var(--accent-color); font-weight: 700; font-size: 0.9rem; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none' stroke='%23D4A843' stroke-width='3'><path d='M50 5 L61 24 L83 24 L72 43 L83 62 L61 62 L50 81 L39 62 L17 62 L28 43 L17 24 L39 24 Z'/><path d='M50 18 L58 31 L73 31 L65 44 L73 57 L58 57 L50 70 L42 57 L27 57 L35 44 L27 31 L42 31 Z' stroke-opacity='0.4'/></svg>"); background-size: contain; background-repeat: no-repeat; background-position: center; }
+.msf-mid { flex: 1; min-width: 0; }
+.msf-name { font-family: 'Amiri', serif; font-size: 1.5rem; font-weight: 700; color: var(--primary-color); line-height: 1.4; }
+.msf-meta { display: flex; align-items: center; gap: 7px; font-size: 0.76rem; color: var(--text-muted); margin-top: 2px; }
+.msf-dot { opacity: 0.6; }
+.msf-count { background: var(--pill-bg); color: var(--accent-color); font-size: 0.72rem; font-weight: 700; padding: 5px 12px; border-radius: 14px; white-space: nowrap; }
+
+/* ===== شريط أدوات المصحف ===== */
+.msf-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; }
+
+/* ===== صفحة المصحف ===== */
+.mushaf-page { text-align: justify; text-align-last: center; direction: rtl; padding: 4px; }
+.mushaf-page .ayah { display: inline; font-family: 'Amiri', serif; line-height: 2.7; cursor: pointer; }
+.mushaf-banner { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 18px 0 22px; padding: 10px 8px; border-top: 2px solid var(--accent-color); border-bottom: 2px solid var(--accent-color); position: relative; }
+.mushaf-banner::before, .mushaf-banner::after { content: ''; position: absolute; left: 8px; right: 8px; height: 1px; background: rgba(212,168,67,0.4); }
+.mushaf-banner::before { top: 3px; } .mushaf-banner::after { bottom: 3px; }
+.mushaf-banner .mb-orn { color: var(--accent-color); font-size: 1.4rem; opacity: 0.85; }
+.mushaf-banner .mb-mid { text-align: center; }
+.mushaf-banner h2 { font-family: 'Amiri', serif; font-size: 1.6rem; color: var(--primary-color); font-weight: 700; }
+.mushaf-banner .mb-sub { font-size: 0.72rem; color: var(--text-muted); }
+.mushaf-foot { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 28px; padding-top: 16px; border-top: 1px dashed var(--border-color); }
+.mushaf-pageno { min-width: 60px; text-align: center; color: var(--accent-color); font-weight: 700; font-family: 'Amiri', serif; font-size: 1.1rem; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 60' fill='none' stroke='%23D4A843' stroke-width='2'><rect x='6' y='12' width='108' height='36' rx='18'/></svg>"); background-size: 100% 100%; background-repeat: no-repeat; padding: 9px 0; }
+.msf-nav-btn { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border-color); background: var(--pill-bg); color: var(--primary-color); font-size: 1rem; cursor: pointer; }
+.msf-nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
 /* ===== التجويد الملوّن ===== */
-.tj-madd { color: #e0524d; }
-.tj-ghunnah { color: #3fb27f; }
-.tj-qalqalah { color: #e08a3c; }
-.tj-idgham { color: #5a9bd4; }
-.tj-hamza { color: #9aa0a6; }
-.tj-silent { color: #9aa0a6; opacity: 0.75; }
+.tj-madd { color: #e0524d; }       /* المدود */
+.tj-ghunnah { color: #3fb27f; }    /* الغنّة */
+.tj-qalqalah { color: #5a9bd4; }   /* القلقلة */
+.tj-ikhfa { color: #b06fc9; }      /* الإخفاء */
+.tj-idgham { color: #2e9e8f; }     /* الإدغام */
+.tj-iqlab { color: #e08a3c; }      /* الإقلاب */
+.tj-silent { color: #9aa0a6; opacity: 0.8; }  /* همزة وصل/ساكن */
 .tj-other { color: inherit; }
 body.light-mode .tj-madd { color: #c0392b; } body.light-mode .tj-ghunnah { color: #1e8a5a; }
 .tajweed-legend { display: flex; flex-wrap: wrap; gap: 10px 16px; justify-content: center; background: var(--pill-bg); border-radius: 12px; padding: 10px 12px; margin-bottom: 16px; font-family: 'Tajawal','Cairo',sans-serif; font-size: 0.78rem; }

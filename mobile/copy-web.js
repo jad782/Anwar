@@ -14,6 +14,7 @@ const INCLUDE = [
   'features.js',
   'pro.js',
   'pro2.js',
+  'mushaf.js',
   'notifications.js',
   'style.css',
   'manifest.json',

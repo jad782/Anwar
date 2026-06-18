@@ -1,15 +1,16 @@
 // Update Version 5
-const CACHE_NAME = 'anwar-cache-v15';
+const CACHE_NAME = 'anwar-cache-v17';
 
 const urlsToCache = [
   './',
   './index.html',
-  './style.css?v=9',
+  './style.css?v=10',
   './quran-data.js?v=1',
   './app.js?v=11',
   './features.js?v=11',
   './pro.js?v=5',
-  './pro2.js?v=2',
+  './pro2.js?v=3',
+  './mushaf.js?v=2',
   './notifications.js?v=2',
   './athan.mp3',
   './manifest.json',

@@ -15,14 +15,16 @@ window.PRO2 = window.PRO2 || {};
 // =======================================================
 let tajweedOn = false;
 // ألوان الأحكام (حسب المصحف الملوّن)
+// خريطة رموز مصدر quran-tajweed الرسمية إلى الأحكام
 function tajweedClass(code){
     const c = code[0];
-    if (c==='p'||c==='n'||c==='m') return 'tj-madd';      // مدّ
-    if (c==='q') return 'tj-qalqalah';                    // قلقلة
-    if (c==='g') return 'tj-ghunnah';                     // غنّة
-    if (c==='h') return 'tj-hamza';                       // همزة وصل
-    if (c==='l'||c==='s') return 'tj-silent';             // لام شمسية / ساكن
-    if (c==='i') return 'tj-idgham';                      // إدغام/إخفاء
+    if (c==='n'||c==='p'||c==='m'||c==='o') return 'tj-madd';   // المدود
+    if (c==='g') return 'tj-ghunnah';                            // الغنّة
+    if (c==='q') return 'tj-qalqalah';                           // القلقلة
+    if (c==='f'||c==='c') return 'tj-ikhfa';                     // الإخفاء (وإخفاء شفوي)
+    if (c==='a'||c==='u'||c==='w'||c==='d') return 'tj-idgham';  // الإدغام
+    if (c==='i') return 'tj-iqlab';                              // الإقلاب
+    if (c==='h'||c==='s'||c==='l') return 'tj-silent';           // همزة وصل/ساكن/لام شمسية
     return 'tj-other';
 }
 function parseTajweed(text){
@@ -44,8 +46,9 @@ PRO2.toggleTajweed = async function(){
         const meta = (cr.type==='surah') ? { number:data.data.number, name:data.data.name } : null;
         let html = `<div class="tajweed-legend">
             <span><b class="tj-madd">المدّ</b></span><span><b class="tj-ghunnah">الغنّة</b></span>
-            <span><b class="tj-qalqalah">القلقلة</b></span><span><b class="tj-idgham">الإدغام/الإخفاء</b></span>
-            <span><b class="tj-hamza">همزة وصل</b></span></div>`;
+            <span><b class="tj-qalqalah">القلقلة</b></span><span><b class="tj-ikhfa">الإخفاء</b></span>
+            <span><b class="tj-idgham">الإدغام</b></span><span><b class="tj-iqlab">الإقلاب</b></span>
+            <span><b class="tj-silent">همزة وصل/ساكن</b></span></div>`;
         let curS = 0;
         ayahs.forEach(a => {
             const aS = a.surah || meta || { number:cr.num, name:'' };
@@ -273,7 +276,29 @@ function injectExtras(){
         const inp=$('wird-time-input'); inp.value = localStorage.getItem('wird_time')||'';
         inp.addEventListener('change', e=>{ if(e.target.value) PRO2.scheduleWirdReminder(e.target.value); });
     }
+    // مجموعة "عن التطبيق" (تُضاف مرة واحدة قبل البيانات)
+    if (list && !$('about-group-added')){
+        const grp = [...list.querySelectorAll('.set-group-title')].find(el=>el.dataset.i18n==='grp_data');
+        const w=document.createElement('div'); w.id='about-group-added';
+        const row=(ico,label,onclick)=>`<div class="setting-item" onclick="${onclick}"><span class="set-ico"><i class="fa-solid ${ico}"></i></span><span class="set-label">${label}</span><i class="fa-solid fa-chevron-left ath-chevron"></i></div>`;
+        w.innerHTML = `<div class="set-group-title">${tr('عن التطبيق','About')}</div>`
+            + row('fa-share-nodes', tr('شارك التطبيق','Share App'), 'PRO2.shareApp()')
+            + row('fa-star', tr('قيّم التطبيق','Rate App'), 'PRO2.rateApp()')
+            + row('fa-shield-halved', tr('سياسة الخصوصية','Privacy Policy'), 'PRO2.openPrivacy()')
+            + row('fa-circle-info', tr('عن التطبيق','About'), 'PRO2.openAbout()')
+            + row('fa-bug', tr('الإبلاغ عن مشكلة','Report a Problem'), 'PRO2.reportProblem()');
+        if(grp) list.insertBefore(w, grp); else list.appendChild(w);
+    }
 }
+PRO2.shareApp = function(){ const msg=tr('حمّل تطبيق الأنوار الإسلامي 🌙','Get Al-Anwar Islamic app 🌙'); if(navigator.share) navigator.share({title:'الأنوار',text:msg}).catch(()=>{}); else { try{navigator.clipboard.writeText(msg);}catch(e){} alert(tr('تم نسخ رسالة المشاركة.','Share text copied.')); } };
+PRO2.rateApp = function(){ alert(tr('شكراً لك! سيتوفّر التقييم بعد نشر التطبيق على المتجر.','Thank you! Rating opens after the app is published.')); };
+PRO2.reportProblem = function(){ const u='https://wa.me/905551517264?text='+encodeURIComponent(tr('السلام عليكم، لديّ ملاحظة على تطبيق الأنوار:','Feedback on Al-Anwar app:')); window.open(u,'_blank'); };
+PRO2.openAbout = function(){ alert(tr('تطبيق الأنوار الإسلامي\nمصحف أوفلاين + أذكار وأدعية + ختمات + قبلة + تنبيهات أذان.\nالإصدار 1.0','Al-Anwar Islamic App\nOffline Quran + Athkar + Khatmas + Qibla + Athan.\nVersion 1.0')); };
+PRO2.openPrivacy = function(){
+    alert(tr(
+'سياسة الخصوصية — تطبيق الأنوار\n\n• لا نجمع أي بيانات شخصية ولا نشاركها مع أي طرف.\n• كل بياناتك (الختمات، المهام، المفضّلة) تُحفظ محلياً على جهازك فقط.\n• يُطلب الموقع فقط لحساب أوقات الصلاة والقبلة، ولا يُرسل لأي خادم.\n• الإشعارات والمايكروفون تُستخدم فقط بإذنك ولأغراض التطبيق.\n• نصوص القرآن والتفسير من مصادر معتمدة (مجمع الملك فهد / alquran.cloud).',
+'Privacy Policy — Al-Anwar\n\n• We collect NO personal data and share nothing.\n• All your data (khatmas, tasks, bookmarks) stays locally on your device.\n• Location is used only for prayer times & qibla, never sent to a server.\n• Notifications & microphone are used only with your permission.\n• Quran & tafsir texts are from trusted sources (KFGQPC / alquran.cloud).'));
+};
 // إعادة تطبيق التجويد/الترجمة بعد إعادة رسم القراءة + رصد الإنجازات
 const _orr = window.onReadingRendered;
 window.onReadingRendered = function(){
