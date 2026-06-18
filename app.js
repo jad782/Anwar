@@ -209,7 +209,7 @@ async function fetchAndSetPrayers(url) {
         const res = await fetch(url);
         const data = await res.json(); const t = data.data.timings; const d = data.data.date;
         prayerTimings = { Fajr: t.Fajr, Sunrise: t.Sunrise, Dhuhr: t.Dhuhr, Asr: t.Asr, Maghrib: t.Maghrib, Isha: t.Isha };
-        document.getElementById('fajr-time').innerText = t.Fajr; document.getElementById('sunrise-time').innerText = t.Sunrise; document.getElementById('dhuhr-time').innerText = t.Dhuhr; document.getElementById('asr-time-active').innerText = t.Asr; document.getElementById('maghrib-time').innerText = t.Maghrib; document.getElementById('isha-time').innerText = t.Isha;
+        document.getElementById('fajr-time').innerText = t.Fajr; document.getElementById('sunrise-time').innerText = t.Sunrise; document.getElementById('dhuhr-time').innerText = t.Dhuhr; document.getElementById('asr-time').innerText = t.Asr; document.getElementById('maghrib-time').innerText = t.Maghrib; document.getElementById('isha-time').innerText = t.Isha;
         
         const days = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
         document.getElementById('current-day').innerText = days[new Date().getDay()]; 
@@ -221,25 +221,38 @@ async function fetchAndSetPrayers(url) {
     } catch (error) {}
 }
 
+let _countdownStarted = false;
 function startCountdown() {
+    if (_countdownStarted) return; // لا تشغّل أكثر من مؤقّت
+    _countdownStarted = true;
+    const pad = n => String(n).padStart(2, '0');
     setInterval(() => {
-        const now = new Date(); const currentMins = (now.getHours() * 60) + now.getMinutes();
-        const list = [{ name: 'الفجر', time: prayerTimings.Fajr, id: 'Fajr' }, { name: 'الشروق', time: prayerTimings.Sunrise, id: 'Sunrise' }, { name: 'الظهر', time: prayerTimings.Dhuhr, id: 'Dhuhr' }, { name: 'العصر', time: prayerTimings.Asr, id: 'Asr' }, { name: 'المغرب', time: prayerTimings.Maghrib, id: 'Maghrib' }, { name: 'العشاء', time: prayerTimings.Isha, id: 'Isha' }];
-        list.forEach(p => document.getElementById(`p-${p.id}`).classList.remove('active-prayer'));
-        let nextP = null;
-        for (let i = 0; i < list.length; i++) {
-            let [h, m] = list[i].time.split(':');
-            if (currentMins < (parseInt(h) * 60) + parseInt(m)) {
-                nextP = list[i]; if(i > 0) document.getElementById(`p-${list[i-1].id}`).classList.add('active-prayer'); else document.getElementById(`p-Isha`).classList.add('active-prayer'); break;
-            }
-        }
-        if (!nextP) { nextP = list[0]; document.getElementById('p-Isha').classList.add('active-prayer'); }
-        document.getElementById('next-prayer-name-card').innerText = nextP.name;
-        let [nH, nM] = nextP.time.split(':'); let target = new Date(); target.setHours(parseInt(nH), parseInt(nM), 0);
-        if (currentMins >= ((parseInt(nH)*60)+parseInt(nM))) target.setDate(target.getDate() + 1);
-        let diff = target - now; let h = Math.floor((diff % 86400000) / 3600000), m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
-        document.getElementById('countdown-card').innerText = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-        document.getElementById('pill-countdown').innerText = `${nextP.name} بعد: ${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        if (!prayerTimings.Fajr) return;
+        const now = new Date(); const cur = (now.getHours() * 60) + now.getMinutes();
+        const list = [
+            { name:'الفجر', time:prayerTimings.Fajr, id:'Fajr' },
+            { name:'الشروق', time:prayerTimings.Sunrise, id:'Sunrise' },
+            { name:'الظهر', time:prayerTimings.Dhuhr, id:'Dhuhr' },
+            { name:'العصر', time:prayerTimings.Asr, id:'Asr' },
+            { name:'المغرب', time:prayerTimings.Maghrib, id:'Maghrib' },
+            { name:'العشاء', time:prayerTimings.Isha, id:'Isha' }
+        ];
+        // صفّر كل البطاقات
+        list.forEach(p => { const c = document.getElementById('p-'+p.id); if(c) c.classList.remove('active-prayer'); const r = document.getElementById('remain-'+p.id); if(r) r.innerText=''; });
+        // الصلاة القادمة (نتجاهل الشروق كأذان)
+        const order = list.filter(p => p.id !== 'Sunrise');
+        let next = null;
+        for (const p of order) { const [h,m] = p.time.split(':').map(Number); if (cur < h*60+m) { next = p; break; } }
+        if (!next) next = order[0]; // بعد العشاء → فجر الغد
+        // العدّاد
+        let [nH,nM] = next.time.split(':').map(Number);
+        const target = new Date(); target.setHours(nH, nM, 0, 0);
+        if (cur >= nH*60+nM) target.setDate(target.getDate()+1);
+        const diff = target - now;
+        const h = Math.floor(diff/3600000), m = Math.floor(diff%3600000/60000), s = Math.floor(diff%60000/1000);
+        const card = document.getElementById('p-'+next.id); if(card) card.classList.add('active-prayer');
+        const rem = document.getElementById('remain-'+next.id); if(rem) rem.innerText = `${pad(h)}:${pad(m)}:${pad(s)}`;
+        const pill = document.getElementById('pill-countdown'); if(pill) pill.innerText = `${next.name} بعد ${pad(h)}:${pad(m)}`;
         _maybeFireNotification();
     }, 1000);
 }

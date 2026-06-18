@@ -593,6 +593,77 @@ const ATHKAR_LIB = {
   }},
 };
 
+// ===== توسعة: مزيد من الأذكار والأدعية والفضائل (مصادر موثوقة) =====
+Object.assign(ATHKAR_LIB.athkar.cats, {
+  tasabeeh:{ ar:'تسابيح وأذكار عامّة', en:'General Dhikr', items:[
+    {text:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ، سُبْحَانَ اللَّهِ الْعَظِيمِ', info:'حبيبتان إلى الرحمن، ثقيلتان في الميزان.', max:33, src:'متفق عليه'},
+    {text:'لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ', info:'مئة مرة في اليوم.', max:100, src:'متفق عليه'},
+    {text:'أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ', info:'كان ﷺ يستغفر في اليوم أكثر من سبعين مرة.', max:100, src:'البخاري'},
+    {text:'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ', info:'كنز من كنوز الجنة.', max:10, src:'متفق عليه'},
+    {text:'سُبْحَانَ اللَّهِ، وَالْحَمْدُ لِلَّهِ، وَلَا إِلَهَ إِلَّا اللَّهُ، وَاللَّهُ أَكْبَرُ', info:'أحبّ الكلام إلى الله.', max:10, src:'مسلم'},
+  ]},
+  toilet:{ ar:'دخول وخروج الخلاء', en:'Toilet', items:[
+    {text:'بِسْمِ اللَّهِ، اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْخُبُثِ وَالْخَبَائِثِ', info:'قبل الدخول.', max:1, src:'متفق عليه'},
+    {text:'غُفْرَانَكَ', info:'عند الخروج.', max:1, src:'أبو داود والترمذي'},
+  ]},
+  clothing:{ ar:'لُبس الثوب', en:'Clothing', items:[
+    {text:'الْحَمْدُ لِلَّهِ الَّذِي كَسَانِي هَذَا الثَّوْبَ وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍ', info:'غُفر له ما تقدّم من ذنبه.', max:1, src:'أبو داود والترمذي'},
+  ]},
+  sneeze:{ ar:'العُطاس', en:'Sneezing', items:[
+    {text:'الْحَمْدُ لِلَّهِ', info:'يقولها العاطس.', max:1, src:'البخاري'},
+    {text:'يَرْحَمُكَ اللَّهُ', info:'يقولها من سمع الحمد.', max:1, src:'البخاري'},
+    {text:'يَهْدِيكُمُ اللَّهُ وَيُصْلِحُ بَالَكُمْ', info:'يردّ العاطس على من شمّته.', max:1, src:'البخاري'},
+  ]},
+  anger:{ ar:'عند الغضب', en:'Anger', items:[
+    {text:'أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ', info:'تذهب عنه شدّة الغضب.', max:1, src:'متفق عليه'},
+  ]},
+});
+Object.assign(ATHKAR_LIB.duaa.cats, {
+  istighfar:{ ar:'الاستغفار والتوبة', en:'Forgiveness', items:[
+    {text:'رَبِّ اغْفِرْ لِي وَتُبْ عَلَيَّ إِنَّكَ أَنْتَ التَّوَّابُ الرَّحِيمُ', info:'', max:1, src:'أبو داود والترمذي'},
+  ]},
+  parents:{ ar:'الدعاء للوالدين', en:'For Parents', items:[
+    {text:'﴿رَّبِّ ارْحَمْهُمَا كَمَا رَبَّيَانِي صَغِيرًا﴾', info:'', max:1, src:'الإسراء: 24'},
+  ]},
+  hamm:{ ar:'الهمّ والحزن', en:'Anxiety & Grief', items:[
+    {text:'اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ، وَالْعَجْزِ وَالْكَسَلِ، وَالْبُخْلِ وَالْجُبْنِ، وَضَلَعِ الدَّيْنِ وَغَلَبَةِ الرِّجَالِ', info:'', max:1, src:'البخاري'},
+    {text:'لَا إِلَهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ', info:'دعوة ذي النون، ما دعا بها مكروب إلا فرّج الله عنه.', max:3, src:'الترمذي'},
+  ]},
+  debt:{ ar:'قضاء الدَّيْن', en:'Debt', items:[
+    {text:'اللَّهُمَّ اكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ، وَأَغْنِنِي بِفَضْلِكَ عَمَّنْ سِوَاكَ', info:'', max:1, src:'الترمذي'},
+  ]},
+  sick:{ ar:'عيادة المريض', en:'Visiting the Sick', items:[
+    {text:'لَا بَأْسَ طَهُورٌ إِنْ شَاءَ اللَّهُ', info:'', max:1, src:'البخاري'},
+    {text:'أَسْأَلُ اللَّهَ الْعَظِيمَ رَبَّ الْعَرْشِ الْعَظِيمِ أَنْ يَشْفِيَكَ', info:'سبع مرات؛ عُوفِيَ بإذن الله.', max:7, src:'أبو داود والترمذي'},
+  ]},
+  fear:{ ar:'الخوف من ظالم', en:'Fear of Oppressor', items:[
+    {text:'اللَّهُمَّ إِنَّا نَجْعَلُكَ فِي نُحُورِهِمْ، وَنَعُوذُ بِكَ مِنْ شُرُورِهِمْ', info:'', max:1, src:'أبو داود'},
+  ]},
+  jawami:{ ar:'جوامع الدعاء', en:'Comprehensive Du\'a', items:[
+    {text:'﴿رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ﴾', info:'كان أكثر دعائه ﷺ.', max:1, src:'البقرة: 201'},
+    {text:'اللَّهُمَّ إِنِّي أَسْأَلُكَ الْهُدَى وَالتُّقَى وَالْعَفَافَ وَالْغِنَى', info:'', max:1, src:'مسلم'},
+  ]},
+  knowledge:{ ar:'طلب العلم', en:'Knowledge', items:[
+    {text:'﴿رَّبِّ زِدْنِي عِلْمًا﴾', info:'', max:1, src:'طه: 114'},
+    {text:'اللَّهُمَّ انْفَعْنِي بِمَا عَلَّمْتَنِي، وَعَلِّمْنِي مَا يَنْفَعُنِي، وَزِدْنِي عِلْمًا', info:'', max:1, src:'الترمذي وابن ماجه'},
+  ]},
+});
+Object.assign(ATHKAR_LIB.fadail.cats, {
+  fatiha:{ ar:'فضل سورة الفاتحة', en:'Al-Fatihah', items:[
+    {text:'فاتحة الكتاب هي أعظم سورة في القرآن، وهي السبع المثاني والقرآن العظيم.', info:'', max:1, src:'البخاري'},
+  ]},
+  baqarah:{ ar:'فضل سورة البقرة', en:'Al-Baqarah', items:[
+    {text:'اقْرَؤُوا سُورَةَ الْبَقَرَةِ؛ فَإِنَّ أَخْذَهَا بَرَكَةٌ وَتَرْكَهَا حَسْرَةٌ، وَلَا تَسْتَطِيعُهَا الْبَطَلَةُ (السحرة).', info:'', max:1, src:'مسلم'},
+    {text:'لَا تَجْعَلُوا بُيُوتَكُمْ مَقَابِرَ؛ إِنَّ الْبَيْتَ الَّذِي تُقْرَأُ فِيهِ سُورَةُ الْبَقَرَةِ لَا يَدْخُلُهُ الشَّيْطَانُ.', info:'', max:1, src:'مسلم'},
+  ]},
+  baqarah_end:{ ar:'فضل آخر آيتين من البقرة', en:'Last 2 of Al-Baqarah', items:[
+    {text:'مَنْ قَرَأَ بِالْآيَتَيْنِ مِنْ آخِرِ سُورَةِ الْبَقَرَةِ فِي لَيْلَةٍ كَفَتَاهُ.', info:'', max:1, src:'متفق عليه'},
+  ]},
+  dhikr_fadl:{ ar:'فضل ذِكر الله', en:'Virtue of Dhikr', items:[
+    {text:'مَثَلُ الَّذِي يَذْكُرُ رَبَّهُ وَالَّذِي لَا يَذْكُرُ رَبَّهُ مَثَلُ الْحَيِّ وَالْمَيِّتِ.', info:'', max:1, src:'البخاري'},
+  ]},
+});
+
 let _athkarSection = 'athkar';
 let _hisnState = [];
 let _curCatTitle = '';
@@ -637,7 +708,7 @@ function renderHisn(){
     const cont = $('athkar-items-container'); if(!cont) return;
     cont.innerHTML = _hisnState.map((th, i) => {
         const done = th.current >= th.max;
-        return `<div class="theker-read-card ${done?'completed':''}" onclick="QA.incHisn(${i})">
+        return `<div class="theker-read-card theker-enter shine ${done?'completed':''}" style="animation-delay:${i*0.07}s" onclick="QA.incHisn(${i})">
             <div class="theker-count-pill">${done?'<i class="fa-solid fa-check"></i> '+tr('تم','Done'):`${th.current} ${tr('من','/')} ${th.max} ${tr('مرات','×')}`}</div>
             <div class="theker-text">${th.text}</div>
             ${th.info?`<div class="theker-info">${th.info}</div>`:''}
@@ -649,6 +720,36 @@ function renderHisn(){
 }
 QA.incHisn = function(i){ if (_hisnState[i].current < _hisnState[i].max){ _hisnState[i].current++; renderHisn(); if(navigator.vibrate) navigator.vibrate(20); } };
 QA.showSrc = function(i){ const th=_hisnState[i]; if(th&&th.src&&typeof showBadgeToast==='function') showBadgeToast({emoji:'📜', name:tr('المصدر','Source'), desc:th.src}); };
+
+// بحث في الأذكار والأدعية (مع تطبيع التشكيل)
+function normAr(s){ return (s||'').replace(/[ؗ-ًؚ-ْٰـ]/g,'').replace(/[إأآا]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').toLowerCase(); }
+function injectAthkarSearch(){
+    if ($('athkar-search-wrap')) return;
+    const cats = $('athkar-categories-list'); if(!cats) return;
+    const w = document.createElement('div'); w.id='athkar-search-wrap'; w.className='quran-search-wrap';
+    w.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i><input id="athkar-search-input" placeholder="${tr('ابحث عن ذكر أو دعاء...','Search dhikr or dua...')}" oninput="QA.searchAthkar()"><button id="athkar-search-clear" style="display:none" onclick="QA.clearAthkarSearch()">${tr('مسح','Clear')}</button>`;
+    const anchor = $('athkar-sections') || cats;
+    anchor.parentNode.insertBefore(w, anchor);
+    const res = document.createElement('div'); res.id='athkar-search-results'; res.style.display='none';
+    anchor.parentNode.insertBefore(res, anchor);
+}
+QA.searchAthkar = function(){
+    const q = normAr($('athkar-search-input').value.trim());
+    const res=$('athkar-search-results'), sec=$('athkar-sections'), cats=$('athkar-categories-list');
+    $('athkar-search-clear').style.display = q?'block':'none';
+    if (!q){ res.style.display='none'; res.innerHTML=''; if(sec)sec.style.display='flex'; cats.style.display='block'; return; }
+    if(sec)sec.style.display='none'; cats.style.display='none'; res.style.display='block';
+    const m=[];
+    Object.keys(ATHKAR_LIB).forEach(s=>{ const cc=ATHKAR_LIB[s].cats; Object.keys(cc).forEach(k=>{ const c=cc[k]; (c.items||[]).forEach(it=>{ if(normAr(it.text).includes(q)||normAr(it.info).includes(q)||normAr(c.ar).includes(q)) m.push({c,it}); }); }); });
+    if(!m.length){ res.innerHTML=`<p class="tasks-empty">${tr('لا نتائج مطابقة','No matches')}</p>`; return; }
+    res.innerHTML = m.slice(0,50).map(({c,it})=>`<div class="theker-read-card shine theker-enter">
+        <div class="theker-cat-tag">${L()==='en'?c.en:c.ar}</div>
+        <div class="theker-text">${it.text}</div>
+        ${it.info?`<div class="theker-info">${it.info}</div>`:''}
+        ${it.src?`<div class="theker-foot"><span class="theker-src"><i class="fa-solid fa-circle-check"></i> ${it.src}</span><span></span></div>`:''}
+    </div>`).join('');
+};
+QA.clearAthkarSearch = function(){ const i=$('athkar-search-input'); if(i)i.value=''; QA.searchAthkar(); };
 
 // =======================================================
 // لوحة الإعدادات الإضافية (صوت الأذان / تنبيه مسبق / إحصائيات)
@@ -694,6 +795,7 @@ function initFeatures(){
     injectKhatmaPlan();
     injectKhatmaShareBtn();
     rebuildAthkarCategories();
+    injectAthkarSearch();
     athanTicker();
     // reciter selection persist
     const rs = $('rt-reciter'); if(rs) rs.value = reciteEdition;

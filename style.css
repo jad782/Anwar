@@ -91,14 +91,14 @@ body.light-mode .vip-card, body.light-mode .date-card-emerald, body.light-mode .
 .prayer-card span { font-size: 0.8rem; }
 .prayer-card strong { font-size: 1.1rem; color: var(--text-main); font-weight: bold; }
 
-.active-prayer { background: linear-gradient(135deg, #2A2008 0%, #4A3410 100%); color: #FAF6EE; grid-column: span 2; display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 15px 20px; text-align: right; border:1px solid rgba(212,168,67,0.35); box-shadow: 0 8px 26px rgba(212,168,67,0.18), 0 0 0 1px rgba(212,168,67,0.08); }
+.active-prayer { background: linear-gradient(135deg, #2A2008 0%, #4A3410 100%); border:1px solid rgba(212,168,67,0.45); box-shadow: 0 8px 26px var(--glow), 0 0 0 1px rgba(212,168,67,0.1); transform: translateY(-2px); }
+.active-prayer span { color: var(--accent-light); }
+.active-prayer strong { color: #FFF3D0; }
 .active-prayer i { color: var(--accent-light); }
-body.light-mode .active-prayer { background: linear-gradient(135deg, #2C1810 0%, #4A2C1A 100%); color: var(--light-bg); border:none; box-shadow: 0 8px 20px rgba(44, 24, 16, 0.25); }
-body.light-mode .active-prayer i { color: var(--accent-color); }
-.active-prayer i { color: var(--accent-color); font-size: 1.5rem; margin-bottom: 0; }
-.active-prayer span { font-size: 0.85rem; opacity: 0.9; color: var(--light-bg); }
-.active-prayer strong { font-size: 1.2rem; color: #FAF6EE;}
-.active-prayer h2 { font-size: 1.8rem; font-weight: 700; margin-top: 5px; direction: ltr; color: var(--accent-color);}
+.prayer-remain { font-size: 0.78rem; font-weight: 700; color: var(--accent-light); direction: ltr; margin-top: 4px; letter-spacing: 0.5px; }
+body.light-mode .active-prayer { background: linear-gradient(135deg, #2C1810 0%, #4A2C1A 100%); }
+body.light-mode .active-prayer span, body.light-mode .active-prayer strong { color: #FAF6EE; }
+body.light-mode .prayer-remain { color: #F2D27A; }
 
 .apps-scroll { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; }
 .apps-scroll::-webkit-scrollbar { display: none; }
@@ -387,6 +387,14 @@ body.light-mode .ayah-number { background-image: url('data:image/svg+xml;utf8,<s
 .theker-src { background: rgba(34,197,94,0.12); color: #4ade80; font-size: 0.72rem; font-weight: 700; padding: 4px 12px; border-radius: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
 .theker-tap-hint { font-size: 0.72rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 5px; }
 .theker-read-card.completed .theker-count-pill { background: #22c55e; color: #fff; }
+.theker-cat-tag { display: inline-block; background: var(--pill-bg); color: var(--accent-color); font-size: 0.72rem; font-weight: 700; padding: 3px 12px; border-radius: 12px; margin-bottom: 10px; }
+
+/* أنيميشن فتح احترافي + لمعة */
+@keyframes thekerIn { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: none; } }
+.theker-enter { animation: thekerIn 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+.theker-read-card.shine { position: relative; overflow: hidden; }
+.theker-read-card.shine::after { content: ''; position: absolute; top: 0; left: -60%; width: 45%; height: 100%; background: linear-gradient(120deg, transparent, rgba(212,168,67,0.20), transparent); transform: skewX(-20deg); animation: cardShine 1.5s ease 0.35s 1; pointer-events: none; }
+@keyframes cardShine { to { left: 160%; } }
 
 /* ===== شريط أدوات القراءة (تلاوة/حفظ) ===== */
 .reading-toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }

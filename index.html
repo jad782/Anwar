@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Al-Anwar">
     <title>تطبيق الأنوار الإسلامي</title>
-    <link rel="stylesheet" href="style.css?v=7">
+    <link rel="stylesheet" href="style.css?v=8">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- ربط ملف المانيفست -->
@@ -79,15 +79,12 @@
             </div>
 
             <div class="prayer-grid">
-                <div class="prayer-card" id="p-Fajr"><i class="fa-solid fa-cloud-moon"></i><span>الفجر</span><strong id="fajr-time">--:--</strong></div>
-                <div class="prayer-card" id="p-Sunrise"><i class="fa-solid fa-sun"></i><span>الشروق</span><strong id="sunrise-time">--:--</strong></div>
-                <div class="prayer-card" id="p-Dhuhr"><i class="fa-solid fa-sun"></i><span>الظهر</span><strong id="dhuhr-time">--:--</strong></div>
-                <div class="prayer-card active-prayer" id="p-Asr">
-                    <div class="active-prayer-header"><i class="fa-regular fa-sun"></i><span id="next-prayer-name-card">الصلاة</span><strong id="asr-time-active">--:--</strong></div>
-                    <div class="active-prayer-body"><span>متبقي على الأذان</span><h2 id="countdown-card" dir="ltr">--:--:--</h2></div>
-                </div>
-                <div class="prayer-card" id="p-Maghrib"><i class="fa-solid fa-cloud-sun"></i><span>المغرب</span><strong id="maghrib-time">--:--</strong></div>
-                <div class="prayer-card" id="p-Isha"><i class="fa-solid fa-moon"></i><span>العشاء</span><strong id="isha-time">--:--</strong></div>
+                <div class="prayer-card" id="p-Fajr"><i class="fa-solid fa-cloud-moon"></i><span>الفجر</span><strong id="fajr-time">--:--</strong><span class="prayer-remain" id="remain-Fajr"></span></div>
+                <div class="prayer-card" id="p-Sunrise"><i class="fa-solid fa-sun"></i><span>الشروق</span><strong id="sunrise-time">--:--</strong><span class="prayer-remain" id="remain-Sunrise"></span></div>
+                <div class="prayer-card" id="p-Dhuhr"><i class="fa-solid fa-sun"></i><span>الظهر</span><strong id="dhuhr-time">--:--</strong><span class="prayer-remain" id="remain-Dhuhr"></span></div>
+                <div class="prayer-card" id="p-Asr"><i class="fa-regular fa-sun"></i><span>العصر</span><strong id="asr-time">--:--</strong><span class="prayer-remain" id="remain-Asr"></span></div>
+                <div class="prayer-card" id="p-Maghrib"><i class="fa-solid fa-cloud-sun"></i><span>المغرب</span><strong id="maghrib-time">--:--</strong><span class="prayer-remain" id="remain-Maghrib"></span></div>
+                <div class="prayer-card" id="p-Isha"><i class="fa-solid fa-moon"></i><span>العشاء</span><strong id="isha-time">--:--</strong><span class="prayer-remain" id="remain-Isha"></span></div>
             </div>
 
             <div class="section-header" style="margin-top: 30px;">
@@ -394,8 +391,8 @@
     </div>
 
     <script src="quran-data.js?v=1"></script>
-    <script src="app.js?v=10"></script>
-    <script src="features.js?v=9"></script>
+    <script src="app.js?v=11"></script>
+    <script src="features.js?v=10"></script>
     <script src="pro.js?v=5"></script>
     <script src="notifications.js?v=2"></script>
 </body>
