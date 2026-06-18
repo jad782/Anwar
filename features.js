@@ -21,6 +21,9 @@ function injectReadingToolbar(){
       <button class="rt-btn" id="rt-play" onclick="QA.toggleRecite()"><i class="fa-solid fa-play"></i><span>${tr('تلاوة','Recite')}</span></button>
       <button class="rt-btn" id="rt-memorize" onclick="QA.toggleMemorize()"><i class="fa-solid fa-graduation-cap"></i><span>${tr('حفظ','Memorize')}</span></button>
       <button class="rt-btn" id="rt-download" onclick="QA.downloadSurahAudio()" title="${tr('تحميل للاستماع بدون نت','Download for offline')}"><i class="fa-solid fa-download"></i></button>
+      <button class="rt-btn" id="rt-tajweed" onclick="PRO2&&PRO2.toggleTajweed()" title="${tr('تلوين التجويد','Tajweed colors')}"><i class="fa-solid fa-palette"></i><span>${tr('تجويد','Tajweed')}</span></button>
+      <button class="rt-btn" id="rt-translate" onclick="PRO2&&PRO2.toggleTranslation()" title="${tr('ترجمة ونطق','Translation')}"><i class="fa-solid fa-language"></i><span>${tr('ترجمة','Translate')}</span></button>
+      <button class="rt-btn" id="rt-record" onclick="PRO2&&PRO2.toggleRecord()" title="${tr('سجّل تلاوتك','Record your recitation')}"><i class="fa-solid fa-microphone"></i></button>
       <select class="rt-reciter" id="rt-reciter" onchange="QA.changeReciter()">
         <option value="ar.alafasy">العفاسي</option>
         <option value="ar.husary">الحصري</option>
@@ -211,6 +214,7 @@ async function openTafsir(surah, ayah, global){
         $('tafsir-trans').innerText = byId['en.sahih'] || '';
         _tafsirCtx.text = byId['quran-uthmani'] || '';
         _tafsirCtx.trans = byId['en.sahih'] || '';
+        window._lastAyah = { surah, ayah, global, text:_tafsirCtx.text };
     }catch(e){ $('tafsir-arabic').innerText = tr('تعذّر التحميل','Failed to load'); }
 }
 function surahNm(n){ try { return surahName(n); } catch(e){ return n; } }

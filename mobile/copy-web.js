@@ -13,6 +13,7 @@ const INCLUDE = [
   'app.js',
   'features.js',
   'pro.js',
+  'pro2.js',
   'notifications.js',
   'style.css',
   'manifest.json',
