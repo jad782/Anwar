@@ -481,6 +481,7 @@ window.requestCompassPermission = function() {
 }
 
 function startCompass() {
+    _smoothRot = null;
     if (_orientationBound) return;
     if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', handleOrientation, true);
     else window.addEventListener('deviceorientation', handleOrientation, true);
@@ -494,23 +495,32 @@ window.closeQibla = function() {
     _orientationBound = false;
 }
 
+let _smoothRot = null; // زاوية مُنعّمة لتفادي الاهتزاز
 function handleOrientation(e) {
     // اتجاه الجهاز بالنسبة للشمال
     let heading;
-    if (typeof e.webkitCompassHeading === 'number') heading = e.webkitCompassHeading; // iOS: درجات من الشمال (عقارب الساعة)
-    else if (e.absolute && typeof e.alpha === 'number') heading = 360 - e.alpha;        // Android absolute
+    if (typeof e.webkitCompassHeading === 'number') heading = e.webkitCompassHeading; // iOS
+    else if (e.absolute && typeof e.alpha === 'number') heading = 360 - e.alpha;
     else if (typeof e.alpha === 'number') heading = 360 - e.alpha;
     else return;
     if (qiblaBearing === null) return;
-    // زاوية السهم = اتجاه القبلة - اتجاه الجهاز
-    const rotation = (qiblaBearing - heading + 360) % 360;
+    const target = (qiblaBearing - heading + 360) % 360;
+    // تنعيم بأقصر مسار زاوي (يمنع القفز عند 0/360)
+    if (_smoothRot === null) _smoothRot = target;
+    else {
+        let diff = ((target - _smoothRot + 540) % 360) - 180; // [-180,180]
+        if (Math.abs(diff) < 0.8) diff = 0;                    // تجاهل الاهتزاز الطفيف
+        _smoothRot = (_smoothRot + diff * 0.18 + 360) % 360;   // مرشّح منخفض التردد
+    }
+    const rotation = _smoothRot;
     const arrow = document.getElementById('compass-arrow');
     const kaaba = document.getElementById('compass-kaaba');
     if (arrow) arrow.style.transform = `rotate(${rotation}deg)`;
     if (kaaba) kaaba.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
-    // عند المحاذاة (ضمن 5 درجات) لون أخضر
-    const aligned = (rotation < 6 || rotation > 354);
-    if (arrow) arrow.style.color = aligned ? '#22c55e' : 'var(--primary-color)';
+    const aligned = (rotation < 5 || rotation > 355);
+    if (arrow) arrow.style.color = aligned ? '#22c55e' : 'var(--accent-color)';
+    const deg = document.getElementById('qibla-degree');
+    if (deg) deg.innerText = Math.round(qiblaBearing) + '°' + (aligned ? ' ✓' : '');
     // بوصلة الكاميرا (AR)
     const arArrow = document.getElementById('ar-arrow');
     if (arArrow){ arArrow.style.transform = `rotate(${rotation}deg)`; arArrow.style.filter = aligned ? 'drop-shadow(0 0 12px #22c55e)' : 'none'; }

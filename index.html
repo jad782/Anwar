@@ -56,6 +56,19 @@
                 </div>
             </div>
 
+            <div class="section-header">
+                <h3 data-i18n="prayer_times">أوقات الصلاة</h3>
+                <span class="location" id="location-text"><i class="fa-solid fa-location-dot"></i> إسطنبول</span>
+            </div>
+            <div class="prayer-grid">
+                <div class="prayer-card" id="p-Fajr"><i class="fa-solid fa-cloud-moon"></i><span>الفجر</span><strong id="fajr-time">--:--</strong><span class="prayer-remain" id="remain-Fajr"></span></div>
+                <div class="prayer-card" id="p-Sunrise"><i class="fa-solid fa-sun"></i><span>الشروق</span><strong id="sunrise-time">--:--</strong><span class="prayer-remain" id="remain-Sunrise"></span></div>
+                <div class="prayer-card" id="p-Dhuhr"><i class="fa-solid fa-sun"></i><span>الظهر</span><strong id="dhuhr-time">--:--</strong><span class="prayer-remain" id="remain-Dhuhr"></span></div>
+                <div class="prayer-card" id="p-Asr"><i class="fa-regular fa-sun"></i><span>العصر</span><strong id="asr-time">--:--</strong><span class="prayer-remain" id="remain-Asr"></span></div>
+                <div class="prayer-card" id="p-Maghrib"><i class="fa-solid fa-cloud-sun"></i><span>المغرب</span><strong id="maghrib-time">--:--</strong><span class="prayer-remain" id="remain-Maghrib"></span></div>
+                <div class="prayer-card" id="p-Isha"><i class="fa-solid fa-moon"></i><span>العشاء</span><strong id="isha-time">--:--</strong><span class="prayer-remain" id="remain-Isha"></span></div>
+            </div>
+
             <div class="ayah-of-day-card" id="ayah-of-day-card">
                 <div class="ayah-day-header">
                     <span class="ayah-day-label"><i class="fa-solid fa-star"></i> آية اليوم</span>
@@ -71,20 +84,6 @@
                     <button onclick="openNewKhatmaModal()" class="tasbeeh-pill" style="width:auto; padding:7px 16px; font-size:0.9rem;"><i class="fa-solid fa-plus" style="margin-left:5px;"></i><span data-i18n="new_khatma">ختمة جديدة</span></button>
                 </div>
                 <div id="khatma-list-preview"></div>
-            </div>
-
-            <div class="section-header">
-                <h3 data-i18n="prayer_times">أوقات الصلاة</h3>
-                <span class="location" id="location-text"><i class="fa-solid fa-location-dot"></i> إسطنبول</span>
-            </div>
-
-            <div class="prayer-grid">
-                <div class="prayer-card" id="p-Fajr"><i class="fa-solid fa-cloud-moon"></i><span>الفجر</span><strong id="fajr-time">--:--</strong><span class="prayer-remain" id="remain-Fajr"></span></div>
-                <div class="prayer-card" id="p-Sunrise"><i class="fa-solid fa-sun"></i><span>الشروق</span><strong id="sunrise-time">--:--</strong><span class="prayer-remain" id="remain-Sunrise"></span></div>
-                <div class="prayer-card" id="p-Dhuhr"><i class="fa-solid fa-sun"></i><span>الظهر</span><strong id="dhuhr-time">--:--</strong><span class="prayer-remain" id="remain-Dhuhr"></span></div>
-                <div class="prayer-card" id="p-Asr"><i class="fa-regular fa-sun"></i><span>العصر</span><strong id="asr-time">--:--</strong><span class="prayer-remain" id="remain-Asr"></span></div>
-                <div class="prayer-card" id="p-Maghrib"><i class="fa-solid fa-cloud-sun"></i><span>المغرب</span><strong id="maghrib-time">--:--</strong><span class="prayer-remain" id="remain-Maghrib"></span></div>
-                <div class="prayer-card" id="p-Isha"><i class="fa-solid fa-moon"></i><span>العشاء</span><strong id="isha-time">--:--</strong><span class="prayer-remain" id="remain-Isha"></span></div>
             </div>
 
             <div class="section-header" style="margin-top: 30px;">
@@ -411,7 +410,7 @@
 
     <script src="quran-data.js?v=1"></script>
     <script src="prayers.js?v=4"></script>
-    <script src="app.js?v=13"></script>
+    <script src="app.js?v=14"></script>
     <script src="features.js?v=13"></script>
     <script src="pro.js?v=7"></script>
     <script src="pro2.js?v=5"></script>
