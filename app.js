@@ -516,7 +516,8 @@ function handleOrientation(e) {
     const arrow = document.getElementById('compass-arrow');
     const kaaba = document.getElementById('compass-kaaba');
     if (arrow) arrow.style.transform = `rotate(${rotation}deg)`;
-    if (kaaba) kaaba.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+    // الكعبة تدور على حافة البوصلة وتبقى منتصبة
+    if (kaaba) kaaba.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) translateY(-92px) rotate(${-rotation}deg)`;
     const aligned = (rotation < 5 || rotation > 355);
     if (arrow) arrow.style.color = aligned ? '#22c55e' : 'var(--accent-color)';
     const deg = document.getElementById('qibla-degree');
