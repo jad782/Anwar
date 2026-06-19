@@ -312,11 +312,76 @@ window.onReadingRendered = function(){
     setTimeout(()=>{ injectExtras(); PRO2.checkBadges && PRO2.checkBadges(); }, 100);
 };
 
+// =======================================================
+// حديث اليوم + دعاء اليوم (تتحدّث يومياً، أوفلاين، مصادر موثّقة)
+// =======================================================
+const HADITHS = [
+ {t:'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى.', s:'متفق عليه'},
+ {t:'مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ.', s:'متفق عليه'},
+ {t:'الدِّينُ النَّصِيحَةُ.', s:'مسلم'},
+ {t:'الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ.', s:'متفق عليه'},
+ {t:'لَا يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لِأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ.', s:'متفق عليه'},
+ {t:'اتَّقِ اللَّهَ حَيْثُمَا كُنْتَ، وَأَتْبِعِ السَّيِّئَةَ الْحَسَنَةَ تَمْحُهَا، وَخَالِقِ النَّاسَ بِخُلُقٍ حَسَنٍ.', s:'الترمذي'},
+ {t:'الْكَلِمَةُ الطَّيِّبَةُ صَدَقَةٌ.', s:'متفق عليه'},
+ {t:'تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ صَدَقَةٌ.', s:'الترمذي'},
+ {t:'مَنْ لَا يَرْحَمُ النَّاسَ لَا يَرْحَمُهُ اللَّهُ.', s:'متفق عليه'},
+ {t:'مِنْ حُسْنِ إِسْلَامِ الْمَرْءِ تَرْكُهُ مَا لَا يَعْنِيهِ.', s:'الترمذي'},
+ {t:'احْرِصْ عَلَى مَا يَنْفَعُكَ وَاسْتَعِنْ بِاللَّهِ وَلَا تَعْجِزْ.', s:'مسلم'},
+ {t:'مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ.', s:'مسلم'},
+ {t:'الطُّهُورُ شَطْرُ الإِيمَانِ.', s:'مسلم'},
+ {t:'مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ.', s:'مسلم'},
+ {t:'خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ.', s:'البخاري'},
+ {t:'لَا تَحْقِرَنَّ مِنَ الْمَعْرُوفِ شَيْئًا وَلَوْ أَنْ تَلْقَى أَخَاكَ بِوَجْهٍ طَلْقٍ.', s:'مسلم'},
+ {t:'الْمُؤْمِنُ الْقَوِيُّ خَيْرٌ وَأَحَبُّ إِلَى اللَّهِ مِنَ الْمُؤْمِنِ الضَّعِيفِ، وَفِي كُلٍّ خَيْرٌ.', s:'مسلم'},
+ {t:'إِنَّ اللَّهَ كَتَبَ الإِحْسَانَ عَلَى كُلِّ شَيْءٍ.', s:'مسلم'},
+ {t:'الْحَيَاءُ لَا يَأْتِي إِلَّا بِخَيْرٍ.', s:'متفق عليه'},
+ {t:'مَنْ صَلَّى الْفَجْرَ فِي جَمَاعَةٍ فَهُوَ فِي ذِمَّةِ اللَّهِ.', s:'مسلم'}
+];
+const DUAS = [
+ {t:'اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ.', s:'أبو داود'},
+ {t:'اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ.', s:'ابن ماجه'},
+ {t:'رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي.', s:'طه: 25-26'},
+ {t:'اللَّهُمَّ اغْفِرْ لِي وَارْحَمْنِي وَاهْدِنِي وَعَافِنِي وَارْزُقْنِي.', s:'مسلم'},
+ {t:'يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ، أَصْلِحْ لِي شَأْنِي كُلَّهُ.', s:'الحاكم'},
+ {t:'اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي.', s:'الترمذي'},
+ {t:'رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا وَهَبْ لَنَا مِنْ لَدُنْكَ رَحْمَةً.', s:'آل عمران: 8'},
+ {t:'اللَّهُمَّ أَصْلِحْ لِي دِينِي وَدُنْيَايَ وَآخِرَتِي.', s:'مسلم'},
+ {t:'حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ.', s:'أبو داود'},
+ {t:'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ.', s:'البقرة: 201'},
+ {t:'اللَّهُمَّ إِنِّي أَسْأَلُكَ الْهُدَى وَالتُّقَى وَالْعَفَافَ وَالْغِنَى.', s:'مسلم'},
+ {t:'اللَّهُمَّ بَارِكْ لَنَا فِيمَا رَزَقْتَنَا وَقِنَا عَذَابَ النَّارِ.', s:'صحيح'},
+ {t:'يَا مُقَلِّبَ الْقُلُوبِ ثَبِّتْ قَلْبِي عَلَى دِينِكَ.', s:'الترمذي'},
+ {t:'اللَّهُمَّ اخْتِمْ لَنَا بِخَيْرٍ، وَاجْعَلْ خَيْرَ أَعْمَالِنَا خَوَاتِيمَهَا.', s:'صحيح الجامع'}
+];
+function dayIndex(){ const d=new Date(); return Math.floor((d - new Date(d.getFullYear(),0,0)) / 86400000); }
+function injectDailyCards(){
+    const anchor = $('ayah-of-day-card'); if(!anchor || $('daily-extra')) return;
+    const di = dayIndex();
+    const h = HADITHS[di % HADITHS.length], du = DUAS[di % DUAS.length];
+    const wrap = document.createElement('div'); wrap.id='daily-extra';
+    wrap.innerHTML = `
+      <div class="daily-card" id="hadith-day-card">
+        <div class="daily-head"><span class="daily-label"><i class="fa-solid fa-comment-dots"></i> ${tr('حديث اليوم','Hadith of the Day')}</span>
+        <button class="daily-share" onclick="PRO2.shareDaily('hadith')"><i class="fa-solid fa-share-nodes"></i></button></div>
+        <p class="daily-text" id="hadith-day-text">${h.t}</p><span class="daily-ref">${h.s}</span></div>
+      <div class="daily-card" id="dua-day-card">
+        <div class="daily-head"><span class="daily-label"><i class="fa-solid fa-hands-praying"></i> ${tr('دعاء اليوم','Dua of the Day')}</span>
+        <button class="daily-share" onclick="PRO2.shareDaily('dua')"><i class="fa-solid fa-share-nodes"></i></button></div>
+        <p class="daily-text" id="dua-day-text">${du.t}</p><span class="daily-ref">${du.s}</span></div>`;
+    anchor.insertAdjacentElement('afterend', wrap);
+}
+PRO2.shareDaily = function(kind){
+    const di=dayIndex(); const item = kind==='hadith'?HADITHS[di%HADITHS.length]:DUAS[di%DUAS.length];
+    const label = kind==='hadith'?tr('حديث اليوم','Hadith of the Day'):tr('دعاء اليوم','Dua of the Day');
+    const msg = `${item.t}\n— ${item.s}\n\n📿 ${tr('تطبيق الأنوار','Al-Anwar App')}`;
+    if(navigator.share) navigator.share({text:msg}).catch(()=>{}); else { try{navigator.clipboard.writeText(msg);}catch(e){} alert(tr('تم النسخ','Copied')); }
+};
+
 // احقن زر القصة بعد فتح التفسير
 const _oat = window.onAyahTap;
 window.onAyahTap = function(){ const r = (typeof _oat==='function') ? _oat.apply(this, arguments) : undefined; setTimeout(injectExtras, 150); return r; };
 
-function initPro2(){ injectExtras(); PRO2.checkBadges(true); }
+function initPro2(){ injectExtras(); injectDailyCards(); PRO2.checkBadges(true); }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(initPro2, 700));
 else setTimeout(initPro2, 700);
 })();
