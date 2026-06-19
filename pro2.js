@@ -381,6 +381,18 @@ PRO2.shareDaily = function(kind){
 const _oat = window.onAyahTap;
 window.onAyahTap = function(){ const r = (typeof _oat==='function') ? _oat.apply(this, arguments) : undefined; setTimeout(injectExtras, 150); return r; };
 
+// (4ج) صانع الاقتباسات: ضغط مطوّل على الآية → بطاقة تصميم (Story)
+let _lpTimer=null;
+function lpStart(e){
+    const ay = e.target.closest && e.target.closest('.ayah'); if(!ay) return;
+    const s=+ay.dataset.surah, a=+ay.dataset.ayah, g=+ay.dataset.global; if(!s) return;
+    _lpTimer = setTimeout(()=>{ window._lastAyah = { surah:s, ayah:a, global:g, text: ay.textContent.replace(/[٠-٩]+\s*$/,'').trim() }; if(window.PRO2&&PRO2.openStory) PRO2.openStory(); if(navigator.vibrate) navigator.vibrate(30); }, 550);
+}
+function lpCancel(){ if(_lpTimer){ clearTimeout(_lpTimer); _lpTimer=null; } }
+document.addEventListener('touchstart', lpStart, {passive:true});
+document.addEventListener('touchend', lpCancel); document.addEventListener('touchmove', lpCancel, {passive:true});
+document.addEventListener('mousedown', lpStart); document.addEventListener('mouseup', lpCancel); document.addEventListener('mouseleave', lpCancel);
+
 function initPro2(){ injectExtras(); injectDailyCards(); PRO2.checkBadges(true); }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(initPro2, 700));
 else setTimeout(initPro2, 700);

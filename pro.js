@@ -210,9 +210,36 @@ PRO.renderGroups = function(){
                 <span class="gm-name">${m.name}</span>
                 <span class="gm-juz">${tr('أجزاء','Juz')} ${m.from}–${m.to}</span></div>`;
         });
-        html += `<button class="group-share" onclick="PRO.shareGroup(${gi})"><i class="fa-solid fa-share-nodes"></i> ${tr('مشاركة التوزيع','Share split')}</button></div>`;
+        const pct = Math.round(doneCount/g.members.length*100);
+        html += `<div class="group-progress"><div class="group-progress-fill" style="width:${pct}%"></div></div>
+            <div class="group-pct">${tr('التقدّم','Progress')}: ${pct}%</div>
+            <div class="group-btns">
+              <button class="group-share" onclick="PRO.shareGroup(${gi})"><i class="fa-solid fa-share-nodes"></i> ${tr('مشاركة','Share')}</button>
+              <button class="group-share" onclick="PRO.copyRoomLink(${gi})"><i class="fa-solid fa-link"></i> ${tr('رابط الغرفة','Room link')}</button>
+            </div></div>`;
     });
     body.innerHTML = html;
+};
+PRO.copyRoomLink = function(gi){
+    let g=JSON.parse(localStorage.getItem('group_khatmas')||'[]'); const k=g[gi]; if(!k)return;
+    try{
+        const code = btoa(unescape(encodeURIComponent(JSON.stringify({n:k.name,m:k.members}))));
+        const link = location.origin + location.pathname + '#room=' + code;
+        if(navigator.clipboard) navigator.clipboard.writeText(link);
+        alert(tr('تم نسخ رابط الغرفة! أرسله لمن يشاركك الختمة.','Room link copied! Send it to your group.'));
+    }catch(e){}
+};
+// استيراد غرفة من الرابط (#room=...)
+PRO.importRoomFromHash = function(){
+    try{
+        const m = (location.hash||'').match(/room=([^&]+)/); if(!m) return;
+        const obj = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+        if(!obj || !obj.m) return;
+        let groups=[]; try{ groups=JSON.parse(localStorage.getItem('group_khatmas')||'[]'); }catch(e){}
+        if(!groups.some(x=>x.name===obj.n)){ groups.unshift({ id:Date.now(), name:obj.n, members:obj.m }); localStorage.setItem('group_khatmas', JSON.stringify(groups)); }
+        history.replaceState(null,'',location.pathname);
+        setTimeout(()=>{ if(typeof showBadgeToast==='function') showBadgeToast({emoji:'👥', name:tr('انضممت لغرفة ختمة','Joined a khatma room'), desc:obj.n}); }, 800);
+    }catch(e){}
 };
 PRO.createGroup = function(){
     const name = prompt(tr('اسم الختمة الجماعية:','Group khatma name:')); if(!name) return;
@@ -312,7 +339,7 @@ window.openDonate = function(){
 };
 window.closeDonate = function(){ const m=$('donate-modal'); if(m) m.classList.remove('active'); };
 
-function initPro(){ injectHomeEntries(); initIAP(); }
+function initPro(){ injectHomeEntries(); initIAP(); PRO.importRoomFromHash(); }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(initPro, 500));
 else setTimeout(initPro, 500);
 })();

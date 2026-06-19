@@ -193,33 +193,39 @@ function _maybeFireNotification(){
     }
 }
 
+// أوقات الصلاة تُحسب محلياً (أوفلاين) عبر prayers.js
 async function getPrayerTimes() {
-    let url = 'https://api.aladhan.com/v1/timingsByCity?city=Istanbul&country=Turkey&method=13';
-    if(localStorage.getItem('gps') === 'true' && navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (pos) => {
-            url = `https://api.aladhan.com/v1/timings?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}&method=13`;
-            document.getElementById('location-text').innerHTML = '<i class="fa-solid fa-location-dot"></i> موقعك الحالي';
-            await fetchAndSetPrayers(url);
-        }, async () => { await fetchAndSetPrayers(url); }); // Fallback
-    } else { await fetchAndSetPrayers(url); }
+    if (window.PRAYERS) { PRAYERS.refresh(); return; }
+    // احتياطي قديم (نادراً): إن لم يُحمّل prayers.js
+    try {
+        const res = await fetch('https://api.aladhan.com/v1/timingsByCity?city=Istanbul&country=Turkey&method=13');
+        const data = await res.json(); const t = data.data.timings;
+        window.setPrayerTimings({Fajr:t.Fajr,Sunrise:t.Sunrise,Dhuhr:t.Dhuhr,Asr:t.Asr,Maghrib:t.Maghrib,Isha:t.Isha}, 'إسطنبول');
+    } catch (e) {}
 }
 
-async function fetchAndSetPrayers(url) {
+// تعبئة الأوقات + التاريخ (هجري/ميلادي أوفلاين) + بدء العدّاد
+window.setPrayerTimings = function(t, label){
+    prayerTimings = { Fajr:t.Fajr, Sunrise:t.Sunrise, Dhuhr:t.Dhuhr, Asr:t.Asr, Maghrib:t.Maghrib, Isha:t.Isha };
+    const set = (id,v)=>{ const e=document.getElementById(id); if(e) e.innerText=v; };
+    set('fajr-time',t.Fajr); set('sunrise-time',t.Sunrise); set('dhuhr-time',t.Dhuhr); set('asr-time',t.Asr); set('maghrib-time',t.Maghrib); set('isha-time',t.Isha);
+    if (label){ const lt=document.getElementById('location-text'); if(lt) lt.innerHTML='<i class="fa-solid fa-location-dot"></i> '+label; }
+    const now = new Date();
+    const days = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    const daysEn = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    set('current-day', (currentLang==='en'?daysEn:days)[now.getDay()]);
+    // التاريخ الهجري (تقويم أم القرى — أوفلاين)
     try {
-        const res = await fetch(url);
-        const data = await res.json(); const t = data.data.timings; const d = data.data.date;
-        prayerTimings = { Fajr: t.Fajr, Sunrise: t.Sunrise, Dhuhr: t.Dhuhr, Asr: t.Asr, Maghrib: t.Maghrib, Isha: t.Isha };
-        document.getElementById('fajr-time').innerText = t.Fajr; document.getElementById('sunrise-time').innerText = t.Sunrise; document.getElementById('dhuhr-time').innerText = t.Dhuhr; document.getElementById('asr-time').innerText = t.Asr; document.getElementById('maghrib-time').innerText = t.Maghrib; document.getElementById('isha-time').innerText = t.Isha;
-        
-        const days = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-        document.getElementById('current-day').innerText = days[new Date().getDay()]; 
-        
-        document.getElementById('hijri-month').innerText = d.hijri.month.ar; document.getElementById('hijri-day').innerText = d.hijri.day; document.getElementById('hijri-year').innerText = d.hijri.year;
-        const engM = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-        document.getElementById('greg-month').innerText = engM[parseInt(d.gregorian.month.number)-1]; document.getElementById('greg-day').innerText = d.gregorian.day; document.getElementById('greg-year').innerText = d.gregorian.year;
-        startCountdown();
-    } catch (error) {}
-}
+        const f = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', { day:'numeric', month:'long', year:'numeric' });
+        let hd,hm,hy; f.formatToParts(now).forEach(p=>{ if(p.type==='day')hd=p.value; if(p.type==='month')hm=p.value; if(p.type==='year')hy=p.value; });
+        set('hijri-month', hm); set('hijri-day', hd); set('hijri-year', hy);
+    } catch(e){}
+    const engM = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    set('greg-month', engM[now.getMonth()]); set('greg-day', now.getDate()); set('greg-year', now.getFullYear());
+    startCountdown();
+    if (window.refreshAthanSchedule) window.refreshAthanSchedule();
+    if (window.AMBIENT && AMBIENT.apply) AMBIENT.apply();
+};
 
 let _countdownStarted = false;
 function startCountdown() {

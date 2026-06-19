@@ -14,6 +14,12 @@
     --glow: rgba(212,168,67,0.28);
 }
 
+/* ===== الواجهة الحيّة: لون التوهّج حسب وقت الصلاة ===== */
+:root[data-phase="fajr"]    { --glow: rgba(96,142,214,0.30); }
+:root[data-phase="day"]     { --glow: rgba(212,168,67,0.22); }
+:root[data-phase="maghrib"] { --glow: rgba(231,124,58,0.32); }
+:root[data-phase="night"]   { --glow: rgba(86,96,156,0.22); }
+
 /* ===== الوضع النهاري (اختياري) ===== */
 body.light-mode {
     --primary-color: #2C1810;
@@ -455,7 +461,11 @@ body.light-mode .tj-madd { color: #c0392b; } body.light-mode .tj-ghunnah { color
 .group-mem.done .gm-name { text-decoration: line-through; color: var(--text-muted); }
 .gm-name { flex: 1; font-weight: 600; }
 .gm-juz { font-size: 0.76rem; color: var(--accent-color); font-weight: 700; }
-.group-share { width: 100%; margin-top: 10px; background: var(--pill-bg); border: 1px solid var(--border-color); color: var(--primary-color); border-radius: 12px; padding: 9px; font-family: 'Tajawal','Cairo',sans-serif; font-weight: 700; cursor: pointer; }
+.group-progress { height: 8px; background: var(--border-color); border-radius: 10px; overflow: hidden; margin-top: 12px; }
+.group-progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-color), var(--accent-light)); border-radius: 10px; transition: width 0.5s ease; }
+.group-pct { font-size: 0.74rem; color: var(--accent-color); font-weight: 700; margin-top: 5px; }
+.group-btns { display: flex; gap: 8px; margin-top: 10px; }
+.group-share { flex: 1; background: var(--pill-bg); border: 1px solid var(--border-color); color: var(--primary-color); border-radius: 12px; padding: 9px; font-family: 'Tajawal','Cairo',sans-serif; font-weight: 700; cursor: pointer; font-size: 0.82rem; }
 
 /* ===== قوالب المشاركة ===== */
 .share-tpl-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }

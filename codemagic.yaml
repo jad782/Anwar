@@ -1,0 +1,76 @@
+# =======================================================
+#  Codemagic — بناء تطبيق الأنوار لـ iOS ورفعه إلى TestFlight
+#  (Capacitor — تُنفّذ على ماكينة macOS سحابية، فلا حاجة لـ Mac)
+#  أنشئ في Codemagic:
+#   • تكامل App Store Connect API key  (باسم: codemagic)
+#   • مجموعة متغيّرات (Group) باسم: appstore
+#       APP_STORE_APP_ID = رقم التطبيق في App Store Connect
+#       BUNDLE_ID        = com.alanwar.quran
+#       APPLE_TEAM_ID    = معرّف فريقك
+# =======================================================
+workflows:
+  ios-testflight:
+    name: Al-Anwar iOS → TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: codemagic
+    environment:
+      groups:
+        - appstore
+      vars:
+        XCODE_WORKSPACE: "mobile/ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+      node: 20
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: تثبيت اعتماديات الويب والـ Capacitor
+        script: |
+          cd mobile
+          npm ci
+      - name: توليد الأيقونات ونسخ ملفات الويب
+        script: |
+          cd mobile
+          node gen-icons.js || true
+          node copy-web.js
+      - name: إنشاء/مزامنة مشروع iOS
+        script: |
+          cd mobile
+          [ -d ios ] || npx cap add ios
+          npx cap sync ios
+          npx @capacitor/assets generate --ios || true
+      - name: حقن أذونات Info.plist (إلزامي لقبول آبل)
+        script: |
+          PLIST="mobile/ios/App/App/Info.plist"
+          P=/usr/libexec/PlistBuddy
+          add() { $P -c "Add :$1 string '$2'" "$PLIST" 2>/dev/null || $P -c "Set :$1 '$2'" "$PLIST"; }
+          add NSLocationWhenInUseUsageDescription "نحتاج موقعك لتحديد اتجاه القبلة بدقّة وحساب أوقات الصلاة لمدينتك. يبقى الموقع على جهازك ولا يُرسل لأي خادم."
+          add NSLocationAlwaysAndWhenInUseUsageDescription "نحتاج موقعك لحساب أوقات الصلاة واتجاه القبلة على جهازك فقط."
+          add NSMicrophoneUsageDescription "للسماح بتسجيل تلاوتك وحفظها على جهازك، والبحث الصوتي عن الآيات."
+          add NSCameraUsageDescription "لعرض اتجاه القبلة فوق الكاميرا (الواقع المعزّز)."
+          $P -c "Add :UIBackgroundModes array" "$PLIST" 2>/dev/null || true
+          $P -c "Add :UIBackgroundModes:0 string audio" "$PLIST" 2>/dev/null || true
+          $P -c "Add :NSSupportsLiveActivities bool true" "$PLIST" 2>/dev/null || $P -c "Set :NSSupportsLiveActivities true" "$PLIST"
+      - name: تثبيت Pods
+        script: |
+          cd mobile/ios/App && pod install
+      - name: التوقيع التلقائي
+        script: |
+          xcode-project use-profiles
+      - name: بناء IPA
+        script: |
+          BUILD_NUMBER=$(($(app-store-connect get-latest-testflight-build-number "$APP_STORE_APP_ID" 2>/dev/null || echo 0) + 1))
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME" \
+            --archive-flags="-destination 'generic/platform=iOS'"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        beta_groups:
+          - Internal Testers
