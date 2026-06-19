@@ -12,7 +12,14 @@ window.MUSHAF = window.MUSHAF || {};
 const BAS = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ';
 
 function toArabic(n){ return String(n).replace(/[0-9]/g, d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
-function surahMeta(n){ return QD().surahs[n-1]; }
+let _countsReady = false;
+function ensureCounts(){
+    if (_countsReady || !QD()) return;
+    const c = {}; QD().ayahs.forEach(a => { c[a.s] = (c[a.s]||0) + 1; });
+    QD().surahs.forEach(s => { if (s.count==null) s.count = c[s.n] || 0; });
+    _countsReady = true;
+}
+function surahMeta(n){ ensureCounts(); return QD().surahs[n-1]; }
 function nameOf(n){ return (surahMeta(n).name||'').replace('سُورَةُ ','').replace('سورة ',''); }
 function pageOfSurah(n){ const a = QD().ayahs.find(x=>x.s===n); return a?a.p:1; }
 function pageOfJuz(j){ const a = QD().ayahs.find(x=>x.j===j); return a?a.p:1; }
@@ -30,6 +37,7 @@ function parseTaj(t){ return (t||'').replace(/\[([a-z]+)(?::\d+)?\[(.*?)\]/g, (m
 // =======================================================
 MUSHAF.renderSurahList = function(){
     const el = $('surah-list'); if(!el || !QD()) return;
+    ensureCounts();
     el.innerHTML = QD().surahs.map(s => {
         const page = pageOfSurah(s.n);
         const type = s.type==='Meccan' ? 'مكية' : 'مدنية';

@@ -142,14 +142,13 @@ function injectSettings(){
       <div class="setting-item"><span class="set-ico"><i class="fa-solid fa-location-crosshairs"></i></span><span class="set-label">${L()==='en'?'Location':'تحديد الموقع'}</span>
         <div class="lang-switch"><button class="lang-btn ${cfg.mode==='auto'?'active':''}" id="pl-mode-auto">${L()==='en'?'Auto':'تلقائي'}</button><button class="lang-btn ${cfg.mode==='manual'?'active':''}" id="pl-mode-manual">${L()==='en'?'Manual':'يدوي'}</button></div></div>
       <div class="setting-item" id="pl-city-row" style="${cfg.mode==='manual'?'':'display:none'}"><span class="set-ico"><i class="fa-solid fa-city"></i></span><span class="set-label">${L()==='en'?'City':'المدينة'}</span><select id="pl-city" class="rt-reciter">${cityOpts}</select></div>
-      <div class="setting-item"><span class="set-ico"><i class="fa-solid fa-calculator"></i></span><span class="set-label">${L()==='en'?'Method':'طريقة الحساب'}</span><select id="pl-method" class="rt-reciter">${methOpts}</select></div>
-      <div class="setting-item"><span class="set-ico"><i class="fa-solid fa-clock"></i></span><span class="set-label">${L()==='en'?'Asr (Hanafi)':'العصر (حنفي)'}</span><label class="switch"><input type="checkbox" id="pl-hanafi" ${cfg.hanafi?'checked':''}><span class="slider round"></span></label></div>`;
+      <div class="setting-item"><span class="set-ico"><i class="fa-solid fa-calculator"></i></span><span class="set-label">${L()==='en'?'Method':'طريقة الحساب'}</span><select id="pl-method" class="rt-reciter">${methOpts}</select></div>`;
     const anchor = [...list.querySelectorAll('.set-group-title')].find(el=>el.dataset.i18n==='grp_alerts') || list.firstChild;
     list.insertBefore(w, anchor);
-    const save = ()=>{ const c=PRAYERS.getConfig(); c.cityIdx=+$('pl-city').value; c.method=$('pl-method').value; c.hanafi=$('pl-hanafi').checked; PRAYERS.saveConfig(c); PRAYERS.refresh(); };
+    const save = ()=>{ const c=PRAYERS.getConfig(); c.cityIdx=+$('pl-city').value; c.method=$('pl-method').value; PRAYERS.saveConfig(c); PRAYERS.refresh(); };
     $('pl-mode-auto').onclick = ()=>{ const c=PRAYERS.getConfig(); c.mode='auto'; c.lat=null; PRAYERS.saveConfig(c); $('pl-mode-auto').classList.add('active'); $('pl-mode-manual').classList.remove('active'); $('pl-city-row').style.display='none'; PRAYERS.refresh(); };
     $('pl-mode-manual').onclick = ()=>{ const c=PRAYERS.getConfig(); c.mode='manual'; PRAYERS.saveConfig(c); $('pl-mode-manual').classList.add('active'); $('pl-mode-auto').classList.remove('active'); $('pl-city-row').style.display='flex'; PRAYERS.refresh(); };
-    $('pl-city').onchange = save; $('pl-method').onchange = save; $('pl-hanafi').onchange = save;
+    $('pl-city').onchange = save; $('pl-method').onchange = save;
     const pid=document.createElement('span'); pid.id='pl-mode'; pid.style.display='none'; w.appendChild(pid);
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ()=>setTimeout(injectSettings, 800));
