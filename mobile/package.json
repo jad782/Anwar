@@ -2,20 +2,19 @@
   "name": "alanwar-mobile",
   "version": "1.0.0",
   "private": true,
-  "description": "تغليف تطبيق الأنوار كتطبيق أصلي (Android/iOS) عبر Capacitor",
+  "description": "تغليف تطبيق الأنوار كتطبيق iOS أصلي عبر Capacitor",
   "scripts": {
     "copy:web": "node copy-web.js",
-    "sync": "npm run copy:web && cap sync",
-    "add:android": "npm run copy:web && cap add android",
+    "icons": "node gen-icons.js",
+    "sync": "npm run copy:web && cap sync ios",
     "add:ios": "npm run copy:web && cap add ios",
-    "open:android": "cap open android",
     "open:ios": "cap open ios"
   },
   "dependencies": {
-    "@capacitor/android": "^6.1.2",
     "@capacitor/core": "^6.1.2",
     "@capacitor/ios": "^6.1.2",
-    "@capacitor/local-notifications": "^6.1.0"
+    "@capacitor/local-notifications": "^6.1.0",
+    "cordova-plugin-purchase": "^13.11.1"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",

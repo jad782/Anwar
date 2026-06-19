@@ -1,10 +1,9 @@
 node_modules/
 www/
-android/app/build/
-android/build/
-android/.gradle/
-android/.idea/
-android/local.properties
 ios/App/build/
 ios/App/Pods/
+ios/App/output/
+ios/App/App/public/
+DerivedData/
 .DS_Store
+recs.json

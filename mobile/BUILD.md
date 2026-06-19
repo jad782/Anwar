@@ -1,72 +1,47 @@
-# بناء تطبيق الأنوار كتطبيق أصلي (Android / iOS) عبر Capacitor
+# بناء تطبيق الأنوار لـ iOS (App Store) عبر Capacitor
 
-> الهدف: تنبيهات الأذان **تشتغل حتى لو كان التطبيق مغلقاً** (وهذا غير ممكن في الويب-آب وحده).
-> كل شيء جاهز في مجلد `mobile/`. التطبيق نفسه (الويب) يبقى في المجلد الأب وتُعدّله كالعادة.
+> ⚠️ بناء iOS يتطلّب **جهاز Mac** + **Xcode** + حساب **Apple Developer (99$/سنة)**.
+> لا يمكن بناء iOS على ويندوز. الخطوات التالية تُنفّذ على الماك.
 
----
-
-## كيف يعمل التنبيه؟
-- ملف `notifications.js` (في تطبيق الويب) يكتشف تلقائياً:
-  - **داخل التطبيق الأصلي** → يجدول الأذان عبر Capacitor LocalNotifications (يعمل والتطبيق مغلق، ويتكرّر يومياً).
-  - **في المتصفّح/الويب-آب** → يرجع لإشعارات الويب (تعمل أثناء فتح التطبيق فقط).
-- التحكّم من شاشة الإعدادات داخل التطبيق: «صوت الأذان» و«تنبيه قبل الأذان».
+تطبيق الويب (المصدر) في المجلد الأب. مجلد `mobile/` يحوي إعداد Capacitor لـ iOS.
 
 ---
 
-## المتطلّبات (مرّة واحدة)
-- **Node.js** (موجود) — للأوامر.
-- **Android Studio** (أحدث إصدار) — لبناء وتشغيل أندرويد.
-- لـ iOS: جهاز **Mac** + **Xcode** + حساب Apple Developer (99$/سنة).
-
----
-
-## أوامر التحديث (كل مرة تعدّل فيها تطبيق الويب)
-من داخل مجلد `mobile/`:
-
+## أول مرّة (على الماك)
 ```bash
-npm run sync
+cd mobile
+npm install
+npm run icons          # يولّد الأيقونات من ../icon-source.png
+npm run add:ios        # ينشئ مشروع ios/
+npx @capacitor/assets generate --ios   # أيقونة + سبلاش iOS
+npx cap open ios       # يفتح Xcode
 ```
-هذا الأمر: ينسخ ملفات الويب إلى `www/` ثم يحدّث مشروع أندرويد/iOS.
 
----
+في Xcode:
+1. اختر فريق التوقيع (Signing & Capabilities ▸ Team).
+2. عدّل **Bundle Identifier** ليطابق `com.alanwar.quran` (أو معرّفك).
+3. فعّل القدرات (Capabilities):
+   - **Push Notifications** (غير مطلوب لكن لا يضر) و**Background Modes ▸ Remote notifications** إن رغبت.
+   - **In-App Purchase** (مطلوب لقسم «ادعم المطوّر»).
+4. شغّل على جهاز حقيقي ▸ ثم **Product ▸ Archive** ▸ ارفع إلى App Store Connect.
 
-## أندرويد — خطوات أول مرّة
-مشروع أندرويد **مُولّد مسبقاً** في `mobile/android`. فقط:
+## التنبيهات وهي مغلقة (الأذان + التذكير اليومي)
+- تعمل عبر `@capacitor/local-notifications` (إشعارات محلّية مجدولة) — تظهر **والتطبيق مغلق** على iOS بعد منح الإذن.
+- عند أول فتح يطلب التطبيق إذن الإشعارات؛ لا حاجة لخادم.
+- صوت الأذان كنغمة إشعار على iOS: أضف ملف `athan.caf` إلى مشروع Xcode، وغيّر `sound:'athan.mp3'` إلى `'athan.caf'` في `notifications.js` (داخل الويب).
 
-1. افتح Android Studio → Open → اختر مجلد `mobile/android`.
-2. انتظر مزامنة Gradle (أول مرة تأخذ دقائق وتحتاج إنترنت).
-3. وصّل هاتفاً (مع تفعيل USB Debugging) أو شغّل محاكياً، واضغط ▶ Run.
-4. لإصدار ملف للنشر: Build ▸ Generate Signed Bundle / APK ▸ **Android App Bundle (.aab)** (هذا المطلوب لمتجر Play).
+## الدفع داخل التطبيق (ادعم المطوّر)
+- يستخدم `cordova-plugin-purchase`. أنشئ في **App Store Connect** منتجات **Consumable** بالمعرّفات:
+  - `com.alanwar.quran.tip1`  (0.99$)
+  - `com.alanwar.quran.tip5`  (4.99$)
+  - `com.alanwar.quran.tip10` (9.99$)
+- راجع `../store/IAP-PRODUCTS.md`.
 
-> إن لم يفتح مشروع أندرويد لأي سبب، أعد توليده: `npm run add:android`.
+## الودجت / Live Activity (آية اليوم على iPhone)
+- يتطلّب **Widget Extension بلغة Swift** يُضاف من داخل Xcode (File ▸ New ▸ Target ▸ Widget Extension).
+- غير ممكن توليده من طبقة الويب — يُبرمَج على الماك. راجع `../store/IOS-WIDGET-GUIDE.md`.
 
-### نشره على Google Play
-- أنشئ حساب مطوّر (25$ مرّة واحدة) على play.google.com/console.
-- ارفع ملف `.aab`، املأ بيانات المتجر (الاسم، الوصف، لقطات الشاشة، سياسة الخصوصية).
-- أول مراجعة قد تأخذ أيّاماً.
-
----
-
-## iOS — خطوات (على Mac فقط)
+## تحديث الويب لاحقاً
 ```bash
-npm run add:ios     # أول مرة فقط
-npm run open:ios    # يفتح Xcode
+cd mobile && npm run sync   # ينسخ ملفات الويب ويحدّث مشروع iOS
 ```
-- في Xcode: اختر فريق التوقيع (Signing Team)، فعّل **Push/Local Notifications** ليست مطلوبة لكن تأكّد من قدرات الإشعارات.
-- شغّل على جهاز حقيقي، ثم Archive ▸ رفع إلى App Store Connect.
-
----
-
-## ما تم إنجازه ✅
-- **القرآن كامل أوفلاين**: نص المصحف كله مضمّن في `quran-data.js` (988KB). القراءة (سور/أجزاء/صفحات/ختمات) تعمل **من أول مرة بدون إنترنت**. الصوت والتفسير والبحث فقط تحتاج إنترنت.
-- **أيقونة + شاشة بداية احترافية**: شعار فانوس ذهبي مولّد لكل الأحجام (74 ملف). المصدر في `assets-src/logo.svg` و`splash.svg`؛ لإعادة التوليد بعد تعديل الشعار:
-  ```bash
-  node -e "require('sharp')('assets-src/logo.svg',{density:300}).resize(1024,1024).toFile('assets/icon-only.png')"
-  npx @capacitor/assets generate --android
-  ```
-- **صوت الأذان**: ملف `athan.mp3` مضمّن (يعمل أوفلاين داخل التطبيق)، وأُنشئت قناة إشعار `athan` بصوته في `notifications.js`، ونُسخ إلى `android/app/src/main/res/raw/athan.mp3`.
-- **الأذونات**: في `AndroidManifest.xml` (POST_NOTIFICATIONS + SCHEDULE_EXACT_ALARM + USE_EXACT_ALARM + CAMERA).
-
-## ملاحظات
-- **iOS**: لصوت الأذان كنغمة، أضف `athan.mp3` (أو caf) إلى حزمة تطبيق Xcode.
-- **تذكير**: عند تعديل تطبيق الويب، زِد رقم `?v=` في `index.html` ثم `npm run sync` لتحديث مشروع أندرويد.

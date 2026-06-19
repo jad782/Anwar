@@ -280,12 +280,26 @@ body.light-mode .ayah-number { background-image: url('data:image/svg+xml;utf8,<s
 .bg-dark { background: #14110B; }
 
 /* تطبيق خلفية القراءة على القارئ والصفحات */
-.quran-text[data-bg="paper"] { background: #FAF6EE; color: #2C1810; border-radius: 14px; }
-.quran-text[data-bg="sepia"] { background: #EDE0C8; color: #3a2c18; border-radius: 14px; padding: 16px; }
-.quran-text[data-bg="green"] { background: #1B3A2B; color: #EAF3EC; border-radius: 14px; padding: 16px; }
-.quran-text[data-bg="green"] .ayah, .quran-text[data-bg="dark"] .ayah { color: inherit; }
-.quran-text[data-bg="green"] .basmalah, .quran-text[data-bg="dark"] .basmalah { color: #D4A843; }
-.quran-text[data-bg="dark"] { background: #14110B; color: #EFE6D5; border-radius: 14px; padding: 16px; }
+/* خلفيات القراءة — ألوان مضمونة الوضوح (الآيات لا تختفي أبداً) */
+.quran-text[data-bg="paper"] { background: #FAF6EE; border-radius: 14px; padding: 16px; }
+.quran-text[data-bg="paper"], .quran-text[data-bg="paper"] .ayah { color: #2C1810; }
+.quran-text[data-bg="paper"] .basmalah, .quran-text[data-bg="paper"] .mushaf-banner h2, .quran-text[data-bg="paper"] .surah-separator { color: #5A3A1C; }
+
+.quran-text[data-bg="sepia"] { background: #EDE0C8; border-radius: 14px; padding: 16px; }
+.quran-text[data-bg="sepia"], .quran-text[data-bg="sepia"] .ayah { color: #3a2c18; }
+.quran-text[data-bg="sepia"] .basmalah, .quran-text[data-bg="sepia"] .mushaf-banner h2, .quran-text[data-bg="sepia"] .surah-separator { color: #6b4a22; }
+
+.quran-text[data-bg="green"] { background: #143626; border-radius: 14px; padding: 16px; }
+.quran-text[data-bg="green"], .quran-text[data-bg="green"] .ayah { color: #EAF3EC; }
+.quran-text[data-bg="green"] .basmalah, .quran-text[data-bg="green"] .mushaf-banner h2, .quran-text[data-bg="green"] .surah-separator { color: #E7C765; }
+
+.quran-text[data-bg="dark"] { background: #14110B; border-radius: 14px; padding: 16px; }
+.quran-text[data-bg="dark"], .quran-text[data-bg="dark"] .ayah { color: #EFE6D5; }
+.quran-text[data-bg="dark"] .basmalah, .quran-text[data-bg="dark"] .mushaf-banner h2, .quran-text[data-bg="dark"] .surah-separator { color: #D4A843; }
+
+/* رقم الآية يبقى واضحاً على كل خلفية */
+.quran-text[data-bg="paper"] .ayah-number, .quran-text[data-bg="sepia"] .ayah-number { color: #5A3A1C; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235A3A1C' stroke-width='1.5'><circle cx='12' cy='12' r='10'/></svg>"); }
+.quran-text[data-bg="green"] .ayah-number, .quran-text[data-bg="dark"] .ayah-number { color: #E7C765; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23D4A843' stroke-width='1.5'><circle cx='12' cy='12' r='10'/></svg>"); }
 
 /* ===== قائمة السور الأنيقة ===== */
 .msf-card { display: flex; align-items: center; gap: 14px; background: var(--white); border: 1px solid var(--border-color); border-radius: 18px; padding: 12px 16px; margin-bottom: 11px; cursor: pointer; transition: transform 0.15s, border-color 0.25s; box-shadow: 0 8px 20px rgba(0,0,0,0.22); }
@@ -386,6 +400,16 @@ body.light-mode .tj-madd { color: #c0392b; } body.light-mode .tj-ghunnah { color
 .donate-copy { background: var(--pill-bg); border: 1px solid var(--border-color); color: var(--primary-color); width: 38px; height: 38px; border-radius: 11px; cursor: pointer; font-size: 0.95rem; }
 .donate-wa { display: flex; align-items: center; justify-content: center; gap: 10px; background: #25D366; color: #fff !important; text-decoration: none; border-radius: 14px; padding: 13px; font-weight: 700; margin-top: 8px; }
 .donate-note { font-size: 0.78rem; color: #e0a23c; text-align: center; margin-top: 12px; }
+
+/* ===== ادعم المطوّر (IAP) ===== */
+.support-intro { text-align: center; color: var(--text-main); font-size: 0.95rem; line-height: 1.8; margin-bottom: 18px; }
+.support-tiers { display: flex; flex-direction: column; gap: 12px; }
+.support-tier { display: flex; align-items: center; gap: 14px; background: var(--white); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 16px; cursor: pointer; font-family: 'Tajawal','Cairo',sans-serif; transition: transform 0.15s, border-color 0.25s; box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
+.support-tier:active { transform: scale(0.98); border-color: var(--accent-color); }
+.st-emoji { font-size: 1.6rem; }
+.st-name { flex: 1; text-align: right; font-weight: 700; color: var(--text-main); font-size: 1rem; }
+.st-price { background: linear-gradient(135deg, var(--accent-color), var(--accent-light)); color: #1A140A; font-weight: 800; padding: 6px 16px; border-radius: 14px; font-size: 0.9rem; }
+.support-note { font-size: 0.76rem; color: var(--text-muted); text-align: center; margin-top: 16px; }
 
 /* ===== كروت الرئيسية (متابعة القراءة / الورد) ===== */
 #pro-home { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }

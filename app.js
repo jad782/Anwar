@@ -601,7 +601,7 @@ function surahName(num){ const s = SURAH_NAMES[num-1]; if(!s) return ''; return 
 // 12. نظام الترجمة (عربي/إنجليزي)
 // =====================================
 const I18N = {
- ar:{ nav_home:"الرئيسية",nav_quran:"المصحف",nav_athkar:"الأذكار",nav_settings:"الإعدادات",nav_donate:"تبرّع",donate_title:"تبرّع وساهم في الأجر",
+ ar:{ nav_home:"الرئيسية",nav_quran:"المصحف",nav_athkar:"الأذكار",nav_settings:"الإعدادات",nav_donate:"ادعم المطوّر",donate_title:"ادعم المطوّر",
   daily_tasks:"مهماتي اليومية",add_task:"إضافة",your_apps:"تطبيقاتك اليومية",prayer_times:"أوقات الصلاة",today_achievements:"إنجازات اليوم",my_khatmas:"ختماتي القرآنية",new_khatma:"ختمة جديدة",
   surahs:"السور",juzs:"الأجزاء",athkar_morning:"أذكار الصباح",athkar_evening:"أذكار المساء",athkar_post:"أذكار بعد الصلاة",athkar_sleep:"أذكار النوم",
   language:"اللغة",reading_bg:"خلفية القراءة",notif_athan:"تنبيهات الأذان",gps_auto:"تحديد الموقع تلقائياً (GPS)",keep_awake:"إبقاء الشاشة مضاءة",night_mode:"الوضع النهاري (فاتح)",font_size:"حجم خط القراءة",factory_reset:"تصفير بيانات التطبيق",
@@ -609,7 +609,7 @@ const I18N = {
   qibla_dir:"اتجاه القبلة",qibla_hint:"امسك الهاتف بشكل مسطح ووجّهه حتى تنطبق الكعبة على السهم.",qibla_enable:"تفعيل البوصلة",qibla_denied:"لم يتم السماح باستخدام البوصلة.",
   add_task_title:"إضافة مهمة",add_surah_task:"إضافة سورة للقراءة اليومية",add_custom_task:"مهمة مخصّصة (ذكر/عبادة)",add_munjiyat:"المنجّيات السبع",pick_surah:"اختر سورة",open_full:"فتح كاملة",mark_done:"تمّت القراءة",
   greeting:"وقت مبارك",tasbeeh_cta:"لِنُسبّح الله",tasks_empty:"لا توجد مهام، أضف وردك اليومي.",all_done:"أتممت ورد اليوم 🌿",of:"من",done_count:"مهمة",custom_prompt:"اكتب اسم المهمة:",munjiyat_note:"السجدة، يس، الدخان، الواقعة، الحشر، المُلك، الإنسان — (صيغة شائعة، عدّلها حسب مصدرك الموثّق)" },
- en:{ nav_home:"Home",nav_quran:"Quran",nav_athkar:"Athkar",nav_settings:"Settings",nav_donate:"Donate",donate_title:"Donate — Ongoing Charity",
+ en:{ nav_home:"Home",nav_quran:"Quran",nav_athkar:"Athkar",nav_settings:"Settings",nav_donate:"Support",donate_title:"Support the Developer",
   daily_tasks:"My Daily Tasks",add_task:"Add",your_apps:"Your Daily Apps",prayer_times:"Prayer Times",today_achievements:"Today's Goals",my_khatmas:"My Khatmas",new_khatma:"New Khatma",
   surahs:"Surahs",juzs:"Juz",athkar_morning:"Morning Athkar",athkar_evening:"Evening Athkar",athkar_post:"After-Prayer Athkar",athkar_sleep:"Sleep Athkar",
   language:"Language",reading_bg:"Reading Background",notif_athan:"Athan Notifications",gps_auto:"Auto Location (GPS)",keep_awake:"Keep Screen On",night_mode:"Day Mode (light)",font_size:"Reading Font Size",factory_reset:"Reset App Data",

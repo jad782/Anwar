@@ -266,48 +266,53 @@ function injectHomeEntries(){
 PRO.refreshBookmarksBadge = function(){};
 
 // =======================================================
-// التبرّع — معلومات الحساب البنكي (عدّل القيم هنا)
+// ادعم المطوّر — عبر In-App Purchase (متوافق مع سياسة آبل)
+// مُعرّفات المنتجات تُنشأ في App Store Connect (Consumable)
 // =======================================================
-const DONATE_INFO = {
-    bank:        'كويت تورك (Kuveyt Türk)',
-    beneficiary: 'JAD ALSAYALEH',
-    swift:       'KTEFTRISXXX',
-    ibans: [
-        { ar:'IBAN (ليرة تركية ₺)', en:'IBAN (TRY ₺)', value:'TR04 0020 5000 0990 7839 6000 01' },
-        { ar:'IBAN (دولار $)',       en:'IBAN (USD $)',  value:'TR90 0020 5000 0990 7839 6001 02' }
-    ],
-    whatsapp:    '905551517264'   // واتساب دولي بدون + (تركيا 90 + 5551517264)
-};
-function donateRow(labelAr, labelEn, value, icon){
-    const empty = !value;
-    const shown = empty ? tr('— لم تُضف بعد —','— not set —') : value;
-    const copyVal = (value||'').replace(/\s/g,'').replace(/'/g,"\\'"); // ينسخ بدون مسافات
-    const copyBtn = empty ? '' : `<button class="donate-copy" onclick="PRO.copy('${copyVal}', this)"><i class="fa-regular fa-copy"></i></button>`;
-    return `<div class="donate-row ${empty?'donate-empty':''}">
-        <div class="donate-ico"><i class="fa-solid ${icon}"></i></div>
-        <div class="donate-field"><span class="donate-label">${L()==='en'?labelEn:labelAr}</span>
-        <span class="donate-value" dir="ltr">${shown}</span></div>${copyBtn}</div>`;
+const SUPPORT_TIERS = [
+    { id:'com.alanwar.quran.tip1',  emoji:'☕', ar:'دعم بسيط',  en:'Small support',  price:'$0.99' },
+    { id:'com.alanwar.quran.tip5',  emoji:'🌿', ar:'دعم كريم',  en:'Generous',       price:'$4.99' },
+    { id:'com.alanwar.quran.tip10', emoji:'🌟', ar:'دعم سخيّ',  en:'Big support',    price:'$9.99' }
+];
+let _iapReady = false;
+function initIAP(){
+    try {
+        const CdvPurchase = window.CdvPurchase;
+        if (!CdvPurchase || _iapReady) return;
+        const { store, ProductType, Platform } = CdvPurchase;
+        SUPPORT_TIERS.forEach(t => store.register({ id:t.id, type:ProductType.CONSUMABLE, platform:Platform.APPLE_APPSTORE }));
+        store.when().approved(tr2 => tr2.verify());
+        store.when().verified(rc => { rc.finish(); if(typeof showBadgeToast==='function') showBadgeToast({emoji:'🤍', name:tr('جزاك الله خيراً','JazakAllah khayr'), desc:tr('شكراً لدعمك التطبيق','Thank you for your support')}); });
+        store.initialize([Platform.APPLE_APPSTORE]);
+        _iapReady = true;
+    } catch(e){}
 }
+PRO.support = function(id){
+    try {
+        const CdvPurchase = window.CdvPurchase;
+        if (CdvPurchase && _iapReady){
+            const p = CdvPurchase.store.get(id, CdvPurchase.Platform.APPLE_APPSTORE);
+            if (p && p.getOffer){ CdvPurchase.store.order(p.getOffer()); return; }
+        }
+    } catch(e){}
+    alert(tr('الدعم متاح داخل التطبيق على App Store عبر حسابك في آبل.','Support is available in the App Store version via your Apple account.'));
+};
 window.openDonate = function(){
     const body = $('donate-bank-body'); if (!body) return;
-    let html = donateRow('اسم البنك','Bank', DONATE_INFO.bank, 'fa-building-columns')
-             + donateRow('اسم المستفيد','Beneficiary', DONATE_INFO.beneficiary, 'fa-user');
-    (DONATE_INFO.ibans||[]).forEach(b => { html += donateRow(b.ar, b.en, b.value, 'fa-hashtag'); });
-    html += donateRow('رمز السويفت (SWIFT/BIC)','SWIFT / BIC', DONATE_INFO.swift, 'fa-globe');
-    if (DONATE_INFO.whatsapp){
-        html += `<a class="donate-wa" href="https://wa.me/${DONATE_INFO.whatsapp}?text=${encodeURIComponent(tr('السلام عليكم، أودّ التبرّع','Assalamu alaikum, I would like to donate'))}" target="_blank"><i class="fa-brands fa-whatsapp"></i> ${tr('تواصل عبر واتساب','Contact via WhatsApp')}</a>`;
-    }
-    body.innerHTML = html;
+    body.innerHTML = `
+        <p class="support-intro">${tr('تطبيق الأنوار مجّاني بالكامل. دعمك يساعدنا على الاستمرار والتطوير 🤍','Al-Anwar is completely free. Your support helps us keep improving 🤍')}</p>
+        <div class="support-tiers">
+            ${SUPPORT_TIERS.map(t=>`<button class="support-tier" onclick="PRO.support('${t.id}')">
+                <span class="st-emoji">${t.emoji}</span>
+                <span class="st-name">${L()==='en'?t.en:t.ar}</span>
+                <span class="st-price">${t.price}</span></button>`).join('')}
+        </div>
+        <p class="support-note">${tr('الدفع يتم بأمان عبر حسابك في آبل (App Store).','Payment is processed securely via your Apple account.')}</p>`;
     $('donate-modal').classList.add('active');
 };
 window.closeDonate = function(){ const m=$('donate-modal'); if(m) m.classList.remove('active'); };
-PRO.copy = function(text, btn){
-    const done = () => { if(btn){ const o=btn.innerHTML; btn.innerHTML='<i class="fa-solid fa-check" style="color:#22c55e"></i>'; setTimeout(()=>btn.innerHTML=o,1500); } };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(()=>{ try{const t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();done();}catch(e){} });
-    else { try{const t=document.createElement('textarea');t.value=text;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();done();}catch(e){} }
-};
 
-function initPro(){ injectHomeEntries(); }
+function initPro(){ injectHomeEntries(); initIAP(); }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(initPro, 500));
 else setTimeout(initPro, 500);
 })();
