@@ -80,9 +80,32 @@ window.scheduleNativeAthan = async function(){
     return false;
 };
 
+// تذكيرات الأذكار خلال اليوم (تعمل والتطبيق مغلق) — 3 أوقات ثابتة
+const DHIKR_REMINDERS = [
+    { h:9,  m:0,  ar:'سبّحان الله وبحمده 🌿', body_ar:'لا تدع يومك يمضي بلا ذكر لله.', en:'SubhanAllah 🌿', body_en:"Don't let your day pass without dhikr." },
+    { h:15, m:0,  ar:'أكثِر من الاستغفار 🤲', body_ar:'«مَن لزم الاستغفار جعل الله له من كل همٍّ فرجاً».', en:'Seek forgiveness 🤲', body_en:'Istighfar brings relief from every worry.' },
+    { h:20, m:30, ar:'صلِّ على النبي ﷺ', body_ar:'صلاة واحدة عليه ﷺ تعدل عشر صلوات من الله عليك.', en:'Send blessings on the Prophet ﷺ', body_en:'One salah brings tenfold from Allah.' }
+];
+window.scheduleDhikrReminders = async function(){
+    if (!isNative()) return false;
+    if (localStorage.getItem('dhikrReminders') === 'false') {
+        try { await window.Capacitor.Plugins.LocalNotifications.cancel({ notifications: DHIKR_REMINDERS.map((_,i)=>({id:2100+i})) }); } catch(e){}
+        return false;
+    }
+    const LN = window.Capacitor.Plugins.LocalNotifications;
+    if (!(await ensurePermission(LN))) return false;
+    const notifs = DHIKR_REMINDERS.map((d,i)=>({
+        id: 2100+i,
+        title: lang()==='en' ? d.en : d.ar,
+        body:  lang()==='en' ? d.body_en : d.body_ar,
+        schedule: { on:{ hour:d.h, minute:d.m }, repeats:true, allowWhileIdle:true }
+    }));
+    try { await LN.schedule({ notifications: notifs }); return true; } catch(e){ return false; }
+};
+
 // نقطة دخول موحّدة — يستدعيها التطبيق بعد تحميل أوقات الصلاة وعند تغيير الإعدادات
 window.refreshAthanSchedule = function(){
-    if (isNative()) { window.scheduleNativeAthan(); }
+    if (isNative()) { window.scheduleNativeAthan(); window.scheduleDhikrReminders(); }
     // على الويب: لا حاجة لشيء؛ app.js/features.js يطلقان الإشعارات أثناء التشغيل
 };
 

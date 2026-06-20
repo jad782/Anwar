@@ -861,11 +861,15 @@ function injectExtraSettings(){
       <div class="setting-item"><span class="set-ico"><i class="fa-solid fa-hourglass-half"></i></span><span class="set-label">${tr('تنبيه قبل الأذان (دقائق)','Pre-Athan reminder (min)')}</span>
         <select id="pre-athan-select" class="rt-reciter">
           <option value="0">${tr('بدون','Off')}</option><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="30">30</option></select></div>
+      <div class="setting-item"><span class="set-ico"><i class="fa-solid fa-hands-praying"></i></span><span class="set-label">${tr('تذكيرات الأذكار خلال اليوم','Daily dhikr reminders')}</span>
+        <label class="switch"><input type="checkbox" id="dhikr-reminders-toggle"><span class="slider round"></span></label></div>
       <div class="setting-item" onclick="QA.openStats()"><span class="set-ico"><i class="fa-solid fa-chart-simple"></i></span><span class="set-label">${tr('إحصائياتي الروحية','My Spiritual Stats')}</span>
         <i class="fa-solid fa-chevron-left ath-chevron"></i></div>`;
     // أدخلها قبل مجموعة "البيانات"
     const dataGroup = [...list.querySelectorAll('.set-group-title')].find(el => el.dataset.i18n === 'grp_data');
     if (dataGroup) list.insertBefore(wrap, dataGroup); else list.appendChild(wrap);
+    const dr = $('dhikr-reminders-toggle'); dr.checked = localStorage.getItem('dhikrReminders') !== 'false';
+    dr.addEventListener('change', e => { localStorage.setItem('dhikrReminders', e.target.checked?'true':'false'); if (window.scheduleDhikrReminders) window.scheduleDhikrReminders(); });
     const at = $('athan-sound-toggle'); at.checked = localStorage.getItem('athanSound')==='true';
     at.addEventListener('change', e => { localStorage.setItem('athanSound', e.target.checked); if (window.refreshAthanSchedule) window.refreshAthanSchedule(); });
     const pa = $('pre-athan-select'); pa.value = localStorage.getItem('preAthanMin')||'0';
