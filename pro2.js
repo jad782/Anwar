@@ -117,23 +117,34 @@ async function applyTranslation(){
 // (5) تسجيل تلاوتك
 // =======================================================
 let mediaRec=null, recChunks=[], recOn=false, recSurah=null;
+// اختر صيغة تسجيل مدعومة (mp4/aac على iOS، webm على غيره)
+function pickRecMime(){
+    const cands = ['audio/mp4', 'audio/aac', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg'];
+    if (window.MediaRecorder && MediaRecorder.isTypeSupported){
+        for (const c of cands){ try{ if (MediaRecorder.isTypeSupported(c)) return c; }catch(e){} }
+    }
+    return '';
+}
 PRO2.toggleRecord = async function(){
     if (recOn){ stopRec(); return; }
     if (!navigator.mediaDevices || !window.MediaRecorder){ alert(tr('التسجيل غير مدعوم على هذا الجهاز/المتصفّح.','Recording not supported here.')); return; }
     try {
         const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-        recChunks=[]; mediaRec=new MediaRecorder(stream); recSurah=(window.CUR_READ||{}).num;
-        mediaRec.ondataavailable = e => { if(e.data.size) recChunks.push(e.data); };
+        recChunks=[]; recSurah=(window.CUR_READ||{}).num;
+        const mime = pickRecMime();
+        mediaRec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+        mediaRec.ondataavailable = e => { if(e.data && e.data.size) recChunks.push(e.data); };
         mediaRec.onstop = async () => {
             stream.getTracks().forEach(t=>t.stop());
-            const blob = new Blob(recChunks, {type:'audio/webm'});
+            const type = (mediaRec && mediaRec.mimeType) || mime || 'audio/mp4';
+            const blob = new Blob(recChunks, { type });
             saveRecBlob('rec_'+recSurah, blob);
             try{ localStorage.setItem('has_recorded','1'); }catch(e){}
             showRecBar(recSurah);
             if (typeof showBadgeToast==='function') showBadgeToast({emoji:'🎙️', name:tr('حُفظت تلاوتك','Recitation saved'), desc:sN(recSurah)});
             PRO2.checkBadges && PRO2.checkBadges();
         };
-        mediaRec.start(); recOn=true;
+        mediaRec.start(500); recOn=true;  // timeslice يضمن تدفّق البيانات على iOS
         const b=$('rt-record'); if(b){ b.classList.add('rec-active'); b.innerHTML='<i class="fa-solid fa-stop"></i>'; }
     } catch(e){ alert(tr('لم يُسمح باستخدام المايكروفون.','Microphone permission denied.')); }
 };
@@ -141,8 +152,11 @@ function stopRec(){ try{ mediaRec && mediaRec.stop(); }catch(e){} recOn=false; c
 // تخزين تسجيل في IndexedDB المخصّص للصوت
 function saveRecBlob(key, blob){ try{ const rq=indexedDB.open('AlAnwarAudio',1); rq.onsuccess=e=>{ const db=e.target.result; try{ db.transaction('audio','readwrite').objectStore('audio').put({url:key, blob}); }catch(x){} }; }catch(e){} }
 PRO2.playRec = async function(surah){
-    const url = await (window.PRO && PRO.getCachedAudio ? PRO.getCachedAudio('rec_'+surah) : null);
-    if (url){ const a=new Audio(url); a.play(); } else alert(tr('لا يوجد تسجيل.','No recording.'));
+    let url = null;
+    try { url = await (window.PRO && PRO.getCachedAudio ? PRO.getCachedAudio('rec_'+surah) : null); } catch(e){}
+    if (!url){ alert(tr('لا يوجد تسجيل محفوظ.','No saved recording.')); return; }
+    const a = new Audio(url);
+    a.play().catch(()=> alert(tr('تعذّر تشغيل التسجيل على هذا الجهاز.','Cannot play the recording on this device.')));
 };
 function showRecBar(surah){
     let bar=$('rec-bar'); const host=$('reading-view'); if(!host) return;
