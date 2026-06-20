@@ -30,7 +30,6 @@ function injectReadingToolbar(){
         <option value="ar.abdulbasitmurattal">عبد الباسط</option>
         <option value="ar.minshawi">المنشاوي</option>
         <option value="ar.mahermuaiqly">المعيقلي</option>
-        <option value="mp3quran:islam">إسلام صبحي 🎧</option>
       </select>`;
     const headerEl = host.querySelector('.reading-header');
     headerEl.insertAdjacentElement('afterend', bar);
@@ -44,6 +43,7 @@ let reciteList = [];      // [{global, surah, ayah, url}]
 let reciteIdx = -1;
 let reciteOn = false;
 let reciteEdition = localStorage.getItem('reciter') || 'ar.alafasy';
+if (reciteEdition.indexOf('mp3quran:') === 0) { reciteEdition = 'ar.alafasy'; localStorage.setItem('reciter','ar.alafasy'); } // إزالة قارئ غير مرخّص
 
 // قرّاء بالسورة الكاملة (بدون تظليل آية-آية)
 const FULL_SURAH_RECITERS = { 'mp3quran:islam': 'https://server14.mp3quran.net/islam/Rewayat-Hafs-A-n-Assem/' };
