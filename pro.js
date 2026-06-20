@@ -194,14 +194,20 @@ PRO.openGroupKhatma = function(){
     $('group-modal').classList.add('active');
 };
 PRO.closeGroupKhatma = function(){ const m=$('group-modal'); if(m) m.classList.remove('active'); };
+function _loadGroups(){ try{ return JSON.parse(localStorage.getItem('group_khatmas')||'[]'); }catch(e){ return []; } }
+function _saveGroups(g){ localStorage.setItem('group_khatmas', JSON.stringify(g)); }
+const _roomSubs = {};
 PRO.renderGroups = function(){
-    let groups=[]; try{ groups=JSON.parse(localStorage.getItem('group_khatmas')||'[]'); }catch(e){}
-    const body = $('group-body');
+    const groups=_loadGroups();
+    const body = $('group-body'); if(!body) return;
+    const synced = (window.FB && FB.ready);
     let html = `<button class="tasbeeh-pill" style="margin-bottom:14px;" onclick="PRO.createGroup()"><i class="fa-solid fa-plus"></i> ${tr('ختمة جماعية جديدة','New group khatma')}</button>`;
+    html += `<p class="group-net"><i class="fa-solid fa-circle" style="color:${synced?'#22c55e':'#9aa0a6'};font-size:0.6rem"></i> ${synced?tr('متّصل — تحديث لحظي','Live sync on'):tr('غير متّصل — محلّي','Offline — local')}</p>`;
     if (!groups.length) html += `<p class="tasks-empty">${tr('وزّع أجزاء القرآن على أفراد العائلة أو الأصدقاء لختمة جماعية.','Split the 30 Juz among family/friends for a shared khatma.')}</p>`;
     groups.forEach((g, gi) => {
         const doneCount = g.members.filter(m=>m.done).length;
         html += `<div class="group-card"><div class="group-head"><b>${g.name}</b>
+            ${g.code?`<span class="group-live"><i class="fa-solid fa-tower-broadcast"></i> ${tr('متزامنة','Live')}</span>`:''}
             <span>${doneCount}/${g.members.length} ✓</span>
             <button class="bm-del" onclick="PRO.delGroup(${gi})"><i class="fa-solid fa-trash-can"></i></button></div>`;
         g.members.forEach((m, mi) => {
@@ -221,23 +227,45 @@ PRO.renderGroups = function(){
     body.innerHTML = html;
 };
 PRO.copyRoomLink = function(gi){
-    let g=JSON.parse(localStorage.getItem('group_khatmas')||'[]'); const k=g[gi]; if(!k)return;
-    try{
-        const code = btoa(unescape(encodeURIComponent(JSON.stringify({n:k.name,m:k.members}))));
-        const link = location.origin + location.pathname + '#room=' + code;
-        if(navigator.clipboard) navigator.clipboard.writeText(link);
-        alert(tr('تم نسخ رابط الغرفة! أرسله لمن يشاركك الختمة.','Room link copied! Send it to your group.'));
-    }catch(e){}
+    const g=_loadGroups(); const k=g[gi]; if(!k)return;
+    let code;
+    if (k.code) code = k.code;                                   // غرفة Firestore متزامنة
+    else code = btoa(unescape(encodeURIComponent(JSON.stringify({n:k.name,m:k.members})))); // احتياطي محلّي
+    const link = location.origin + location.pathname + '#room=' + code;
+    try{ if(navigator.clipboard) navigator.clipboard.writeText(link); }catch(e){}
+    if (navigator.share) navigator.share({ text: tr('انضم لختمتنا الجماعية: ','Join our group khatma: ')+link }).catch(()=>{});
+    else alert(tr('تم نسخ رابط الغرفة! أرسله لمن يشاركك الختمة.','Room link copied! Send it to your group.'));
 };
-// استيراد غرفة من الرابط (#room=...)
+// تطبيق لقطة Firestore على النسخة المحلّية + إعادة الرسم
+function _applyRoomSnap(code, data){
+    const g=_loadGroups(); const i=g.findIndex(x=>x.code===code);
+    if (i===-1) g.unshift({ id:Date.now(), code, name:data.name, members:data.members });
+    else { g[i].name=data.name; g[i].members=data.members; }
+    _saveGroups(g);
+    if ($('group-modal') && $('group-modal').classList.contains('active')) PRO.renderGroups();
+}
+function _subscribeRoom(code){
+    if (!(window.FB && FB.ready) || _roomSubs[code]) return;
+    _roomSubs[code] = FB.subscribe(code, data => _applyRoomSnap(code, data));
+}
+PRO._subscribeAll = function(){ _loadGroups().forEach(g=>{ if(g.code) _subscribeRoom(g.code); }); };
+// استيراد/انضمام لغرفة من الرابط (#room=...)
 PRO.importRoomFromHash = function(){
+    const m = (location.hash||'').match(/room=([^&]+)/); if(!m) return;
+    const code = m[1]; history.replaceState(null,'',location.pathname);
+    // 1) غرفة Firestore (كود قصير)
+    if (window.FB && FB.ready && !/[{}]/.test(code) && code.length < 40){
+        FB.getRoom(code).then(data=>{
+            if(!data){ return; }
+            _applyRoomSnap(code, data); _subscribeRoom(code);
+            if(typeof showBadgeToast==='function') showBadgeToast({emoji:'👥', name:tr('انضممت لغرفة ختمة','Joined a khatma room'), desc:data.name});
+        }).catch(()=>{});
+        return;
+    }
+    // 2) احتياطي: رابط مُرمّز محلّياً
     try{
-        const m = (location.hash||'').match(/room=([^&]+)/); if(!m) return;
-        const obj = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
-        if(!obj || !obj.m) return;
-        let groups=[]; try{ groups=JSON.parse(localStorage.getItem('group_khatmas')||'[]'); }catch(e){}
-        if(!groups.some(x=>x.name===obj.n)){ groups.unshift({ id:Date.now(), name:obj.n, members:obj.m }); localStorage.setItem('group_khatmas', JSON.stringify(groups)); }
-        history.replaceState(null,'',location.pathname);
+        const obj = JSON.parse(decodeURIComponent(escape(atob(code)))); if(!obj||!obj.m) return;
+        const g=_loadGroups(); if(!g.some(x=>x.name===obj.n)){ g.unshift({ id:Date.now(), name:obj.n, members:obj.m }); _saveGroups(g); }
         setTimeout(()=>{ if(typeof showBadgeToast==='function') showBadgeToast({emoji:'👥', name:tr('انضممت لغرفة ختمة','Joined a khatma room'), desc:obj.n}); }, 800);
     }catch(e){}
 };
@@ -247,10 +275,22 @@ PRO.createGroup = function(){
     const names = membersStr.split(',').map(s=>s.trim()).filter(Boolean); if(!names.length) return;
     const per = Math.floor(30/names.length); let extra = 30 - per*names.length; let cur = 1;
     const members = names.map(nm => { let cnt = per + (extra>0?1:0); if(extra>0)extra--; const from=cur; const to=cur+cnt-1; cur=to+1; return { name:nm, from, to, done:false }; });
-    let groups=[]; try{ groups=JSON.parse(localStorage.getItem('group_khatmas')||'[]'); }catch(e){}
-    groups.unshift({ id:Date.now(), name, members }); localStorage.setItem('group_khatmas', JSON.stringify(groups)); PRO.renderGroups();
+    const groups=_loadGroups();
+    const entry = { id:Date.now(), name, members };
+    groups.unshift(entry); _saveGroups(groups); PRO.renderGroups();
+    // أنشئ غرفة Firestore متزامنة إن توفّر اتصال
+    if (window.FB && FB.ready){
+        FB.createRoom(name, members).then(code=>{
+            const g=_loadGroups(); const i=g.findIndex(x=>x.id===entry.id); if(i!==-1){ g[i].code=code; _saveGroups(g); }
+            _subscribeRoom(code); PRO.renderGroups();
+        }).catch(()=>{});
+    }
 };
-PRO.toggleMember = function(gi,mi){ let g=JSON.parse(localStorage.getItem('group_khatmas')||'[]'); g[gi].members[mi].done=!g[gi].members[mi].done; localStorage.setItem('group_khatmas',JSON.stringify(g)); PRO.renderGroups(); };
+PRO.toggleMember = function(gi,mi){
+    const g=_loadGroups(); if(!g[gi]) return;
+    g[gi].members[mi].done=!g[gi].members[mi].done; _saveGroups(g); PRO.renderGroups();
+    if (g[gi].code && window.FB && FB.ready) FB.updateMembers(g[gi].code, g[gi].members);
+};
 PRO.delGroup = function(gi){ if(!confirm(tr('حذف هذه الختمة الجماعية؟','Delete this group khatma?')))return; let g=JSON.parse(localStorage.getItem('group_khatmas')||'[]'); g.splice(gi,1); localStorage.setItem('group_khatmas',JSON.stringify(g)); PRO.renderGroups(); };
 PRO.shareGroup = function(gi){
     let g=JSON.parse(localStorage.getItem('group_khatmas')||'[]'); const k=g[gi]; if(!k)return;
@@ -339,7 +379,7 @@ window.openDonate = function(){
 };
 window.closeDonate = function(){ const m=$('donate-modal'); if(m) m.classList.remove('active'); };
 
-function initPro(){ injectHomeEntries(); initIAP(); PRO.importRoomFromHash(); }
+function initPro(){ injectHomeEntries(); initIAP(); PRO.importRoomFromHash(); if(PRO._subscribeAll) PRO._subscribeAll(); }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(initPro, 500));
 else setTimeout(initPro, 500);
 })();
