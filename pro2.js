@@ -391,6 +391,55 @@ PRO2.shareDaily = function(kind){
     if(navigator.share) navigator.share({text:msg}).catch(()=>{}); else { try{navigator.clipboard.writeText(msg);}catch(e){} alert(tr('تم النسخ','Copied')); }
 };
 
+// =======================================================
+// تخصيص عرض الواجهة الرئيسية (اختر ما يظهر)
+// =======================================================
+const HOME_SECTIONS = [
+    { key:'prayer',   ar:'أوقات الصلاة', en:'Prayer times', sel:['#tab-home .section-header:has(h3[data-i18n="prayer_times"])', '#tab-home .prayer-grid'] },
+    { key:'ayah',     ar:'آية اليوم', en:'Ayah of the day', sel:['#ayah-of-day-card'] },
+    { key:'daily',    ar:'حديث ودعاء اليوم', en:'Hadith & Du’a', sel:['#daily-extra'] },
+    { key:'continue', ar:'متابعة القراءة والورد', en:'Continue & Wird', sel:['#pro-home'] },
+    { key:'khatma',   ar:'ختماتي القرآنية', en:'My Khatmas', sel:['#tab-home .khatma-manager-card'] },
+    { key:'achieve',  ar:'إنجازات اليوم', en:'Today’s goals', sel:['#tab-home .section-header:has(h3[data-i18n="today_achievements"])', '#tab-home .achievement-rings-card'] },
+    { key:'tasks',    ar:'مهماتي اليومية', en:'Daily tasks', sel:['#tab-home .section-header:has(h3[data-i18n="daily_tasks"])', '#tab-home .daily-tasks-card'] },
+    { key:'apps',     ar:'الاختصارات', en:'Shortcuts', sel:['#tab-home .section-header:has(h3[data-i18n="your_apps"])', '#tab-home .apps-scroll'] }
+];
+function homePrefs(){ try{ return JSON.parse(localStorage.getItem('home_sections')||'{}'); }catch(e){ return {}; } }
+PRO2.applyHomeSections = function(){
+    const pref = homePrefs();
+    HOME_SECTIONS.forEach(s => {
+        const show = pref[s.key] !== false; // افتراضياً ظاهر
+        s.sel.forEach(q => { document.querySelectorAll(q).forEach(el => { el.style.display = show ? '' : 'none'; }); });
+    });
+};
+PRO2.openCustomizeHome = function(){
+    ensureCustomizeModal();
+    const pref = homePrefs();
+    $('ch-body').innerHTML = HOME_SECTIONS.map(s => {
+        const on = pref[s.key] !== false;
+        return `<div class="ch-row"><span class="ch-name">${L()==='en'?s.en:s.ar}</span>
+            <label class="switch"><input type="checkbox" data-key="${s.key}" ${on?'checked':''} onchange="PRO2.toggleHomeSection('${s.key}',this.checked)"><span class="slider round"></span></label></div>`;
+    }).join('');
+    $('customize-home-modal').classList.add('active');
+};
+PRO2.closeCustomizeHome = function(){ const m=$('customize-home-modal'); if(m) m.classList.remove('active'); };
+PRO2.toggleHomeSection = function(key, on){
+    const pref = homePrefs();
+    // حدّ أدنى 3 أقسام ظاهرة
+    if (!on){ const visible = HOME_SECTIONS.filter(s => (pref[s.key]!==false)).length; if (visible <= 3){ alert(tr('يجب إبقاء 3 أقسام على الأقل.','Keep at least 3 sections.')); PRO2.openCustomizeHome(); return; } }
+    pref[key] = on; localStorage.setItem('home_sections', JSON.stringify(pref)); PRO2.applyHomeSections();
+};
+function ensureCustomizeModal(){
+    if ($('customize-home-modal')) return;
+    const d=document.createElement('div'); d.id='customize-home-modal'; d.className='qibla-overlay';
+    d.innerHTML = `<div class="qibla-modal" style="width:94%;max-width:420px;text-align:right;">
+        <button class="close-qibla" onclick="PRO2.closeCustomizeHome()"><i class="fa-solid fa-xmark"></i></button>
+        <h2 style="color:var(--primary-color);margin-bottom:6px;"><i class="fa-solid fa-sliders"></i> ${tr('تخصيص الواجهة','Customize Home')}</h2>
+        <p style="color:var(--text-muted);font-size:0.8rem;margin-bottom:14px;">${tr('اختر الأقسام التي تظهر في صفحتك الرئيسية (3 على الأقل).','Choose which sections appear on your home (min 3).')}</p>
+        <div id="ch-body"></div></div>`;
+    document.body.appendChild(d);
+}
+
 // احقن زر القصة بعد فتح التفسير
 const _oat = window.onAyahTap;
 window.onAyahTap = function(){ const r = (typeof _oat==='function') ? _oat.apply(this, arguments) : undefined; setTimeout(injectExtras, 150); return r; };
@@ -407,7 +456,15 @@ document.addEventListener('touchstart', lpStart, {passive:true});
 document.addEventListener('touchend', lpCancel); document.addEventListener('touchmove', lpCancel, {passive:true});
 document.addEventListener('mousedown', lpStart); document.addEventListener('mouseup', lpCancel); document.addEventListener('mouseleave', lpCancel);
 
-function initPro2(){ injectExtras(); injectDailyCards(); PRO2.checkBadges(true); }
+function injectCustomizeHomeSetting(){
+    const list = document.querySelector('#tab-settings .settings-list'); if(!list || $('customize-home-row')) return;
+    const gen = [...list.querySelectorAll('.set-group-title')].find(el=>el.dataset.i18n==='grp_general');
+    const row=document.createElement('div'); row.className='setting-item'; row.id='customize-home-row';
+    row.setAttribute('onclick','PRO2.openCustomizeHome()');
+    row.innerHTML = `<span class="set-ico"><i class="fa-solid fa-table-cells-large"></i></span><span class="set-label">${L()==='en'?'Customize home':'تخصيص عرض الواجهة'}</span><i class="fa-solid fa-chevron-left ath-chevron"></i>`;
+    if (gen && gen.nextSibling) list.insertBefore(row, gen.nextSibling); else list.appendChild(row);
+}
+function initPro2(){ injectExtras(); injectCustomizeHomeSetting(); injectDailyCards(); PRO2.applyHomeSections(); PRO2.checkBadges(true); }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(initPro2, 700));
 else setTimeout(initPro2, 700);
 })();

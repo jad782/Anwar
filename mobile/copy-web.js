@@ -19,6 +19,7 @@ const INCLUDE = [
   'pro2.js',
   'mushaf.js',
   'live-activity.js',
+  'widget-bridge.js',
   'notifications.js',
   'style.css',
   'manifest.json',

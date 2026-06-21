@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Al-Anwar">
     <title>تطبيق الأنوار الإسلامي</title>
-    <link rel="stylesheet" href="style.css?v=17">
+    <link rel="stylesheet" href="style.css?v=18">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- ربط ملف المانيفست -->
@@ -332,7 +332,8 @@
     <div id="qibla-overlay" class="qibla-overlay">
         <div class="qibla-modal">
             <button class="close-qibla" onclick="closeQibla()"><i class="fa-solid fa-xmark"></i></button>
-            <h2 style="color:var(--primary-color); margin-bottom:20px;" data-i18n="qibla_dir">اتجاه القبلة</h2>
+            <h2 style="color:var(--primary-color); margin-bottom:16px;" data-i18n="qibla_dir">اتجاه القبلة</h2>
+            <div class="qibla-banner" id="qibla-banner"><i class="fa-solid fa-location-arrow"></i> <span>وجّه السهم نحو الأعلى ☝</span></div>
             <div class="compass-circle">
                 <svg class="compass-rose" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
                     <defs>
@@ -413,13 +414,14 @@
     <script src="firebase.js?v=1"></script>
     <script src="quran-data.js?v=1"></script>
     <script src="prayers.js?v=4"></script>
-    <script src="app.js?v=15"></script>
+    <script src="app.js?v=16"></script>
     <script src="features.js?v=15"></script>
     <script src="pro.js?v=8"></script>
-    <script src="pro2.js?v=6"></script>
+    <script src="pro2.js?v=7"></script>
     <script src="mushaf.js?v=3"></script>
     <script src="ambient.js?v=1"></script>
     <script src="live-activity.js?v=1"></script>
+    <script src="widget-bridge.js?v=1"></script>
     <script src="notifications.js?v=3"></script>
 </body>
 </html>

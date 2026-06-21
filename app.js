@@ -522,6 +522,8 @@ function handleOrientation(e) {
     if (arrow) arrow.style.color = aligned ? '#22c55e' : 'var(--accent-color)';
     const deg = document.getElementById('qibla-degree');
     if (deg) deg.innerText = Math.round(qiblaBearing) + '°' + (aligned ? ' ✓' : '');
+    const banner = document.getElementById('qibla-banner');
+    if (banner){ banner.classList.toggle('aligned', aligned); banner.querySelector('span').innerText = aligned ? (currentLang==='en'?'Correct Qibla direction ✓':'الاتجاه الصحيح للقبلة ✓') : (currentLang==='en'?'Point the arrow up ☝':'وجّه السهم نحو الأعلى ☝'); }
     // بوصلة الكاميرا (AR)
     const arArrow = document.getElementById('ar-arrow');
     if (arArrow){ arArrow.style.transform = `rotate(${rotation}deg)`; arArrow.style.filter = aligned ? 'drop-shadow(0 0 12px #22c55e)' : 'none'; }
