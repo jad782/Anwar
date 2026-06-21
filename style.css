@@ -587,5 +587,6 @@ body.light-mode .tj-madd { color: #c0392b; } body.light-mode .tj-ghunnah { color
 .compass-rose .cr-card { fill: var(--accent-color); font-family: 'Tajawal', sans-serif; font-weight: 800; font-size: 15px; text-anchor: middle; dominant-baseline: middle; opacity: 0.85; }
 .compass-rose .cr-n { fill: #F2D27A; font-size: 17px; }
 .compass-kaaba { position: absolute; top: 50%; left: 50%; transform-origin: center center; transform: translate(-50%, -50%) translateY(-92px); font-size: 1.4rem; transition: transform 0.15s ease-out; filter: drop-shadow(0 0 4px rgba(212,168,67,0.5)); z-index: 3; }
-.compass-circle i#compass-arrow { font-size: 4.6rem; color: var(--accent-color); transition: transform 0.15s ease-out; transform: rotate(0deg); z-index: 2; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)); }
+.q-needle { position: absolute; top: 50%; left: 50%; width: 30px; height: 120px; transform: translate(-50%,-50%) rotate(0deg); transform-origin: center center; color: var(--accent-light); transition: transform 0.15s ease-out, color 0.3s; z-index: 2; filter: drop-shadow(0 3px 7px rgba(0,0,0,0.55)); }
+.q-needle.al { color: #22c55e; }
 .compass-hub { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; border-radius: 50%; transform: translate(-50%,-50%); background: radial-gradient(circle, #F2D27A, #B8860B); box-shadow: 0 0 8px var(--glow); z-index: 4; }

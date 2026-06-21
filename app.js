@@ -515,11 +515,11 @@ function handleOrientation(e) {
     const rotation = _smoothRot;
     const arrow = document.getElementById('compass-arrow');
     const kaaba = document.getElementById('compass-kaaba');
-    if (arrow) arrow.style.transform = `rotate(${rotation}deg)`;
+    if (arrow) arrow.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
     // الكعبة تدور على حافة البوصلة وتبقى منتصبة
     if (kaaba) kaaba.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) translateY(-92px) rotate(${-rotation}deg)`;
     const aligned = (rotation < 5 || rotation > 355);
-    if (arrow) arrow.style.color = aligned ? '#22c55e' : 'var(--accent-color)';
+    if (arrow) arrow.classList.toggle('al', aligned);
     const deg = document.getElementById('qibla-degree');
     if (deg) deg.innerText = Math.round(qiblaBearing) + '°' + (aligned ? ' ✓' : '');
     const banner = document.getElementById('qibla-banner');
