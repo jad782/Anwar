@@ -4,9 +4,11 @@
 #  أنشئ في Codemagic:
 #   • تكامل App Store Connect API key  (باسم: codemagic)
 #   • مجموعة متغيّرات (Group) باسم: appstore
-#       APP_STORE_APP_ID = رقم التطبيق في App Store Connect
-#       BUNDLE_ID        = com.alanwar.quran
+#       APP_STORE_APP_ID = 6782741099
+#       BUNDLE_ID        = com.alanwar.quran.jad        (معرّفك الحالي)
 #       APPLE_TEAM_ID    = معرّف فريقك
+#   ⚠️ إلزامي قبل البناء: فعّل ميزة App Groups على App ID للتطبيق والودجت
+#      في بوابة آبل، وأضِف المجموعة group.com.alanwar.quran للاثنين.
 # =======================================================
 workflows:
   ios-testflight:
@@ -55,8 +57,15 @@ workflows:
       - name: تثبيت Pods
         script: |
           cd mobile/ios/App && pod install
-      - name: التوقيع التلقائي
+      - name: التوقيع — إنشاء شهادات وبروفايلات تشمل App Groups تلقائياً
         script: |
+          keychain initialize
+          # أنشئ شهادة توزيع إن لم توجد
+          app-store-connect create-certificate --type IOS_DISTRIBUTION --save 2>/dev/null || true
+          # أنشئ/اسحب بروفايلات للتطبيق والودجت (تشمل قدرات الـ App ID مثل App Groups)
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          app-store-connect fetch-signing-files "$BUNDLE_ID.AnwarWidgetExtension" --type IOS_APP_STORE --create
+          keychain add-certificates
           xcode-project use-profiles
       - name: ضبط رقم البناء
         script: |
