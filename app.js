@@ -225,6 +225,7 @@ window.setPrayerTimings = function(t, label){
     startCountdown();
     if (window.refreshAthanSchedule) window.refreshAthanSchedule();
     if (window.AMBIENT && AMBIENT.apply) AMBIENT.apply();
+    if (window.WidgetBridge && WidgetBridge.push) setTimeout(()=>WidgetBridge.push(), 300); // حدّث الودجت بالأوقات الحقيقية
 };
 
 let _countdownStarted = false;
