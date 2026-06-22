@@ -1,149 +1,142 @@
 # =======================================================
-
 # Codemagic - Al-Anwar iOS TestFlight
-
 # App: com.alanwar.quran.jad
-
 # Widget: com.alanwar.quran.jad.AnwarWidgetExtension
-
 # Team ID: 8888Q27UY8
-
 # =======================================================
 
 workflows:
-ios-testflight:
-name: "Al-Anwar iOS TestFlight"
-instance_type: mac_mini_m2
-max_build_duration: 60
+  ios-testflight:
+    name: "Al-Anwar iOS TestFlight"
+    instance_type: mac_mini_m2
+    max_build_duration: 60
 
-```
-integrations:
-  app_store_connect: codemagic
+    integrations:
+      app_store_connect: codemagic
 
-environment:
-  vars:
-    APP_STORE_APP_ID: "6782741099"
-    APPLE_TEAM_ID: "8888Q27UY8"
-    BUNDLE_ID: "com.alanwar.quran.jad"
-    WIDGET_BUNDLE_ID: "com.alanwar.quran.jad.AnwarWidgetExtension"
-    APP_GROUP_ID: "group.com.alanwar.quran"
-    XCODE_WORKSPACE: "mobile/ios/App/App.xcworkspace"
-    XCODE_SCHEME: "App"
+    environment:
+      vars:
+        APP_STORE_APP_ID: "6782741099"
+        APPLE_TEAM_ID: "8888Q27UY8"
+        BUNDLE_ID: "com.alanwar.quran.jad"
+        WIDGET_BUNDLE_ID: "com.alanwar.quran.jad.AnwarWidgetExtension"
+        APP_GROUP_ID: "group.com.alanwar.quran"
+        XCODE_WORKSPACE: "mobile/ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
 
-  node: 20
-  xcode: latest
-  cocoapods: default
+      node: 20
+      xcode: latest
+      cocoapods: default
 
-scripts:
-  - name: Install web dependencies
-    script: |
-      cd mobile
-      npm ci
+    scripts:
+      - name: Install web dependencies
+        script: |
+          cd mobile
+          npm ci
 
-  - name: Generate icons and copy web files
-    script: |
-      cd mobile
-      node gen-icons.js || true
-      node copy-web.js
+      - name: Generate icons and copy web files
+        script: |
+          cd mobile
+          node gen-icons.js || true
+          node copy-web.js
 
-  - name: Sync Capacitor iOS project
-    script: |
-      cd mobile
-      [ -d ios ] || npx cap add ios
-      npx cap sync ios
-      npx @capacitor/assets generate --ios || true
+      - name: Sync Capacitor iOS project
+        script: |
+          cd mobile
+          [ -d ios ] || npx cap add ios
+          npx cap sync ios
+          npx @capacitor/assets generate --ios || true
 
-  - name: Patch Info.plist permissions
-    script: |
-      PLIST="mobile/ios/App/App/Info.plist"
-      P=/usr/libexec/PlistBuddy
+      - name: Patch Info.plist permissions
+        script: |
+          PLIST="mobile/ios/App/App/Info.plist"
+          P=/usr/libexec/PlistBuddy
 
-      add() {
-        $P -c "Add :$1 string '$2'" "$PLIST" 2>/dev/null || $P -c "Set :$1 '$2'" "$PLIST"
-      }
+          add() {
+            $P -c "Add :$1 string '$2'" "$PLIST" 2>/dev/null || $P -c "Set :$1 '$2'" "$PLIST"
+          }
 
-      add NSLocationWhenInUseUsageDescription "نحتاج موقعك لتحديد اتجاه القبلة بدقّة وحساب أوقات الصلاة لمدينتك. يبقى الموقع على جهازك ولا يُرسل لأي خادم."
-      add NSLocationAlwaysAndWhenInUseUsageDescription "نحتاج موقعك لحساب أوقات الصلاة واتجاه القبلة على جهازك فقط."
-      add NSMicrophoneUsageDescription "للسماح بتسجيل تلاوتك وحفظها على جهازك، والبحث الصوتي عن الآيات."
-      add NSCameraUsageDescription "لعرض اتجاه القبلة فوق الكاميرا."
+          add NSLocationWhenInUseUsageDescription "نحتاج موقعك لتحديد اتجاه القبلة بدقّة وحساب أوقات الصلاة لمدينتك. يبقى الموقع على جهازك ولا يُرسل لأي خادم."
+          add NSLocationAlwaysAndWhenInUseUsageDescription "نحتاج موقعك لحساب أوقات الصلاة واتجاه القبلة على جهازك فقط."
+          add NSMicrophoneUsageDescription "للسماح بتسجيل تلاوتك وحفظها على جهازك، والبحث الصوتي عن الآيات."
+          add NSCameraUsageDescription "لعرض اتجاه القبلة فوق الكاميرا."
 
-      $P -c "Add :UIBackgroundModes array" "$PLIST" 2>/dev/null || true
-      $P -c "Add :UIBackgroundModes:0 string audio" "$PLIST" 2>/dev/null || true
-      $P -c "Add :NSSupportsLiveActivities bool true" "$PLIST" 2>/dev/null || $P -c "Set :NSSupportsLiveActivities true" "$PLIST"
+          $P -c "Add :UIBackgroundModes array" "$PLIST" 2>/dev/null || true
+          $P -c "Add :UIBackgroundModes:0 string audio" "$PLIST" 2>/dev/null || true
+          $P -c "Add :NSSupportsLiveActivities bool true" "$PLIST" 2>/dev/null || $P -c "Set :NSSupportsLiveActivities true" "$PLIST"
 
-  - name: Install CocoaPods
-    script: |
-      cd mobile/ios/App
-      pod install
+      - name: Install CocoaPods
+        script: |
+          cd mobile/ios/App
+          pod install
 
-  - name: Set Xcode Team ID
-    script: |
-      cd mobile/ios/App
+      - name: Set Xcode Team ID
+        script: |
+          cd mobile/ios/App
 
-      ruby <<'RUBY'
-      require 'xcodeproj'
+          ruby <<'RUBY'
+          require 'xcodeproj'
 
-      project_path = 'App.xcodeproj'
-      team_id = ENV['APPLE_TEAM_ID']
+          project_path = 'App.xcodeproj'
+          team_id = ENV['APPLE_TEAM_ID']
 
-      project = Xcodeproj::Project.open(project_path)
+          project = Xcodeproj::Project.open(project_path)
 
-      project.targets.each do |target|
-        target.build_configurations.each do |config|
-          config.build_settings['DEVELOPMENT_TEAM'] = team_id
-          config.build_settings['CODE_SIGN_STYLE'] = 'Manual'
-        end
-      end
+          project.targets.each do |target|
+            target.build_configurations.each do |config|
+              config.build_settings['DEVELOPMENT_TEAM'] = team_id
+              config.build_settings['CODE_SIGN_STYLE'] = 'Manual'
+            end
+          end
 
-      project.save
-      RUBY
+          project.save
+          RUBY
 
-  - name: Prepare iOS signing files
-    script: |
-      keychain initialize
+      - name: Prepare iOS signing files
+        script: |
+          keychain initialize
 
-      app-store-connect create-certificate \
-        --type IOS_DISTRIBUTION \
-        --save || true
+          app-store-connect create-certificate \
+            --type IOS_DISTRIBUTION \
+            --save || true
 
-      app-store-connect fetch-signing-files "$BUNDLE_ID" \
-        --type IOS_APP_STORE \
-        --create
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
 
-      app-store-connect fetch-signing-files "$WIDGET_BUNDLE_ID" \
-        --type IOS_APP_STORE \
-        --create
+          app-store-connect fetch-signing-files "$WIDGET_BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
 
-      keychain add-certificates
-      xcode-project use-profiles
+          keychain add-certificates
+          xcode-project use-profiles
 
-  - name: Set build number
-    script: |
-      PLIST="mobile/ios/App/App/Info.plist"
-      P=/usr/libexec/PlistBuddy
+      - name: Set build number
+        script: |
+          PLIST="mobile/ios/App/App/Info.plist"
+          P=/usr/libexec/PlistBuddy
 
-      LATEST_BUILD=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APP_ID" 2>/dev/null || echo 0)
-      BUILD_NUMBER=$((LATEST_BUILD + 1))
+          LATEST_BUILD=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APP_ID" 2>/dev/null || echo 0)
+          BUILD_NUMBER=$((LATEST_BUILD + 1))
 
-      $P -c "Set :CFBundleVersion $BUILD_NUMBER" "$PLIST" 2>/dev/null || $P -c "Add :CFBundleVersion string $BUILD_NUMBER" "$PLIST"
-      $P -c "Set :CFBundleShortVersionString 1.0.0" "$PLIST" 2>/dev/null || $P -c "Add :CFBundleShortVersionString string 1.0.0" "$PLIST"
+          $P -c "Set :CFBundleVersion $BUILD_NUMBER" "$PLIST" 2>/dev/null || $P -c "Add :CFBundleVersion string $BUILD_NUMBER" "$PLIST"
+          $P -c "Set :CFBundleShortVersionString 1.0.0" "$PLIST" 2>/dev/null || $P -c "Add :CFBundleShortVersionString string 1.0.0" "$PLIST"
 
-      echo "Build number: $BUILD_NUMBER"
+          echo "Build number: $BUILD_NUMBER"
 
-  - name: Build IPA
-    script: |
-      xcode-project build-ipa \
-        --workspace "$XCODE_WORKSPACE" \
-        --scheme "$XCODE_SCHEME"
+      - name: Build IPA
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
 
-artifacts:
-  - build/ios/ipa/*.ipa
-  - /tmp/xcodebuild_logs/*.log
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
 
-publishing:
-  app_store_connect:
-    auth: integration
-    submit_to_testflight: true
-    beta_groups:
-      - Internal Testers
-```
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        beta_groups:
+          - Internal Testers
