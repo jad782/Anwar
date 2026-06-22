@@ -1,84 +1,124 @@
-//
-//  AnwarWidget.swift
-//  AnwarWidget
-//
-//  Created by Malaz Bitar on 20.06.2026.
-//
-
 import WidgetKit
 import SwiftUI
 
-struct Provider: TimelineProvider {
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), emoji: "😀")
-    }
+// ===== App Group + قراءة البيانات =====
+let APP_GROUP = "group.com.alanwar.quran"
 
-    func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-        let entry = SimpleEntry(date: Date(), emoji: "😀")
-        completion(entry)
-    }
-
-    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-        var entries: [SimpleEntry] = []
-
-        // Generate a timeline consisting of five entries an hour apart, starting from the current date.
-        let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, emoji: "😀")
-            entries.append(entry)
-        }
-
-        let timeline = Timeline(entries: entries, policy: .atEnd)
-        completion(timeline)
-    }
-
-//    func relevances() async -> WidgetRelevances<Void> {
-//        // Generate a list containing the contexts this widget is relevant in.
-//    }
+struct AnwarData {
+    var nextPrayer = "—"
+    var nextPrayerTime = "--:--"
+    var ayah = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
+    var ayahRef = ""
+    var hadith = ""
+    var location = ""
 }
 
-struct SimpleEntry: TimelineEntry {
-    let date: Date
-    let emoji: String
+func loadAnwarData() -> AnwarData {
+    var data = AnwarData()
+    let d = UserDefaults(suiteName: APP_GROUP)
+    guard let s = d?.string(forKey: "widgetData"),
+          let jd = s.data(using: .utf8),
+          let obj = try? JSONSerialization.jsonObject(with: jd) as? [String: Any] else { return data }
+    data.nextPrayer     = obj["nextPrayer"] as? String ?? data.nextPrayer
+    data.nextPrayerTime = obj["nextPrayerTime"] as? String ?? data.nextPrayerTime
+    data.ayah           = obj["ayah"] as? String ?? data.ayah
+    data.ayahRef        = obj["ayahRef"] as? String ?? data.ayahRef
+    data.hadith         = obj["hadith"] as? String ?? data.hadith
+    data.location       = obj["location"] as? String ?? data.location
+    return data
 }
 
-struct AnwarWidgetEntryView : View {
-    var entry: Provider.Entry
+// ===== Timeline =====
+struct AnwarEntry: TimelineEntry { let date: Date; let data: AnwarData }
+
+struct AnwarProvider: TimelineProvider {
+    func placeholder(in context: Context) -> AnwarEntry { AnwarEntry(date: Date(), data: AnwarData()) }
+    func getSnapshot(in context: Context, completion: @escaping (AnwarEntry) -> Void) {
+        completion(AnwarEntry(date: Date(), data: loadAnwarData()))
+    }
+    func getTimeline(in context: Context, completion: @escaping (Timeline<AnwarEntry>) -> Void) {
+        let entry = AnwarEntry(date: Date(), data: loadAnwarData())
+        // حدّث كل ساعة
+        let next = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date().addingTimeInterval(3600)
+        completion(Timeline(entries: [entry], policy: .after(next)))
+    }
+}
+
+// ===== ألوان الهوية (رملي ذهبي فخم على داكن) =====
+let GOLD = Color(red: 0.83, green: 0.66, blue: 0.26)
+let GOLD_LIGHT = Color(red: 0.95, green: 0.82, blue: 0.48)
+let DARK_BG = Color(red: 0.08, green: 0.07, blue: 0.04)
+let CREAM = Color(red: 0.95, green: 0.91, blue: 0.84)
+
+// ===== الواجهات حسب الحجم =====
+struct AnwarWidgetEntryView: View {
+    var entry: AnwarEntry
+    @Environment(\.widgetFamily) var family
 
     var body: some View {
-        VStack {
-            Text("Time:")
-            Text(entry.date, style: .time)
-
-            Text("Emoji:")
-            Text(entry.emoji)
+        ZStack {
+            LinearGradient(colors: [Color(red:0.14,green:0.11,blue:0.06), DARK_BG],
+                           startPoint: .topLeading, endPoint: .bottomTrailing)
+            switch family {
+            case .systemSmall:  smallView
+            default:            mediumView
+            }
         }
+    }
+
+    var smallView: some View {
+        VStack(alignment: .trailing, spacing: 6) {
+            HStack { Spacer(); Text("الأنوار").font(.caption2).foregroundColor(GOLD) }
+            Spacer()
+            Text("🕌 \(entry.data.nextPrayer)").font(.subheadline).bold().foregroundColor(CREAM)
+            Text(entry.data.nextPrayerTime).font(.title2).bold().foregroundColor(GOLD_LIGHT)
+            Spacer()
+            Text(entry.data.ayahRef).font(.caption2).foregroundColor(GOLD).lineLimit(1)
+        }
+        .padding(12).environment(\.layoutDirection, .rightToLeft)
+    }
+
+    var mediumView: some View {
+        HStack(spacing: 12) {
+            // يسار: الصلاة القادمة
+            VStack(spacing: 4) {
+                Text("الصلاة القادمة").font(.caption2).foregroundColor(.secondary)
+                Text(entry.data.nextPrayer).font(.headline).foregroundColor(CREAM)
+                Text(entry.data.nextPrayerTime).font(.title).bold().foregroundColor(GOLD_LIGHT)
+                if !entry.data.location.isEmpty {
+                    Text("📍 \(entry.data.location)").font(.caption2).foregroundColor(.secondary).lineLimit(1)
+                }
+            }.frame(maxWidth: 120)
+            Rectangle().fill(GOLD.opacity(0.25)).frame(width: 1)
+            // يمين: آية اليوم
+            VStack(alignment: .trailing, spacing: 6) {
+                Text("✦ آية اليوم").font(.caption2).foregroundColor(GOLD)
+                Text(entry.data.ayah).font(.system(size: 16, weight: .medium, design: .serif))
+                    .foregroundColor(CREAM).multilineTextAlignment(.trailing).lineLimit(3).minimumScaleFactor(0.7)
+                Text(entry.data.ayahRef).font(.caption2).foregroundColor(GOLD)
+            }.frame(maxWidth: .infinity, alignment: .trailing)
+        }
+        .padding(14).environment(\.layoutDirection, .rightToLeft)
     }
 }
 
 struct AnwarWidget: Widget {
-    let kind: String = "AnwarWidget"
-
+    let kind = "AnwarWidget"
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: Provider()) { entry in
-            if #available(iOS 17.0, *) {
-                AnwarWidgetEntryView(entry: entry)
-                    .containerBackground(.fill.tertiary, for: .widget)
-            } else {
-                AnwarWidgetEntryView(entry: entry)
-                    .padding()
-                    .background()
-            }
+        StaticConfiguration(kind: kind, provider: AnwarProvider()) { entry in
+            AnwarWidgetEntryView(entry: entry)
         }
-        .configurationDisplayName("My Widget")
-        .description("This is an example widget.")
+        .configurationDisplayName("الأنوار")
+        .description("أوقات الصلاة وآية اليوم")
+        .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
 
-#Preview(as: .systemSmall) {
-    AnwarWidget()
-} timeline: {
-    SimpleEntry(date: .now, emoji: "😀")
-    SimpleEntry(date: .now, emoji: "🤩")
+// ===== حزمة الودجت (نقطة الدخول الوحيدة @main) =====
+@main
+struct AnwarWidgetBundle: WidgetBundle {
+    var body: some Widget {
+        AnwarWidget()
+        AnwarWidgetLiveActivity()
+    }
 }

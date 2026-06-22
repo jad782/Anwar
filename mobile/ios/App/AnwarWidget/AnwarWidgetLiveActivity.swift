@@ -1,80 +1,73 @@
-//
-//  AnwarWidgetLiveActivity.swift
-//  AnwarWidget
-//
-//  Created by Malaz Bitar on 20.06.2026.
-//
-
 import ActivityKit
 import WidgetKit
 import SwiftUI
 
-struct AnwarWidgetAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
-        // Dynamic stateful properties about your activity go here!
-        var emoji: String
-    }
 
-    // Fixed non-changing properties about your activity go here!
-    var name: String
+struct AnwarAttributes: ActivityAttributes {
+    public struct ContentState: Codable, Hashable {
+        var kind: String
+        var prayerName: String
+        var targetEpoch: Double
+        var surahName: String
+        var ayah: String
+        var reciter: String
+    }
 }
 
+// النشاط الحيّ + Dynamic Island (بدون @main — موجود في AnwarWidget.swift)
 struct AnwarWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
-        ActivityConfiguration(for: AnwarWidgetAttributes.self) { context in
-            // Lock screen/banner UI goes here
-            VStack {
-                Text("Hello \(context.state.emoji)")
+        ActivityConfiguration(for: AnwarAttributes.self) { context in
+            // واجهة شاشة القفل / البانر
+            HStack(spacing: 12) {
+                Text(context.state.kind == "prayer" ? "🕌" : "📖").font(.title2)
+                VStack(alignment: .leading, spacing: 2) {
+                    if context.state.kind == "prayer" {
+                        Text("الصلاة القادمة: \(context.state.prayerName)").font(.caption).foregroundColor(.secondary)
+                        Text(Date(timeIntervalSince1970: context.state.targetEpoch), style: .timer)
+                            .font(.title3).bold().foregroundColor(GOLD).frame(maxWidth: 120)
+                    } else {
+                        Text(context.state.surahName).font(.subheadline).bold().foregroundColor(CREAM)
+                        Text("آية \(context.state.ayah) · \(context.state.reciter)").font(.caption).foregroundColor(.secondary)
+                    }
+                }
+                Spacer()
             }
-            .activityBackgroundTint(Color.cyan)
-            .activitySystemActionForegroundColor(Color.black)
-
+            .padding(14)
+            .activityBackgroundTint(DARK_BG)
+            .activitySystemActionForegroundColor(GOLD)
         } dynamicIsland: { context in
             DynamicIsland {
-                // Expanded UI goes here.  Compose the expanded UI through
-                // various regions, like leading/trailing/center/bottom
                 DynamicIslandExpandedRegion(.leading) {
-                    Text("Leading")
+                    Label { Text(context.state.kind == "prayer" ? context.state.prayerName : context.state.surahName).font(.caption).bold() }
+                          icon: { Text(context.state.kind == "prayer" ? "🕌" : "📖") }
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text("Trailing")
+                    if context.state.kind == "prayer" {
+                        Text(Date(timeIntervalSince1970: context.state.targetEpoch), style: .timer)
+                            .font(.headline).foregroundColor(GOLD).frame(maxWidth: 90).multilineTextAlignment(.trailing)
+                    } else {
+                        Text("آية \(context.state.ayah)").font(.headline).foregroundColor(GOLD)
+                    }
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("Bottom \(context.state.emoji)")
-                    // more content
+                    Text(context.state.kind == "prayer" ? "وجّه قلبك للصلاة 🤍" : "تلاوة مباركة 🌿")
+                        .font(.caption2).foregroundColor(.secondary)
                 }
             } compactLeading: {
-                Text("L")
+                Text(context.state.kind == "prayer" ? "🕌" : "📖")
             } compactTrailing: {
-                Text("T \(context.state.emoji)")
+                if context.state.kind == "prayer" {
+                    Text(Date(timeIntervalSince1970: context.state.targetEpoch), style: .timer)
+                        .font(.caption2).foregroundColor(GOLD).frame(maxWidth: 48)
+                } else {
+                    Text("\(context.state.ayah)").font(.caption2).foregroundColor(GOLD)
+                }
             } minimal: {
-                Text(context.state.emoji)
+                Text(context.state.kind == "prayer" ? "🕌" : "📖")
             }
-            .widgetURL(URL(string: "http://www.apple.com"))
-            .keylineTint(Color.red)
+            .keylineTint(GOLD)
+            .widgetURL(URL(string: "alanwar://open"))
         }
     }
-}
-
-extension AnwarWidgetAttributes {
-    fileprivate static var preview: AnwarWidgetAttributes {
-        AnwarWidgetAttributes(name: "World")
-    }
-}
-
-extension AnwarWidgetAttributes.ContentState {
-    fileprivate static var smiley: AnwarWidgetAttributes.ContentState {
-        AnwarWidgetAttributes.ContentState(emoji: "😀")
-     }
-     
-     fileprivate static var starEyes: AnwarWidgetAttributes.ContentState {
-         AnwarWidgetAttributes.ContentState(emoji: "🤩")
-     }
-}
-
-#Preview("Notification", as: .content, using: AnwarWidgetAttributes.preview) {
-   AnwarWidgetLiveActivity()
-} contentStates: {
-    AnwarWidgetAttributes.ContentState.smiley
-    AnwarWidgetAttributes.ContentState.starEyes
 }
