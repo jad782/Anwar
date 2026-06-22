@@ -1,4 +1,4 @@
-# =======================================================
+﻿# =======================================================
 
 # Codemagic - Al-Anwar iOS TestFlight
 
@@ -18,7 +18,6 @@ name: "Al-Anwar iOS TestFlight"
 instance_type: mac_mini_m2
 max_build_duration: 60
 
-```
 integrations:
   app_store_connect: codemagic
 
@@ -64,10 +63,10 @@ scripts:
         $P -c "Add :$1 string '$2'" "$PLIST" 2>/dev/null || $P -c "Set :$1 '$2'" "$PLIST"
       }
 
-      add NSLocationWhenInUseUsageDescription "نحتاج موقعك لتحديد اتجاه القبلة بدقّة وحساب أوقات الصلاة لمدينتك. يبقى الموقع على جهازك ولا يُرسل لأي خادم."
-      add NSLocationAlwaysAndWhenInUseUsageDescription "نحتاج موقعك لحساب أوقات الصلاة واتجاه القبلة على جهازك فقط."
-      add NSMicrophoneUsageDescription "للسماح بتسجيل تلاوتك وحفظها على جهازك، والبحث الصوتي عن الآيات."
-      add NSCameraUsageDescription "لعرض اتجاه القبلة فوق الكاميرا."
+      add NSLocationWhenInUseUsageDescription "Ù†Ø­ØªØ§Ø¬ Ù…ÙˆÙ‚Ø¹Ùƒ Ù„ØªØ­Ø¯ÙŠØ¯ Ø§ØªØ¬Ø§Ù‡ Ø§Ù„Ù‚Ø¨Ù„Ø© Ø¨Ø¯Ù‚Ù‘Ø© ÙˆØ­Ø³Ø§Ø¨ Ø£ÙˆÙ‚Ø§Øª Ø§Ù„ØµÙ„Ø§Ø© Ù„Ù…Ø¯ÙŠÙ†ØªÙƒ. ÙŠØ¨Ù‚Ù‰ Ø§Ù„Ù…ÙˆÙ‚Ø¹ Ø¹Ù„Ù‰ Ø¬Ù‡Ø§Ø²Ùƒ ÙˆÙ„Ø§ ÙŠÙØ±Ø³Ù„ Ù„Ø£ÙŠ Ø®Ø§Ø¯Ù…."
+      add NSLocationAlwaysAndWhenInUseUsageDescription "Ù†Ø­ØªØ§Ø¬ Ù…ÙˆÙ‚Ø¹Ùƒ Ù„Ø­Ø³Ø§Ø¨ Ø£ÙˆÙ‚Ø§Øª Ø§Ù„ØµÙ„Ø§Ø© ÙˆØ§ØªØ¬Ø§Ù‡ Ø§Ù„Ù‚Ø¨Ù„Ø© Ø¹Ù„Ù‰ Ø¬Ù‡Ø§Ø²Ùƒ ÙÙ‚Ø·."
+      add NSMicrophoneUsageDescription "Ù„Ù„Ø³Ù…Ø§Ø­ Ø¨ØªØ³Ø¬ÙŠÙ„ ØªÙ„Ø§ÙˆØªÙƒ ÙˆØ­ÙØ¸Ù‡Ø§ Ø¹Ù„Ù‰ Ø¬Ù‡Ø§Ø²ÙƒØŒ ÙˆØ§Ù„Ø¨Ø­Ø« Ø§Ù„ØµÙˆØªÙŠ Ø¹Ù† Ø§Ù„Ø¢ÙŠØ§Øª."
+      add NSCameraUsageDescription "Ù„Ø¹Ø±Ø¶ Ø§ØªØ¬Ø§Ù‡ Ø§Ù„Ù‚Ø¨Ù„Ø© ÙÙˆÙ‚ Ø§Ù„ÙƒØ§Ù…ÙŠØ±Ø§."
 
       $P -c "Add :UIBackgroundModes array" "$PLIST" 2>/dev/null || true
       $P -c "Add :UIBackgroundModes:0 string audio" "$PLIST" 2>/dev/null || true
@@ -214,4 +213,3 @@ publishing:
     submit_to_testflight: true
     beta_groups:
       - Internal Testers
-```
