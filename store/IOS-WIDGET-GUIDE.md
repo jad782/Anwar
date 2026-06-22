@@ -6,7 +6,7 @@
 
 1. Xcode ▸ File ▸ New ▸ Target ▸ **Widget Extension** ▸ سمِّه `AnwarWidget`.
 2. في `AnwarWidget.swift`: اعرض نصّ آية + المرجع، وبدّلها يومياً (TimelineProvider بـ `.atEnd` كل يوم).
-3. شارك البيانات مع التطبيق عبر **App Group** (`group.com.alanwar.quran.jad`) واكتب «آية اليوم» من التطبيق إلى `UserDefaults(suiteName:)` ليقرأها الودجت.
+3. شارك البيانات مع التطبيق عبر **App Group** (`group.com.alanwar.quran.jad.jad`) واكتب «آية اليوم» من التطبيق إلى `UserDefaults(suiteName:)` ليقرأها الودجت.
 4. صمّمه بنفس الهوية (خلفية داكنة + ذهبي).
 
 ## آيات جاهزة (نفس آيات «آية اليوم» في التطبيق)

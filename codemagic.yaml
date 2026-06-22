@@ -20,7 +20,7 @@ workflows:
         APPLE_TEAM_ID: "8888Q27UY8"
         BUNDLE_ID: "com.alanwar.quran.jad"
         WIDGET_BUNDLE_ID: "com.alanwar.quran.jad.AnwarWidgetExtension"
-        APP_GROUP_ID: "group.com.alanwar.quran"
+        APP_GROUP_ID: "group.com.alanwar.quran.jad"
         XCODE_WORKSPACE: "mobile/ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
 

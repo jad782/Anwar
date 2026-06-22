@@ -6,7 +6,7 @@ import WidgetKit
 // يُضاف لهدف التطبيق الرئيسي (App). استدعِه من JS عبر window.WidgetBridge.
 @objc(WidgetBridge)
 public class WidgetBridge: CAPPlugin {
-    let appGroup = "group.com.alanwar.quran.jad"
+    let appGroup = "group.com.alanwar.quran.jad.jad"
 
     @objc func setData(_ call: CAPPluginCall) {
         let json = call.getString("json") ?? "{}"

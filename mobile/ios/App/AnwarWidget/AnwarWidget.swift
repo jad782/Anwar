@@ -2,7 +2,7 @@ import WidgetKit
 import SwiftUI
 
 // ===== App Group + قراءة البيانات =====
-let APP_GROUP = "group.com.alanwar.quran.jad"
+let APP_GROUP = "group.com.alanwar.quran.jad.jad"
 
 struct AnwarData {
     var nextPrayer = "—"
