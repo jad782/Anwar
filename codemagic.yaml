@@ -5,7 +5,7 @@
 #   • تكامل App Store Connect API key  (باسم: codemagic)
 #   • مجموعة متغيّرات (Group) باسم: appstore
 #       APP_STORE_APP_ID = رقم التطبيق في App Store Connect
-#       BUNDLE_ID        = com.alanwar.quran
+#       BUNDLE_ID        = com.alanwar.quran.jad
 #       APPLE_TEAM_ID    = معرّف فريقك
 # =======================================================
 workflows:

@@ -337,9 +337,9 @@ PRO.refreshBookmarksBadge = function(){};
 // مُعرّفات المنتجات تُنشأ في App Store Connect (Consumable)
 // =======================================================
 const SUPPORT_TIERS = [
-    { id:'com.alanwar.quran.tip1',  emoji:'☕', ar:'دعم بسيط',  en:'Small support',  price:'$0.99' },
-    { id:'com.alanwar.quran.tip5',  emoji:'🌿', ar:'دعم كريم',  en:'Generous',       price:'$4.99' },
-    { id:'com.alanwar.quran.tip10', emoji:'🌟', ar:'دعم سخيّ',  en:'Big support',    price:'$9.99' }
+    { id:'com.alanwar.quran.jad.tip1',  emoji:'☕', ar:'دعم بسيط',  en:'Small support',  price:'$0.99' },
+    { id:'com.alanwar.quran.jad.tip5',  emoji:'🌿', ar:'دعم كريم',  en:'Generous',       price:'$4.99' },
+    { id:'com.alanwar.quran.jad.tip10', emoji:'🌟', ar:'دعم سخيّ',  en:'Big support',    price:'$9.99' }
 ];
 let _iapReady = false;
 function initIAP(){
