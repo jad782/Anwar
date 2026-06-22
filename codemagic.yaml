@@ -1,215 +1,209 @@
-﻿# =======================================================
-
+# =======================================================
 # Codemagic - Al-Anwar iOS TestFlight
-
 # App: com.alanwar.quran.jad
-
 # Widget: com.alanwar.quran.jad.AnwarWidgetExtension
-
 # Team ID: 8888Q27UY8
-
 # App Group: group.com.alanwar.quran.jad
-
 # =======================================================
 
 workflows:
-ios-testflight:
-name: "Al-Anwar iOS TestFlight"
-instance_type: mac_mini_m2
-max_build_duration: 60
+  ios-testflight:
+    name: "Al-Anwar iOS TestFlight"
+    instance_type: mac_mini_m2
+    max_build_duration: 60
 
-integrations:
-  app_store_connect: codemagic
+    integrations:
+      app_store_connect: codemagic
 
-environment:
-  vars:
-    APP_STORE_APP_ID: "6782741099"
-    APPLE_TEAM_ID: "8888Q27UY8"
-    BUNDLE_ID: "com.alanwar.quran.jad"
-    WIDGET_BUNDLE_ID: "com.alanwar.quran.jad.AnwarWidgetExtension"
-    APP_GROUP_ID: "group.com.alanwar.quran.jad"
-    XCODE_WORKSPACE: "mobile/ios/App/App.xcworkspace"
-    XCODE_SCHEME: "App"
+    environment:
+      vars:
+        APP_STORE_APP_ID: "6782741099"
+        APPLE_TEAM_ID: "8888Q27UY8"
+        BUNDLE_ID: "com.alanwar.quran.jad"
+        WIDGET_BUNDLE_ID: "com.alanwar.quran.jad.AnwarWidgetExtension"
+        APP_GROUP_ID: "group.com.alanwar.quran.jad"
+        XCODE_WORKSPACE: "mobile/ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
 
-  node: 20
-  xcode: latest
-  cocoapods: default
+      node: 20
+      xcode: latest
+      cocoapods: default
 
-scripts:
-  - name: Install web dependencies
-    script: |
-      cd mobile
-      npm ci
+    scripts:
+      - name: Install web dependencies
+        script: |
+          cd mobile
+          npm ci
 
-  - name: Generate icons and copy web files
-    script: |
-      cd mobile
-      node gen-icons.js || true
-      node copy-web.js
+      - name: Generate icons and copy web files
+        script: |
+          cd mobile
+          node gen-icons.js || true
+          node copy-web.js
 
-  - name: Sync Capacitor iOS project
-    script: |
-      cd mobile
-      [ -d ios ] || npx cap add ios
-      npx cap sync ios
-      npx @capacitor/assets generate --ios || true
+      - name: Sync Capacitor iOS project
+        script: |
+          cd mobile
+          [ -d ios ] || npx cap add ios
+          npx cap sync ios
+          npx @capacitor/assets generate --ios || true
 
-  - name: Patch Info.plist permissions
-    script: |
-      PLIST="mobile/ios/App/App/Info.plist"
-      P=/usr/libexec/PlistBuddy
+      - name: Patch Info.plist permissions
+        script: |
+          PLIST="mobile/ios/App/App/Info.plist"
+          P=/usr/libexec/PlistBuddy
 
-      add() {
-        $P -c "Add :$1 string '$2'" "$PLIST" 2>/dev/null || $P -c "Set :$1 '$2'" "$PLIST"
-      }
+          add() {
+            $P -c "Add :$1 string '$2'" "$PLIST" 2>/dev/null || $P -c "Set :$1 '$2'" "$PLIST"
+          }
 
-      add NSLocationWhenInUseUsageDescription "Ù†Ø­ØªØ§Ø¬ Ù…ÙˆÙ‚Ø¹Ùƒ Ù„ØªØ­Ø¯ÙŠØ¯ Ø§ØªØ¬Ø§Ù‡ Ø§Ù„Ù‚Ø¨Ù„Ø© Ø¨Ø¯Ù‚Ù‘Ø© ÙˆØ­Ø³Ø§Ø¨ Ø£ÙˆÙ‚Ø§Øª Ø§Ù„ØµÙ„Ø§Ø© Ù„Ù…Ø¯ÙŠÙ†ØªÙƒ. ÙŠØ¨Ù‚Ù‰ Ø§Ù„Ù…ÙˆÙ‚Ø¹ Ø¹Ù„Ù‰ Ø¬Ù‡Ø§Ø²Ùƒ ÙˆÙ„Ø§ ÙŠÙØ±Ø³Ù„ Ù„Ø£ÙŠ Ø®Ø§Ø¯Ù…."
-      add NSLocationAlwaysAndWhenInUseUsageDescription "Ù†Ø­ØªØ§Ø¬ Ù…ÙˆÙ‚Ø¹Ùƒ Ù„Ø­Ø³Ø§Ø¨ Ø£ÙˆÙ‚Ø§Øª Ø§Ù„ØµÙ„Ø§Ø© ÙˆØ§ØªØ¬Ø§Ù‡ Ø§Ù„Ù‚Ø¨Ù„Ø© Ø¹Ù„Ù‰ Ø¬Ù‡Ø§Ø²Ùƒ ÙÙ‚Ø·."
-      add NSMicrophoneUsageDescription "Ù„Ù„Ø³Ù…Ø§Ø­ Ø¨ØªØ³Ø¬ÙŠÙ„ ØªÙ„Ø§ÙˆØªÙƒ ÙˆØ­ÙØ¸Ù‡Ø§ Ø¹Ù„Ù‰ Ø¬Ù‡Ø§Ø²ÙƒØŒ ÙˆØ§Ù„Ø¨Ø­Ø« Ø§Ù„ØµÙˆØªÙŠ Ø¹Ù† Ø§Ù„Ø¢ÙŠØ§Øª."
-      add NSCameraUsageDescription "Ù„Ø¹Ø±Ø¶ Ø§ØªØ¬Ø§Ù‡ Ø§Ù„Ù‚Ø¨Ù„Ø© ÙÙˆÙ‚ Ø§Ù„ÙƒØ§Ù…ÙŠØ±Ø§."
+          add NSLocationWhenInUseUsageDescription "نحتاج موقعك لتحديد اتجاه القبلة بدقّة وحساب أوقات الصلاة لمدينتك. يبقى الموقع على جهازك ولا يُرسل لأي خادم."
+          add NSLocationAlwaysAndWhenInUseUsageDescription "نحتاج موقعك لحساب أوقات الصلاة واتجاه القبلة على جهازك فقط."
+          add NSMicrophoneUsageDescription "للسماح بتسجيل تلاوتك وحفظها على جهازك، والبحث الصوتي عن الآيات."
+          add NSCameraUsageDescription "لعرض اتجاه القبلة فوق الكاميرا."
 
-      $P -c "Add :UIBackgroundModes array" "$PLIST" 2>/dev/null || true
-      $P -c "Add :UIBackgroundModes:0 string audio" "$PLIST" 2>/dev/null || true
-      $P -c "Add :NSSupportsLiveActivities bool true" "$PLIST" 2>/dev/null || $P -c "Set :NSSupportsLiveActivities true" "$PLIST"
+          $P -c "Add :UIBackgroundModes array" "$PLIST" 2>/dev/null || true
+          $P -c "Add :UIBackgroundModes:0 string audio" "$PLIST" 2>/dev/null || true
+          $P -c "Add :NSSupportsLiveActivities bool true" "$PLIST" 2>/dev/null || $P -c "Set :NSSupportsLiveActivities true" "$PLIST"
 
-  - name: Force Bundle IDs, Team ID, and App Group entitlements
-    script: |
-      cd mobile/ios/App
+      - name: Force Bundle IDs, Team ID, and App Group entitlements
+        script: |
+          cd mobile/ios/App
 
-      ruby <<'RUBY'
-      require 'xcodeproj'
-      require 'fileutils'
+          ruby <<'RUBY'
+          require 'xcodeproj'
+          require 'fileutils'
 
-      project_path = 'App.xcodeproj'
-      team_id = ENV['APPLE_TEAM_ID']
-      app_bundle_id = ENV['BUNDLE_ID']
-      widget_bundle_id = ENV['WIDGET_BUNDLE_ID']
-      app_group_id = ENV['APP_GROUP_ID']
+          project_path = 'App.xcodeproj'
+          team_id = ENV['APPLE_TEAM_ID']
+          app_bundle_id = ENV['BUNDLE_ID']
+          widget_bundle_id = ENV['WIDGET_BUNDLE_ID']
+          app_group_id = ENV['APP_GROUP_ID']
 
-      project = Xcodeproj::Project.open(project_path)
-      entitlement_paths = []
+          project = Xcodeproj::Project.open(project_path)
+          entitlement_paths = []
 
-      def clean_entitlement_path(path)
-        return nil if path.nil?
-        path = path.to_s.strip
-        return nil if path.empty?
-        path = path.gsub('$(SRCROOT)/', '')
-        path = path.gsub('${SRCROOT}/', '')
-        path
-      end
-
-      def ensure_app_group_entitlement(path, group_id)
-        return if path.nil? || path.empty?
-
-        FileUtils.mkdir_p(File.dirname(path))
-
-        unless File.exist?(path)
-          File.write(path, <<~PLIST)
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict/>
-          </plist>
-          PLIST
-        end
-
-        system('/usr/libexec/PlistBuddy', '-c', 'Delete :com.apple.security.application-groups', path, out: File::NULL, err: File::NULL)
-        system('/usr/libexec/PlistBuddy', '-c', 'Add :com.apple.security.application-groups array', path)
-        system('/usr/libexec/PlistBuddy', '-c', "Add :com.apple.security.application-groups:0 string #{group_id}", path)
-
-        puts "Patched App Group entitlement in: #{path}"
-      end
-
-      project.targets.each do |target|
-        target.build_configurations.each do |config|
-          settings = config.build_settings
-
-          settings['DEVELOPMENT_TEAM'] = team_id
-          settings['CODE_SIGN_STYLE'] = 'Manual'
-
-          if target.name == 'App'
-            settings['PRODUCT_BUNDLE_IDENTIFIER'] = app_bundle_id
-
-            entitlements = clean_entitlement_path(settings['CODE_SIGN_ENTITLEMENTS'])
-            entitlements = 'App/App.entitlements' if entitlements.nil?
-            settings['CODE_SIGN_ENTITLEMENTS'] = entitlements
-            entitlement_paths << entitlements
+          def clean_entitlement_path(path)
+            return nil if path.nil?
+            path = path.to_s.strip
+            return nil if path.empty?
+            path = path.gsub('$(SRCROOT)/', '')
+            path = path.gsub('${SRCROOT}/', '')
+            path
           end
 
-          if target.name == 'AnwarWidgetExtension'
-            settings['PRODUCT_BUNDLE_IDENTIFIER'] = widget_bundle_id
+          def ensure_app_group_entitlement(path, group_id)
+            return if path.nil? || path.empty?
 
-            entitlements = clean_entitlement_path(settings['CODE_SIGN_ENTITLEMENTS'])
-            entitlements = 'AnwarWidgetExtension/AnwarWidgetExtension.entitlements' if entitlements.nil?
-            settings['CODE_SIGN_ENTITLEMENTS'] = entitlements
-            entitlement_paths << entitlements
+            FileUtils.mkdir_p(File.dirname(path))
+
+            unless File.exist?(path)
+              File.write(path, <<~PLIST)
+              <?xml version="1.0" encoding="UTF-8"?>
+              <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+              <plist version="1.0">
+              <dict/>
+              </plist>
+              PLIST
+            end
+
+            system('/usr/libexec/PlistBuddy', '-c', 'Delete :com.apple.security.application-groups', path, out: File::NULL, err: File::NULL)
+            system('/usr/libexec/PlistBuddy', '-c', 'Add :com.apple.security.application-groups array', path)
+            system('/usr/libexec/PlistBuddy', '-c', "Add :com.apple.security.application-groups:0 string #{group_id}", path)
+
+            puts "Patched App Group entitlement in: #{path}"
           end
-        end
-      end
 
-      project.save
+          project.targets.each do |target|
+            target.build_configurations.each do |config|
+              settings = config.build_settings
 
-      entitlement_paths.uniq.each do |path|
-        ensure_app_group_entitlement(path, app_group_id)
-      end
-      RUBY
+              settings['DEVELOPMENT_TEAM'] = team_id
+              settings['CODE_SIGN_STYLE'] = 'Manual'
 
-  - name: Install CocoaPods
-    script: |
-      cd mobile/ios/App
-      pod install
+              if target.name == 'App'
+                settings['PRODUCT_BUNDLE_IDENTIFIER'] = app_bundle_id
 
-  - name: Prepare iOS signing files
-    script: |
-      keychain initialize
+                entitlements = clean_entitlement_path(settings['CODE_SIGN_ENTITLEMENTS'])
+                entitlements = 'App/App.entitlements' if entitlements.nil?
+                settings['CODE_SIGN_ENTITLEMENTS'] = entitlements
+                entitlement_paths << entitlements
+              end
 
-      app-store-connect create-certificate \
-        --type IOS_DISTRIBUTION \
-        --save || true
+              if target.name == 'AnwarWidgetExtension'
+                settings['PRODUCT_BUNDLE_IDENTIFIER'] = widget_bundle_id
 
-      app-store-connect fetch-signing-files "$BUNDLE_ID" \
-        --type IOS_APP_STORE \
-        --create
+                entitlements = clean_entitlement_path(settings['CODE_SIGN_ENTITLEMENTS'])
+                entitlements = 'AnwarWidgetExtension/AnwarWidgetExtension.entitlements' if entitlements.nil?
+                settings['CODE_SIGN_ENTITLEMENTS'] = entitlements
+                entitlement_paths << entitlements
+              end
+            end
+          end
 
-      app-store-connect fetch-signing-files "$WIDGET_BUNDLE_ID" \
-        --type IOS_APP_STORE \
-        --create
+          project.save
 
-      keychain add-certificates
+          entitlement_paths.uniq.each do |path|
+            ensure_app_group_entitlement(path, app_group_id)
+          end
+          RUBY
 
-      xcode-project use-profiles
+      - name: Install CocoaPods
+        script: |
+          cd mobile/ios/App
+          pod install
 
-      echo "Installed provisioning profiles:"
-      ls -la "$HOME/Library/MobileDevice/Provisioning Profiles" || true
+      - name: Prepare iOS signing files
+        script: |
+          keychain initialize
 
-  - name: Set build number
-    script: |
-      PLIST="mobile/ios/App/App/Info.plist"
-      P=/usr/libexec/PlistBuddy
+          app-store-connect create-certificate \
+            --type IOS_DISTRIBUTION \
+            --save || true
 
-      LATEST_BUILD=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APP_ID" 2>/dev/null || echo 0)
-      BUILD_NUMBER=$((LATEST_BUILD + 1))
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
 
-      $P -c "Set :CFBundleVersion $BUILD_NUMBER" "$PLIST" 2>/dev/null || $P -c "Add :CFBundleVersion string $BUILD_NUMBER" "$PLIST"
-      $P -c "Set :CFBundleShortVersionString 1.0.0" "$PLIST" 2>/dev/null || $P -c "Add :CFBundleShortVersionString string 1.0.0" "$PLIST"
+          app-store-connect fetch-signing-files "$WIDGET_BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
 
-      echo "Build number: $BUILD_NUMBER"
+          keychain add-certificates
 
-  - name: Build IPA
-    script: |
-      xcode-project use-profiles
+          xcode-project use-profiles
 
-      xcode-project build-ipa \
-        --workspace "$XCODE_WORKSPACE" \
-        --scheme "$XCODE_SCHEME"
+          echo "Installed provisioning profiles:"
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles" || true
 
-artifacts:
-  - build/ios/ipa/*.ipa
-  - /tmp/xcodebuild_logs/*.log
+      - name: Set build number
+        script: |
+          PLIST="mobile/ios/App/App/Info.plist"
+          P=/usr/libexec/PlistBuddy
 
-publishing:
-  app_store_connect:
-    auth: integration
-    submit_to_testflight: true
-    beta_groups:
-      - Internal Testers
+          LATEST_BUILD=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APP_ID" 2>/dev/null || echo 0)
+          BUILD_NUMBER=$((LATEST_BUILD + 1))
+
+          $P -c "Set :CFBundleVersion $BUILD_NUMBER" "$PLIST" 2>/dev/null || $P -c "Add :CFBundleVersion string $BUILD_NUMBER" "$PLIST"
+          $P -c "Set :CFBundleShortVersionString 1.0.0" "$PLIST" 2>/dev/null || $P -c "Add :CFBundleShortVersionString string 1.0.0" "$PLIST"
+
+          echo "Build number: $BUILD_NUMBER"
+
+      - name: Build IPA
+        script: |
+          xcode-project use-profiles
+
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        beta_groups:
+          - Internal Testers
