@@ -21,7 +21,6 @@ workflows:
           - anwar_app_appstore
           - anwar_widget_appstore
         certificates:
-          - ios_distribution
           - "Anwar Cert"
 
       vars:
