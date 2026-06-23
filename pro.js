@@ -182,6 +182,24 @@ PRO.renderHomeExtras = function(){
                 <i class="fa-solid fa-circle-play pro-card-go"></i></div>`;
         }
     } catch(e){}
+    // الختمة الجماعية — بطاقة مزخرفة لامعة
+    try {
+        const groups = _loadGroups();
+        groups.slice(0,2).forEach((g, gi) => {
+            const total = g.members.reduce((s,m)=> s+(m.done||[]).length, 0);
+            const pct = Math.round(total/30*100);
+            const names = g.members.slice(0,4).map(m=>m.name).join(' · ');
+            html += `<div class="group-home-card" onclick="PRO.openGroupKhatma()">
+                <div class="ghc-glow"></div>
+                <div class="ghc-head"><span class="ghc-badge"><i class="fa-solid fa-users"></i> ${tr('ختمة جماعية','Group Khatma')}</span>
+                    ${g.code?`<span class="ghc-live"><i class="fa-solid fa-tower-broadcast"></i> ${tr('مباشر','Live')}</span>`:''}</div>
+                <div class="ghc-title">${g.name}</div>
+                <div class="ghc-names">${names}${g.members.length>4?' …':''}</div>
+                <div class="ghc-bar"><div class="ghc-fill" style="width:${pct}%"></div></div>
+                <div class="ghc-foot"><span>${total}/30 ${tr('جزء','juz')}</span><span class="ghc-pct">${pct}%</span></div>
+            </div>`;
+        });
+    } catch(e){}
     host.innerHTML = html;
 };
 
@@ -194,7 +212,27 @@ PRO.openGroupKhatma = function(){
     $('group-modal').classList.add('active');
 };
 PRO.closeGroupKhatma = function(){ const m=$('group-modal'); if(m) m.classList.remove('active'); };
-function _loadGroups(){ try{ return JSON.parse(localStorage.getItem('group_khatmas')||'[]'); }catch(e){ return []; } }
+function _migrateMember(m){
+    // الصيغة القديمة: {name, from, to, done:bool} → الجديدة: {name, juz:[..], done:[..]}
+    if (Array.isArray(m.juz)) { if(!Array.isArray(m.done)) m.done = []; return m; }
+    const juz = [];
+    if (typeof m.from === 'number' && typeof m.to === 'number'){ for(let j=m.from;j<=m.to;j++) juz.push(j); }
+    const done = (m.done === true) ? juz.slice() : [];
+    return { name:m.name, juz, done };
+}
+function _loadGroups(){
+    try{
+        const g = JSON.parse(localStorage.getItem('group_khatmas')||'[]');
+        g.forEach(grp => { if(Array.isArray(grp.members)) grp.members = grp.members.map(_migrateMember); });
+        return g;
+    }catch(e){ return []; }
+}
+// أجزاء مأخوذة من قِبل أعضاء آخرين (للاختيار اليدوي)
+function _takenJuz(group, exceptMi){
+    const taken = {};
+    group.members.forEach((m, i) => { if(i===exceptMi) return; (m.juz||[]).forEach(j => taken[j] = m.name); });
+    return taken;
+}
 function _saveGroups(g){ localStorage.setItem('group_khatmas', JSON.stringify(g)); }
 const _roomSubs = {};
 PRO.renderGroups = function(){
@@ -205,20 +243,30 @@ PRO.renderGroups = function(){
     html += `<p class="group-net"><i class="fa-solid fa-circle" style="color:${synced?'#22c55e':'#9aa0a6'};font-size:0.6rem"></i> ${synced?tr('متّصل — تحديث لحظي','Live sync on'):tr('غير متّصل — محلّي','Offline — local')}</p>`;
     if (!groups.length) html += `<p class="tasks-empty">${tr('وزّع أجزاء القرآن على أفراد العائلة أو الأصدقاء لختمة جماعية.','Split the 30 Juz among family/friends for a shared khatma.')}</p>`;
     groups.forEach((g, gi) => {
-        const doneCount = g.members.filter(m=>m.done).length;
+        const totalDone = g.members.reduce((s,m)=> s + (m.done||[]).length, 0);
         html += `<div class="group-card"><div class="group-head"><b>${g.name}</b>
             ${g.code?`<span class="group-live"><i class="fa-solid fa-tower-broadcast"></i> ${tr('متزامنة','Live')}</span>`:''}
-            <span>${doneCount}/${g.members.length} ✓</span>
+            <span>${totalDone}/30 ${tr('جزء','juz')}</span>
             <button class="bm-del" onclick="PRO.delGroup(${gi})"><i class="fa-solid fa-trash-can"></i></button></div>`;
         g.members.forEach((m, mi) => {
-            html += `<div class="group-mem ${m.done?'done':''}" onclick="PRO.toggleMember(${gi},${mi})">
-                <i class="fa-${m.done?'solid fa-circle-check':'regular fa-circle'}"></i>
-                <span class="gm-name">${m.name}</span>
-                <span class="gm-juz">${tr('أجزاء','Juz')} ${m.from}–${m.to}</span></div>`;
+            const assigned = m.juz || [], done = m.done || [];
+            const allDone = assigned.length>0 && assigned.every(j=>done.includes(j));
+            html += `<div class="group-mem-block ${allDone?'done':''}">
+                <div class="gm-top"><span class="gm-name">${allDone?'<i class="fa-solid fa-circle-check" style="color:#22c55e;margin-left:5px"></i>':''}${m.name}</span>
+                    <span class="gm-count">${done.length}/${assigned.length||0}</span></div>`;
+            if (assigned.length){
+                html += `<div class="gm-juz-chips">` + assigned.slice().sort((a,b)=>a-b).map(j =>
+                    `<button class="juz-chip ${done.includes(j)?'read':''}" onclick="PRO.toggleJuz(${gi},${mi},${j})">${done.includes(j)?'<i class=\'fa-solid fa-check\'></i> ':''}${j}</button>`
+                ).join('') + `</div>`;
+                if (g.manual) html += `<button class="gm-editjuz" onclick="PRO.pickJuz(${gi},${mi})"><i class="fa-solid fa-pen"></i> ${tr('تعديل أجزائي','Edit my juz')}</button>`;
+            } else {
+                html += `<button class="gm-pickbtn" onclick="PRO.pickJuz(${gi},${mi})"><i class="fa-solid fa-hand-pointer"></i> ${tr('اختر أجزاءك','Choose your juz')}</button>`;
+            }
+            html += `</div>`;
         });
-        const pct = Math.round(doneCount/g.members.length*100);
+        const pct = Math.round(totalDone/30*100);
         html += `<div class="group-progress"><div class="group-progress-fill" style="width:${pct}%"></div></div>
-            <div class="group-pct">${tr('التقدّم','Progress')}: ${pct}%</div>
+            <div class="group-pct">${tr('تقدّم الختمة','Khatma progress')}: ${pct}%</div>
             <div class="group-btns">
               <button class="group-share" onclick="PRO.shareGroup(${gi})"><i class="fa-solid fa-share-nodes"></i> ${tr('مشاركة','Share')}</button>
               <button class="group-share" onclick="PRO.copyRoomLink(${gi})"><i class="fa-solid fa-link"></i> ${tr('رابط الغرفة','Room link')}</button>
@@ -274,7 +322,11 @@ PRO.openCreateGroup = function(){
     ensureGroupModal();
     $('group-body').innerHTML = `
       <input id="gk-name" class="modal-input" placeholder="${tr('اسم الختمة (مثل: ختمة العائلة)','Khatma name (e.g. Family)')}" />
-      <p style="color:var(--text-muted);font-size:0.82rem;margin:8px 2px 12px;">${tr('اكتب اسم كل مشارك في خانة، وسنوزّع الأجزاء الثلاثين عليهم تلقائياً.','Type each participant in a field; the 30 Juz are split automatically.')}</p>
+      <div class="gk-mode">
+        <label class="gk-mode-opt"><input type="radio" name="gkmode" value="auto" checked> ${tr('توزيع تلقائي للأجزاء','Auto-split juz')}</label>
+        <label class="gk-mode-opt"><input type="radio" name="gkmode" value="manual"> ${tr('كل مشارك يختار أجزاءه','Each picks own juz')}</label>
+      </div>
+      <p style="color:var(--text-muted);font-size:0.82rem;margin:8px 2px 12px;">${tr('اكتب اسم كل مشارك في خانة. في الوضع التلقائي نوزّع الأجزاء الثلاثين، وفي اليدوي يختار كلٌّ أجزاءه.','Add each participant. Auto splits the 30 Juz; manual lets each pick their own.')}</p>
       <div id="gk-names"></div>
       <button class="group-share" style="width:100%;margin-top:6px;justify-content:center;" onclick="PRO.addGroupNameRow()"><i class="fa-solid fa-user-plus"></i> ${tr('إضافة مشارك','Add participant')}</button>
       <button class="tasbeeh-pill" style="width:100%;margin-top:14px;" onclick="PRO.submitCreateGroup()"><i class="fa-solid fa-check"></i> ${tr('إنشاء الختمة','Create khatma')}</button>`;
@@ -295,14 +347,22 @@ PRO.submitCreateGroup = function(){
     const name = (($('gk-name')||{}).value||'').trim() || tr('ختمة جماعية','Group Khatma');
     const names = [...document.querySelectorAll('.gk-name-input')].map(i=>i.value.trim()).filter(Boolean);
     if(!names.length){ alert(tr('أضف مشاركاً واحداً على الأقل.','Add at least one participant.')); return; }
-    PRO.createGroup(name, names);
+    const modeEl = document.querySelector('input[name="gkmode"]:checked');
+    const manual = modeEl && modeEl.value === 'manual';
+    PRO.createGroup(name, names, manual);
     PRO.openGroupKhatma();
 };
-PRO.createGroup = function(name, names){
-    const per = Math.floor(30/names.length); let extra = 30 - per*names.length; let cur = 1;
-    const members = names.map(nm => { let cnt = per + (extra>0?1:0); if(extra>0)extra--; const from=cur; const to=cur+cnt-1; cur=to+1; return { name:nm, from, to, done:false }; });
+PRO.createGroup = function(name, names, manual){
+    let members;
+    if (manual){
+        // يدوي: لا أجزاء بعد، يختار كل مشارك أجزاءه
+        members = names.map(nm => ({ name:nm, juz:[], done:[] }));
+    } else {
+        const per = Math.floor(30/names.length); let extra = 30 - per*names.length; let cur = 1;
+        members = names.map(nm => { let cnt = per + (extra>0?1:0); if(extra>0)extra--; const juz=[]; for(let j=0;j<cnt;j++) juz.push(cur++); return { name:nm, juz, done:[] }; });
+    }
     const groups=_loadGroups();
-    const entry = { id:Date.now(), name, members };
+    const entry = { id:Date.now(), name, manual:!!manual, members };
     groups.unshift(entry); _saveGroups(groups); PRO.renderGroups();
     // أنشئ غرفة Firestore متزامنة إن توفّر اتصال
     if (window.FB && FB.ready){
@@ -312,15 +372,42 @@ PRO.createGroup = function(name, names){
         }).catch(()=>{});
     }
 };
-PRO.toggleMember = function(gi,mi){
-    const g=_loadGroups(); if(!g[gi]) return;
-    g[gi].members[mi].done=!g[gi].members[mi].done; _saveGroups(g); PRO.renderGroups();
+// علّم جزءاً واحداً مقروءاً/غير مقروء
+PRO.toggleJuz = function(gi,mi,j){
+    const g=_loadGroups(); if(!g[gi]||!g[gi].members[mi]) return;
+    const m=g[gi].members[mi]; if(!Array.isArray(m.done)) m.done=[];
+    const k=m.done.indexOf(j); if(k>=0) m.done.splice(k,1); else m.done.push(j);
+    _saveGroups(g); PRO.renderGroups(); PRO.renderHomeExtras && PRO.renderHomeExtras();
+    if (g[gi].code && window.FB && FB.ready) FB.updateMembers(g[gi].code, g[gi].members);
+};
+// اختيار/تعديل أجزاء مشارك (شبكة 1..30، المأخوذ من غيره معطّل)
+PRO.pickJuz = function(gi,mi){
+    const g=_loadGroups(); if(!g[gi]||!g[gi].members[mi]) return;
+    const m=g[gi].members[mi]; const taken=_takenJuz(g[gi], mi); const mine=new Set(m.juz||[]);
+    let grid='';
+    for(let j=1;j<=30;j++){
+        if(taken[j]) grid += `<button class="jp-cell taken" disabled>${j}<span>${taken[j]}</span></button>`;
+        else grid += `<button class="jp-cell ${mine.has(j)?'sel':''}" data-j="${j}" onclick="this.classList.toggle('sel')">${j}</button>`;
+    }
+    $('group-body').innerHTML = `
+      <button class="group-share" style="margin-bottom:12px;" onclick="PRO.openGroupKhatma()"><i class="fa-solid fa-arrow-right"></i> ${tr('رجوع','Back')}</button>
+      <h3 style="text-align:center;color:var(--accent-color);margin-bottom:4px;">${m.name}</h3>
+      <p style="text-align:center;color:var(--text-muted);font-size:0.82rem;margin-bottom:12px;">${tr('اضغط الأجزاء التي ستقرؤها','Tap the juz you will read')}</p>
+      <div class="jp-grid">${grid}</div>
+      <button class="tasbeeh-pill" style="width:100%;margin-top:16px;" onclick="PRO.saveJuzPick(${gi},${mi})"><i class="fa-solid fa-check"></i> ${tr('حفظ','Save')}</button>`;
+};
+PRO.saveJuzPick = function(gi,mi){
+    const sel=[...document.querySelectorAll('.jp-cell.sel')].map(b=>+b.dataset.j).sort((a,b)=>a-b);
+    const g=_loadGroups(); if(!g[gi]||!g[gi].members[mi]) return;
+    const m=g[gi].members[mi]; m.juz=sel; m.done=(m.done||[]).filter(j=>sel.includes(j));
+    _saveGroups(g); PRO.openGroupKhatma(); PRO.renderHomeExtras && PRO.renderHomeExtras();
     if (g[gi].code && window.FB && FB.ready) FB.updateMembers(g[gi].code, g[gi].members);
 };
 PRO.delGroup = function(gi){ if(!confirm(tr('حذف هذه الختمة الجماعية؟','Delete this group khatma?')))return; let g=JSON.parse(localStorage.getItem('group_khatmas')||'[]'); g.splice(gi,1); localStorage.setItem('group_khatmas',JSON.stringify(g)); PRO.renderGroups(); };
 PRO.shareGroup = function(gi){
-    let g=JSON.parse(localStorage.getItem('group_khatmas')||'[]'); const k=g[gi]; if(!k)return;
-    const lines = k.members.map(m=>`${m.name}: ${tr('الأجزاء','Juz')} ${m.from}–${m.to}`).join('\n');
+    const g=_loadGroups(); const k=g[gi]; if(!k)return;
+    const fmtJuz = a => (a&&a.length)? a.slice().sort((x,y)=>x-y).join('، ') : tr('لم تُختر بعد','not set');
+    const lines = k.members.map(m=>`${m.name}: ${tr('الأجزاء','Juz')} ${fmtJuz(m.juz)} (${(m.done||[]).length}/${(m.juz||[]).length} ✓)`).join('\n');
     const msg = `📖 ${tr('ختمة جماعية','Group Khatma')}: ${k.name}\n${lines}\n${tr('عبر تطبيق الأنوار','via Al-Anwar app')}`;
     if (navigator.share) navigator.share({text:msg}).catch(()=>{}); else { try{navigator.clipboard.writeText(msg);}catch(e){} alert(tr('تم نسخ التوزيع.','Split copied.')); }
 };
