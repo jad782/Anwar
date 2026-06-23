@@ -14,7 +14,7 @@
    - `LiveActivityPlugin.swift`
    - `LiveActivityPlugin.m`
 6. في `Info.plist` للتطبيق: `NSSupportsLiveActivities = YES` (يحقنها Codemagic تلقائياً).
-7. (اختياري) App Group `group.com.alanwar.quran.jad.jad` لمشاركة البيانات.
+7. (اختياري) App Group `group.com.alanwar.quran.jad` لمشاركة البيانات.
 
 ## الاستدعاء من الويب (JavaScript)
 
