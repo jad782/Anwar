@@ -201,7 +201,7 @@ PRO.renderGroups = function(){
     const groups=_loadGroups();
     const body = $('group-body'); if(!body) return;
     const synced = (window.FB && FB.ready);
-    let html = `<button class="tasbeeh-pill" style="margin-bottom:14px;" onclick="PRO.createGroup()"><i class="fa-solid fa-plus"></i> ${tr('ختمة جماعية جديدة','New group khatma')}</button>`;
+    let html = `<button class="tasbeeh-pill" style="margin-bottom:14px;" onclick="PRO.openCreateGroup()"><i class="fa-solid fa-plus"></i> ${tr('ختمة جماعية جديدة','New group khatma')}</button>`;
     html += `<p class="group-net"><i class="fa-solid fa-circle" style="color:${synced?'#22c55e':'#9aa0a6'};font-size:0.6rem"></i> ${synced?tr('متّصل — تحديث لحظي','Live sync on'):tr('غير متّصل — محلّي','Offline — local')}</p>`;
     if (!groups.length) html += `<p class="tasks-empty">${tr('وزّع أجزاء القرآن على أفراد العائلة أو الأصدقاء لختمة جماعية.','Split the 30 Juz among family/friends for a shared khatma.')}</p>`;
     groups.forEach((g, gi) => {
@@ -269,10 +269,36 @@ PRO.importRoomFromHash = function(){
         setTimeout(()=>{ if(typeof showBadgeToast==='function') showBadgeToast({emoji:'👥', name:tr('انضممت لغرفة ختمة','Joined a khatma room'), desc:obj.n}); }, 800);
     }catch(e){}
 };
-PRO.createGroup = function(){
-    const name = prompt(tr('اسم الختمة الجماعية:','Group khatma name:')); if(!name) return;
-    const membersStr = prompt(tr('أسماء المشاركين (افصل بفاصلة):','Member names (comma separated):')); if(!membersStr) return;
-    const names = membersStr.split(',').map(s=>s.trim()).filter(Boolean); if(!names.length) return;
+// نموذج إنشاء سهل: حقل لكل مشارك + زر إضافة (بدل الفصل بفاصلة)
+PRO.openCreateGroup = function(){
+    ensureGroupModal();
+    $('group-body').innerHTML = `
+      <input id="gk-name" class="modal-input" placeholder="${tr('اسم الختمة (مثل: ختمة العائلة)','Khatma name (e.g. Family)')}" />
+      <p style="color:var(--text-muted);font-size:0.82rem;margin:8px 2px 12px;">${tr('اكتب اسم كل مشارك في خانة، وسنوزّع الأجزاء الثلاثين عليهم تلقائياً.','Type each participant in a field; the 30 Juz are split automatically.')}</p>
+      <div id="gk-names"></div>
+      <button class="group-share" style="width:100%;margin-top:6px;justify-content:center;" onclick="PRO.addGroupNameRow()"><i class="fa-solid fa-user-plus"></i> ${tr('إضافة مشارك','Add participant')}</button>
+      <button class="tasbeeh-pill" style="width:100%;margin-top:14px;" onclick="PRO.submitCreateGroup()"><i class="fa-solid fa-check"></i> ${tr('إنشاء الختمة','Create khatma')}</button>`;
+    PRO.addGroupNameRow(); PRO.addGroupNameRow(); PRO.addGroupNameRow();
+    $('group-modal').classList.add('active');
+};
+PRO.addGroupNameRow = function(){
+    const wrap=$('gk-names'); if(!wrap) return;
+    const row=document.createElement('div'); row.className='gk-row';
+    row.innerHTML = `<input class="modal-input gk-name-input" style="margin:0;flex:1;" placeholder="${tr('اسم المشارك','Participant name')}" />
+        <button class="gk-del" onclick="this.closest('.gk-row').remove()"><i class="fa-solid fa-xmark"></i></button>`;
+    wrap.appendChild(row);
+    const inp=row.querySelector('input');
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); PRO.addGroupNameRow(); } });
+    inp.focus();
+};
+PRO.submitCreateGroup = function(){
+    const name = (($('gk-name')||{}).value||'').trim() || tr('ختمة جماعية','Group Khatma');
+    const names = [...document.querySelectorAll('.gk-name-input')].map(i=>i.value.trim()).filter(Boolean);
+    if(!names.length){ alert(tr('أضف مشاركاً واحداً على الأقل.','Add at least one participant.')); return; }
+    PRO.createGroup(name, names);
+    PRO.openGroupKhatma();
+};
+PRO.createGroup = function(name, names){
     const per = Math.floor(30/names.length); let extra = 30 - per*names.length; let cur = 1;
     const members = names.map(nm => { let cnt = per + (extra>0?1:0); if(extra>0)extra--; const from=cur; const to=cur+cnt-1; cur=to+1; return { name:nm, from, to, done:false }; });
     const groups=_loadGroups();
