@@ -9,6 +9,7 @@ const DEST = path.resolve(__dirname, 'www');   // وجهة Capacitor
 // الملفات/المجلدات المطلوبة فقط (نتجنّب نسخ node_modules وملفات PDF الكبيرة)
 const INCLUDE = [
   'index.html',
+  'persist.js',
   'quran-data.js',
   'firebase.js',
   'prayers.js',
