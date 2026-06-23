@@ -17,6 +17,7 @@ const INCLUDE = [
   'features.js',
   'pro.js',
   'pro2.js',
+  'sunan.js',
   'mushaf.js',
   'live-activity.js',
   'widget-bridge.js',
