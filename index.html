@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Al-Anwar">
     <title>تطبيق الأنوار الإسلامي</title>
-    <link rel="stylesheet" href="style.css?v=19">
+    <link rel="stylesheet" href="style.css?v=20">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- ربط ملف المانيفست -->
@@ -152,6 +152,7 @@
                 <div class="app-item" onclick="openQibla()"><div class="app-icon" style="background:rgba(13, 59, 46, 0.1); color:var(--primary-color);"><i class="fa-solid fa-compass"></i></div><span>القبلة</span></div>
                 <div class="app-item" onclick="goToTab(2)"><div class="app-icon" style="background:rgba(197, 160, 89, 0.1); color:var(--accent-color);"><i class="fa-solid fa-person-praying"></i></div><span>الأذكار</span></div>
                 <div class="app-item" onclick="goToTab(1)"><div class="app-icon" style="background:rgba(13, 59, 46, 0.1); color:var(--primary-color);"><i class="fa-solid fa-book-quran"></i></div><span>المصحف</span></div>
+                <div class="app-item" onclick="openSunan()"><div class="app-icon" style="background:rgba(197, 160, 89, 0.1); color:var(--accent-color);"><i class="fa-solid fa-star-and-crescent"></i></div><span>السنن</span></div>
             </div>
 
             <a href="https://wa.me/905551517264?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%E2%80%8C%20%D8%A3%D9%88%D8%AF%20%D8%A7%D9%84%D8%AA%D8%A8%D8%B1%D8%B9" target="_blank" class="donate-card">
@@ -391,6 +392,17 @@
         </div>
     </div>
 
+    <!-- قائمة السنن -->
+    <div id="sunan-modal" class="qibla-overlay">
+        <div class="qibla-modal" style="width:94%; max-width:440px; padding:18px; text-align:right; max-height:86vh; display:flex; flex-direction:column;">
+            <button class="close-qibla" onclick="closeSunan()"><i class="fa-solid fa-xmark"></i></button>
+            <button id="sunan-back" onclick="renderSunanHome()" style="display:none; position:absolute; top:14px; right:14px; background:none; border:none; color:var(--accent-color); font-size:1.3rem; cursor:pointer;"><i class="fa-solid fa-arrow-right"></i></button>
+            <h2 id="sunan-title" style="color:var(--accent-color); margin-bottom:6px; text-align:center;"><i class="fa-solid fa-star-and-crescent" style="margin-left:8px;"></i>قائمة السنن</h2>
+            <p id="sunan-sub" style="color:var(--text-soft,#9a8f7a); font-size:0.85rem; text-align:center; margin-bottom:14px;">سنن المصطفى ﷺ — اغتنمها لرفع الدرجات</p>
+            <div id="sunan-body" style="overflow-y:auto; flex:1;"></div>
+        </div>
+    </div>
+
     <!-- منتقي السور -->
     <div id="surah-picker-modal" class="qibla-overlay">
         <div class="qibla-modal" style="width:92%; max-width:400px; padding:20px;">
@@ -434,7 +446,8 @@
     <script src="app.js?v=18"></script>
     <script src="features.js?v=15"></script>
     <script src="pro.js?v=8"></script>
-    <script src="pro2.js?v=7"></script>
+    <script src="pro2.js?v=8"></script>
+    <script src="sunan.js?v=1"></script>
     <script src="mushaf.js?v=3"></script>
     <script src="ambient.js?v=1"></script>
     <script src="live-activity.js?v=1"></script>

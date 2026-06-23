@@ -405,19 +405,44 @@ const HOME_SECTIONS = [
     { key:'apps',     ar:'الاختصارات', en:'Shortcuts', sel:['#tab-home .section-header:has(h3[data-i18n="your_apps"])', '#tab-home .apps-scroll'] }
 ];
 function homePrefs(){ try{ return JSON.parse(localStorage.getItem('home_sections')||'{}'); }catch(e){ return {}; } }
+function homeOrder(){
+    let saved=[]; try{ saved = JSON.parse(localStorage.getItem('home_order')||'[]'); }catch(e){ saved=[]; }
+    const valid = saved.filter(k => HOME_SECTIONS.some(s=>s.key===k));
+    // أضف أي أقسام جديدة لم تكن محفوظة بنهاية الترتيب
+    HOME_SECTIONS.forEach(s => { if(!valid.includes(s.key)) valid.push(s.key); });
+    return valid;
+}
 PRO2.applyHomeSections = function(){
     const pref = homePrefs();
+    // إظهار/إخفاء
     HOME_SECTIONS.forEach(s => {
         const show = pref[s.key] !== false; // افتراضياً ظاهر
         s.sel.forEach(q => { document.querySelectorAll(q).forEach(el => { el.style.display = show ? '' : 'none'; }); });
+    });
+    // إعادة الترتيب: ننقل عناصر كل قسم لتسبق بطاقة التبرّع (تبقى في الأسفل والهيرو في الأعلى)
+    const home = document.getElementById('tab-home'); if(!home) return;
+    const anchor = home.querySelector('.donate-card') || home.querySelector('#khatma-view');
+    if(!anchor) return;
+    homeOrder().forEach(key => {
+        const s = HOME_SECTIONS.find(x=>x.key===key); if(!s) return;
+        s.sel.forEach(q => { home.querySelectorAll(q).forEach(el => { if(el!==anchor) anchor.parentNode.insertBefore(el, anchor); }); });
     });
 };
 PRO2.openCustomizeHome = function(){
     ensureCustomizeModal();
     const pref = homePrefs();
-    $('ch-body').innerHTML = HOME_SECTIONS.map(s => {
+    const order = homeOrder();
+    $('ch-body').innerHTML = order.map((key,i) => {
+        const s = HOME_SECTIONS.find(x=>x.key===key); if(!s) return '';
         const on = pref[s.key] !== false;
-        return `<div class="ch-row"><span class="ch-name">${L()==='en'?s.en:s.ar}</span>
+        const upDis = i===0 ? 'disabled' : '';
+        const dnDis = i===order.length-1 ? 'disabled' : '';
+        return `<div class="ch-row">
+            <div class="ch-move">
+                <button class="ch-arrow" ${upDis} onclick="PRO2.moveHomeSection('${s.key}',-1)"><i class="fa-solid fa-chevron-up"></i></button>
+                <button class="ch-arrow" ${dnDis} onclick="PRO2.moveHomeSection('${s.key}',1)"><i class="fa-solid fa-chevron-down"></i></button>
+            </div>
+            <span class="ch-name">${L()==='en'?s.en:s.ar}</span>
             <label class="switch"><input type="checkbox" data-key="${s.key}" ${on?'checked':''} onchange="PRO2.toggleHomeSection('${s.key}',this.checked)"><span class="slider round"></span></label></div>`;
     }).join('');
     $('customize-home-modal').classList.add('active');
@@ -429,13 +454,22 @@ PRO2.toggleHomeSection = function(key, on){
     if (!on){ const visible = HOME_SECTIONS.filter(s => (pref[s.key]!==false)).length; if (visible <= 3){ alert(tr('يجب إبقاء 3 أقسام على الأقل.','Keep at least 3 sections.')); PRO2.openCustomizeHome(); return; } }
     pref[key] = on; localStorage.setItem('home_sections', JSON.stringify(pref)); PRO2.applyHomeSections();
 };
+PRO2.moveHomeSection = function(key, dir){
+    const order = homeOrder();
+    const i = order.indexOf(key); if(i<0) return;
+    const j = i + dir; if(j<0 || j>=order.length) return;
+    const tmp = order[i]; order[i] = order[j]; order[j] = tmp;
+    localStorage.setItem('home_order', JSON.stringify(order));
+    PRO2.applyHomeSections();
+    PRO2.openCustomizeHome(); // أعد رسم القائمة بالترتيب الجديد
+};
 function ensureCustomizeModal(){
     if ($('customize-home-modal')) return;
     const d=document.createElement('div'); d.id='customize-home-modal'; d.className='qibla-overlay';
     d.innerHTML = `<div class="qibla-modal" style="width:94%;max-width:420px;text-align:right;">
         <button class="close-qibla" onclick="PRO2.closeCustomizeHome()"><i class="fa-solid fa-xmark"></i></button>
         <h2 style="color:var(--primary-color);margin-bottom:6px;"><i class="fa-solid fa-sliders"></i> ${tr('تخصيص الواجهة','Customize Home')}</h2>
-        <p style="color:var(--text-muted);font-size:0.8rem;margin-bottom:14px;">${tr('اختر الأقسام التي تظهر في صفحتك الرئيسية (3 على الأقل).','Choose which sections appear on your home (min 3).')}</p>
+        <p style="color:var(--text-muted);font-size:0.8rem;margin-bottom:14px;">${tr('اختر ما يظهر (3 على الأقل) ورتّب الأقسام بالأسهم: مثلاً اجعل أوقات الصلاة أولاً ثم آية وحديث اليوم.','Choose what shows (min 3) and reorder with the arrows: e.g. put prayer times first, then ayah & hadith.')}</p>
         <div id="ch-body"></div></div>`;
     document.body.appendChild(d);
 }
