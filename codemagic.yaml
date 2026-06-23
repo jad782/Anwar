@@ -1,4 +1,4 @@
-# =======================================================
+﻿# =======================================================
 # Codemagic - Al-Anwar iOS TestFlight
 # App: com.alanwar.quran.jad
 # Widget: com.alanwar.quran.jad.AnwarWidgetExtension
@@ -21,7 +21,6 @@ workflows:
           - anwar_app_appstore
           - anwar_widget_appstore
         certificates:
-          - ios_distribution
           - "Anwar Cert"
 
       vars:
@@ -91,6 +90,7 @@ workflows:
 
           def write_entitlements(path, app_group_id)
             FileUtils.mkdir_p(File.dirname(path))
+
             File.write(path, <<~PLIST)
             <?xml version="1.0" encoding="UTF-8"?>
             <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -160,11 +160,26 @@ workflows:
 
       - name: Build IPA
         script: |
+          set +e
+
           xcode-project use-profiles
 
           xcode-project build-ipa \
             --workspace "$XCODE_WORKSPACE" \
             --scheme "$XCODE_SCHEME"
+
+          BUILD_EXIT_CODE=$?
+
+          if [ $BUILD_EXIT_CODE -ne 0 ]; then
+            echo "====== XCODEBUILD LOGS START ======"
+            if [ -d /tmp/xcodebuild_logs ]; then
+              find /tmp/xcodebuild_logs -type f -name "*.log" -print -exec cat {} \;
+            else
+              echo "No /tmp/xcodebuild_logs directory found"
+            fi
+            echo "====== XCODEBUILD LOGS END ======"
+            exit $BUILD_EXIT_CODE
+          fi
 
     artifacts:
       - build/ios/ipa/*.ipa
