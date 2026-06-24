@@ -744,3 +744,16 @@ body.qfont-naskh .ayah, body.qfont-naskh .mushaf-ayah, body.qfont-naskh .ayah-da
 body.qfont-othmani .ayah, body.qfont-othmani .mushaf-ayah, body.qfont-othmani .ayah-day-text, body.qfont-othmani #mini-reader-body { font-family:'Scheherazade New','Amiri',serif !important; }
 /* ثيم ذهبي ملكي */
 body.theme-royal { --accent-color:#E6BE5C; --accent-light:#FFD97A; }
+
+/* ===== تحديثات النقاط: متجر مؤقت + خريطة بأرقام + شارة العضو ===== */
+.hm-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; direction:ltr; }
+.hm-cell { aspect-ratio:1; border-radius:6px; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; font-size:0.62rem; font-weight:700; color:transparent; }
+.hm-cell.on { background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; box-shadow:0 0 6px rgba(242,210,122,0.4); }
+.member-badge { display:inline-flex; align-items:center; gap:6px; margin-top:10px; background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; font-weight:800; font-size:0.78rem; padding:5px 14px; border-radius:20px; }
+.rw-active { display:flex; align-items:center; gap:8px; }
+.rw-left { font-size:0.72rem; color:var(--text-muted); font-weight:700; }
+.rw-rent { display:flex; gap:6px; }
+.rw-btn.sm { display:flex; flex-direction:column; align-items:center; line-height:1.1; padding:6px 10px; }
+.rw-btn.sm small { font-size:0.62rem; opacity:0.8; font-weight:600; }
+/* ثيم أخضر زمردي */
+body.theme-emerald { --accent-color:#3FB984; --accent-light:#6FE3B0; }
