@@ -12,7 +12,7 @@ function today(){ return new Date().toISOString().slice(0,10); }
 const DAY=86400000;
 
 const PT_KEY='anwar_points', LOG_KEY='anwar_daily_log', CH_KEY='anwar_challenges';
-const UNLOCK_KEY='anwar_unlocks', FONT_KEY='quran_font', THEME_KEY='anwar_theme';
+const UNLOCK_KEY='anwar_unlocks', FONT_KEY='quran_font', THEME_KEY='anwar_theme', READBG_KEY='anwar_readbg';
 
 function loadPts(){ try{ return JSON.parse(localStorage.getItem(PT_KEY)||'{"balance":0,"lifetime":0}'); }catch(e){ return {balance:0,lifetime:0}; } }
 function savePts(p){ localStorage.setItem(PT_KEY, JSON.stringify(p)); }
@@ -68,6 +68,8 @@ const REWARDS = [
     { id:'theme_emerald', type:'rent', ar:'ثيم أخضر زمردي',       en:'Emerald theme',       ico:'fa-palette', kind:'theme' },
     { id:'theme_night',   type:'rent', ar:'ثيم أزرق ليلي',        en:'Night blue theme',    ico:'fa-moon',    kind:'theme' },
     { id:'theme_rose',    type:'rent', ar:'ثيم وردي هادئ',        en:'Soft rose theme',     ico:'fa-spa',     kind:'theme' },
+    { id:'readbg_royal',  type:'rent', ar:'خلفية قراءة: ورق ملكي', en:'Royal reading bg',   ico:'fa-scroll',  kind:'readbg' },
+    { id:'readbg_night',  type:'rent', ar:'خلفية قراءة: ليل مرصّع',en:'Starry reading bg',  ico:'fa-star',    kind:'readbg' },
 ];
 const RENT_OPTS = [ {days:30, cost:200, ar:'شهر', en:'1 month'}, {days:90, cost:350, ar:'3 أشهر', en:'3 months'} ];
 function isActive(id){ const r=REWARDS.find(x=>x.id===id); if(!r) return false; const u=loadUnlocks();
@@ -91,6 +93,7 @@ window.AnwarReward = {
         // فعّلها تلقائياً
         if(r.kind==='font') localStorage.setItem(FONT_KEY, id);
         if(r.kind==='theme') localStorage.setItem(THEME_KEY, id);
+        if(r.kind==='readbg') localStorage.setItem(READBG_KEY, id);
         applyVisual(); renderAll();
         ptToast(tr('تم الفتح 🎁','Unlocked 🎁'));
     },
@@ -99,6 +102,7 @@ window.AnwarReward = {
         const r=REWARDS.find(x=>x.id===id);
         if(r.kind==='font'){ const cur=localStorage.getItem(FONT_KEY)||''; localStorage.setItem(FONT_KEY, cur===id?'':id); }
         if(r.kind==='theme'){ const cur=localStorage.getItem(THEME_KEY)||''; localStorage.setItem(THEME_KEY, cur===id?'':id); }
+        if(r.kind==='readbg'){ const cur=localStorage.getItem(READBG_KEY)||''; localStorage.setItem(READBG_KEY, cur===id?'':id); }
         applyVisual(); renderPointsPage();
     }
 };
@@ -115,6 +119,11 @@ function applyVisual(){
     if(t==='theme_emerald') document.body.classList.add('theme-emerald');
     if(t==='theme_night') document.body.classList.add('theme-night');
     if(t==='theme_rose') document.body.classList.add('theme-rose');
+    // خلفية القراءة
+    let rb=localStorage.getItem(READBG_KEY)||''; if(rb && !isActive(rb)){ rb=''; localStorage.setItem(READBG_KEY,''); }
+    document.body.classList.remove('readbg-royal','readbg-night');
+    if(rb==='readbg_royal') document.body.classList.add('readbg-royal');
+    if(rb==='readbg_night') document.body.classList.add('readbg-night');
 }
 window.applyAnwarVisual = applyVisual;
 
@@ -149,7 +158,8 @@ window.renderPointsPage = function(){
             right = active ? `<span class="rw-done"><i class="fa-solid fa-check"></i> ${tr('مملوكة','Owned')}</span>`
                            : `<button class="rw-btn" onclick="event.stopPropagation();AnwarReward.buy('${r.id}')">${r.cost} ${tr('نقطة','pts')}</button>`;
         } else if(active){
-            const cur=(r.kind==='font'?localStorage.getItem(FONT_KEY):localStorage.getItem(THEME_KEY))===r.id;
+            const curKey=r.kind==='font'?FONT_KEY:(r.kind==='readbg'?READBG_KEY:THEME_KEY);
+            const cur=localStorage.getItem(curKey)===r.id;
             right = `<div class="rw-active"><span class="rw-left">${daysLeft(r.id)} ${tr('يوم','d')}</span>
                 <button class="rw-btn ${cur?'on':''}" onclick="event.stopPropagation();AnwarReward.use('${r.id}')">${cur?tr('مُفعّل','On'):tr('تفعيل','Use')}</button></div>`;
         } else {

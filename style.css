@@ -784,3 +784,11 @@ body.light-mode .gm-juz-chips .juz-chip { background:#fff; color:var(--text-main
 body.light-mode .sunan-cat-title, body.light-mode .sunan-item-title { color:var(--text-main); }
 body.light-mode .ch-name, body.light-mode .pe-txt { font-weight:700; }
 /* الهيرو يبقى داكناً فخماً حتى في الوضع النهاري (مقصود) — نصّه فاتح ومقروء */
+
+/* زر حفظ القصة */
+.story-save { margin-top:14px; background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; border:none; border-radius:30px; padding:12px 28px; font-weight:800; font-size:0.95rem; cursor:pointer; font-family:'Tajawal','Cairo',sans-serif; box-shadow:0 6px 18px rgba(0,0,0,0.4); }
+.story-save:active { transform:scale(0.96); }
+
+/* خلفيات قراءة فاخرة (تُفتح بالنقاط) */
+body.readbg-royal #ayahs-container, body.readbg-royal .mushaf-page, body.readbg-royal #khatma-container, body.readbg-royal #mini-reader-body { background:linear-gradient(160deg,#2a1d08,#14110b) !important; background-image:radial-gradient(circle at 50% 0%, rgba(242,210,122,0.12), transparent 60%) !important; border:1px solid rgba(212,168,67,0.3) !important; }
+body.readbg-night #ayahs-container, body.readbg-night .mushaf-page, body.readbg-night #khatma-container, body.readbg-night #mini-reader-body { background:linear-gradient(170deg,#0c1430,#05070f) !important; border:1px solid rgba(120,150,220,0.25) !important; }

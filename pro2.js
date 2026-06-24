@@ -276,7 +276,8 @@ function ensureStory(){
             <div class="story-brand">anwar</div>
         </div>
         <div class="story-swatches">${swatches}</div>
-        <p class="story-hint">${tr('اختر لون الخلفية ثم التقط صورة للشاشة 📸','Pick a background then screenshot 📸')}</p>`;
+        <button class="story-save" onclick="PRO2.saveStoryImage()"><i class="fa-solid fa-download"></i> ${tr('حفظ الصورة بدقة عالية','Save HD image')}</button>
+        <p class="story-hint">${tr('اختر لون الخلفية ثم احفظ الصورة في جهازك','Pick a background then save to your device')}</p>`;
     document.body.appendChild(d);
     d._bgs = bgs;
     const saved = localStorage.getItem('story_bg'); if(saved!=null) PRO2.setStoryBg(+saved);
@@ -285,6 +286,42 @@ PRO2.setStoryBg = function(i){
     const d=$('story-modal'); const card=$('story-card'); if(!d||!card||!d._bgs[i]) return;
     card.style.background = d._bgs[i]; localStorage.setItem('story_bg', i);
     d.querySelectorAll('.story-sw').forEach((b,bi)=>b.classList.toggle('on', bi===i));
+};
+// لفّ نص عربي على أسطر بعرض محدّد
+function _wrapText(ctx, text, maxW){
+    const words=(text||'').split(/\s+/); const lines=[]; let line='';
+    words.forEach(w=>{ const test=line?line+' '+w:w; if(ctx.measureText(test).width>maxW && line){ lines.push(line); line=w; } else line=test; });
+    if(line) lines.push(line); return lines;
+}
+// حفظ القصة كصورة PNG بدقة عالية (1080×1920) — ليست لقطة شاشة
+PRO2.saveStoryImage = async function(){
+    const a=window._lastAyah; if(!a){ return; }
+    const idx=+(localStorage.getItem('story_bg')||0);
+    const pairs=[['#4A2C1A','#14110B'],['#0D3B2E','#07160F'],['#1B2A4A','#070C16'],['#3A2140','#140A18'],['#5A4410','#14110B'],['#262626','#000000']];
+    const [c1,c2]=pairs[idx]||pairs[0];
+    const W=1080,H=1920; const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const ctx=cv.getContext('2d');
+    try{ await document.fonts.load('64px Amiri'); await document.fonts.load('120px Amiri'); }catch(e){}
+    const g=ctx.createRadialGradient(W/2,H*0.30,60,W/2,H*0.30,H); g.addColorStop(0,c1); g.addColorStop(1,c2);
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(212,168,67,0.45)'; ctx.lineWidth=5; ctx.strokeRect(46,46,W-92,H-92);
+    ctx.textAlign='center'; try{ctx.direction='rtl';}catch(e){}
+    ctx.fillStyle='rgba(212,168,67,0.6)'; ctx.font='150px Amiri, serif'; ctx.fillText('﷽', W/2, 360);
+    ctx.fillStyle='#FAF6EE'; ctx.font='66px Amiri, serif';
+    const lines=_wrapText(ctx, a.text, W-300);
+    let y=H/2 - (lines.length-1)*62; lines.forEach(l=>{ ctx.fillText(l, W/2, y); y+=124; });
+    ctx.fillStyle='#D4A843'; ctx.font='46px Amiri, serif';
+    ctx.fillText('﴿ '+tr('سورة','')+' '+sN(a.surah)+' : '+a.ayah+' ﴾', W/2, y+30);
+    ctx.fillStyle='rgba(250,246,238,0.5)'; ctx.font='32px Tajawal, sans-serif';
+    ctx.fillText('anwar', W/2, H-110);
+    cv.toBlob(async (blob)=>{
+        if(!blob){ return; }
+        const file=new File([blob], 'anwar-ayah.png', {type:'image/png'});
+        try{
+            if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:tr('آية','Ayah')}); return; }
+        }catch(e){}
+        // احتياطي: تنزيل مباشر
+        const url=URL.createObjectURL(blob); const link=document.createElement('a'); link.href=url; link.download='anwar-ayah.png'; document.body.appendChild(link); link.click(); link.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
+    }, 'image/png');
 };
 
 // =======================================================
