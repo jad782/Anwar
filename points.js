@@ -45,6 +45,15 @@ window.AnwarChallenge = {
         d.ids.push(id); saveDone(d);
         const p=loadPts(); p.balance+=c.pts; p.lifetime=(p.lifetime||0)+c.pts; savePts(p);
         logToday(); ptToast('+'+c.pts+' '+tr('نقطة','pts')+' ✨'); renderAll();
+    },
+    // ينقل المستخدم للمكان الصحيح لأداء المهمة، ثم يرجع ويضغط «تم»
+    go:function(id){
+        const close=()=>{ const m=$('points-modal'); if(m) m.classList.remove('active'); };
+        if(id==='morning'||id==='evening'){ close(); window.AnwarPoints.goAthkar(id); return; }
+        if(id==='tasbeeh'){ close(); if(typeof goToTab==='function') goToTab(2); return; }
+        if(id==='page'||id==='juz'||id==='tadabbur'){ close(); if(typeof goToTab==='function') goToTab(1); return; }
+        // مهام بلا وجهة (نافلة/صلاة على النبي): علّمها مباشرة
+        AnwarChallenge.toggle(id);
     }
 };
 window.awardPoints = function(base){ const p=loadPts(); const g=Math.max(1,base||1); p.balance+=g; p.lifetime=(p.lifetime||0)+g; savePts(p); logToday(); ptToast('+'+g+' '+tr('نقطة','pts')); renderAll(); return g; };
@@ -57,6 +66,8 @@ const REWARDS = [
     { id:'othmani',       type:'rent', ar:'خط مصحف: عثماني فخم',  en:'Othmani Mushaf font', ico:'fa-pen-nib', kind:'font' },
     { id:'theme_royal',   type:'rent', ar:'ثيم ذهبي ملكي',        en:'Royal gold theme',    ico:'fa-crown',   kind:'theme' },
     { id:'theme_emerald', type:'rent', ar:'ثيم أخضر زمردي',       en:'Emerald theme',       ico:'fa-palette', kind:'theme' },
+    { id:'theme_night',   type:'rent', ar:'ثيم أزرق ليلي',        en:'Night blue theme',    ico:'fa-moon',    kind:'theme' },
+    { id:'theme_rose',    type:'rent', ar:'ثيم وردي هادئ',        en:'Soft rose theme',     ico:'fa-spa',     kind:'theme' },
 ];
 const RENT_OPTS = [ {days:30, cost:200, ar:'شهر', en:'1 month'}, {days:90, cost:350, ar:'3 أشهر', en:'3 months'} ];
 function isActive(id){ const r=REWARDS.find(x=>x.id===id); if(!r) return false; const u=loadUnlocks();
@@ -99,9 +110,11 @@ function applyVisual(){
     if(f==='othmani') document.body.classList.add('qfont-othmani');
     // الثيم
     let t=localStorage.getItem(THEME_KEY)||''; if(t && !isActive(t)){ t=''; localStorage.setItem(THEME_KEY,''); }
-    document.body.classList.remove('theme-royal','theme-emerald');
+    document.body.classList.remove('theme-royal','theme-emerald','theme-night','theme-rose');
     if(t==='theme_royal') document.body.classList.add('theme-royal');
     if(t==='theme_emerald') document.body.classList.add('theme-emerald');
+    if(t==='theme_night') document.body.classList.add('theme-night');
+    if(t==='theme_rose') document.body.classList.add('theme-rose');
 }
 window.applyAnwarVisual = applyVisual;
 
@@ -123,10 +136,12 @@ window.renderPointsPage = function(){
     const earned=CHALLENGES.filter(c=>d.ids.includes(c.id)).reduce((s,c)=>s+c.pts,0);
     const hasBadge=isActive('badge');
     const chRows=CHALLENGES.map(c=>{ const done=d.ids.includes(c.id);
-        return `<div class="ch-task ${done?'done':''}" onclick="AnwarChallenge.toggle('${c.id}')">
+        const btn = done ? `<span class="ch-pts done"><i class="fa-solid fa-check"></i></span>`
+                         : `<button class="ch-claim" onclick="event.stopPropagation();AnwarChallenge.toggle('${c.id}')">${tr('تم','Done')} +${c.pts}</button>`;
+        return `<div class="ch-task ${done?'done':''}" onclick="AnwarChallenge.go('${c.id}')">
             <span class="ch-ico"><i class="fa-solid ${c.ico}"></i></span>
             <span class="ch-name">${L()==='en'?c.en:c.ar}</span>
-            <span class="ch-pts">${done?'<i class=\'fa-solid fa-check\'></i>':'+'+c.pts}</span></div>`; }).join('');
+            ${btn}</div>`; }).join('');
     const rwRows=REWARDS.map(r=>{
         const active=isActive(r.id);
         let right='';

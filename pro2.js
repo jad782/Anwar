@@ -259,16 +259,33 @@ PRO2.closeStory = function(){ const m=$('story-modal'); if(m) m.classList.remove
 function ensureStory(){
     if ($('story-modal')) return;
     const d=document.createElement('div'); d.id='story-modal'; d.className='story-overlay';
+    const bgs = [
+        'radial-gradient(circle at 50% 30%, #4A2C1A, #14110B 75%)',
+        'radial-gradient(circle at 50% 30%, #0D3B2E, #07160F 75%)',
+        'radial-gradient(circle at 50% 25%, #1B2A4A, #070C16 75%)',
+        'radial-gradient(circle at 50% 30%, #3A2140, #140A18 75%)',
+        'radial-gradient(circle at 50% 30%, #5A4410, #14110B 75%)',
+        'linear-gradient(160deg, #1A1A1A, #000)'
+    ];
+    const swatches = bgs.map((b,i)=>`<button class="story-sw" style="background:${b}" onclick="PRO2.setStoryBg(${i})"></button>`).join('');
     d.innerHTML = `<button class="story-close" onclick="PRO2.closeStory()"><i class="fa-solid fa-xmark"></i></button>
         <div id="story-card" class="story-card">
             <div class="story-bismillah">﷽</div>
             <div id="story-text" class="story-text"></div>
             <div id="story-ref" class="story-ref"></div>
-            <div class="story-brand">تطبيق الأنوار</div>
+            <div class="story-brand">anwar</div>
         </div>
-        <p class="story-hint">${tr('التقط صورة للشاشة وشاركها 📸','Screenshot and share 📸')}</p>`;
+        <div class="story-swatches">${swatches}</div>
+        <p class="story-hint">${tr('اختر لون الخلفية ثم التقط صورة للشاشة 📸','Pick a background then screenshot 📸')}</p>`;
     document.body.appendChild(d);
+    d._bgs = bgs;
+    const saved = localStorage.getItem('story_bg'); if(saved!=null) PRO2.setStoryBg(+saved);
 }
+PRO2.setStoryBg = function(i){
+    const d=$('story-modal'); const card=$('story-card'); if(!d||!card||!d._bgs[i]) return;
+    card.style.background = d._bgs[i]; localStorage.setItem('story_bg', i);
+    d.querySelectorAll('.story-sw').forEach((b,bi)=>b.classList.toggle('on', bi===i));
+};
 
 // =======================================================
 // حقن: زر القصة في التفسير + عناصر الرئيسية + إعادة تطبيق عند تغيّر القراءة

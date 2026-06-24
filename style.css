@@ -399,7 +399,10 @@ body.light-mode .tj-madd { color: #c0392b; } body.light-mode .tj-ghunnah { color
 .story-bismillah { font-family: 'Amiri', serif; font-size: 2.4rem; color: rgba(212,168,67,0.5); animation: storyFade 1s ease both; }
 .story-text { font-family: 'Amiri', serif; font-size: 1.7rem; line-height: 2.1; color: #FAF6EE; margin: 24px 0; animation: storyRise 1.1s cubic-bezier(0.22,1,0.36,1) 0.2s both; }
 .story-ref { color: #D4A843; font-weight: 800; font-family: 'Tajawal',sans-serif; animation: storyFade 1s ease 0.7s both; }
-.story-brand { position: absolute; bottom: 18px; color: rgba(250,246,238,0.5); font-size: 0.75rem; font-family: 'Tajawal',sans-serif; animation: storyFade 1s ease 1s both; }
+.story-brand { position: absolute; bottom: 14px; color: rgba(250,246,238,0.4); font-size: 0.55rem; letter-spacing: 2px; text-transform: lowercase; font-family: 'Tajawal',sans-serif; animation: storyFade 1s ease 1s both; }
+.story-swatches { display: flex; gap: 9px; margin-top: 16px; }
+.story-sw { width: 30px; height: 30px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.25); cursor: pointer; padding: 0; transition: .15s; }
+.story-sw.on { border-color: var(--accent-light, #F2D27A); transform: scale(1.18); box-shadow: 0 0 10px rgba(242,210,122,0.5); }
 @keyframes storyRise { from{ opacity:0; transform:translateY(24px) scale(0.96);} to{ opacity:1; transform:none;} }
 @keyframes storyFade { from{opacity:0;} to{opacity:1;} }
 .story-close { position: absolute; top: 22px; right: 22px; background: rgba(255,255,255,0.12); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; z-index: 2; }
@@ -757,3 +760,27 @@ body.theme-royal { --accent-color:#E6BE5C; --accent-light:#FFD97A; }
 .rw-btn.sm small { font-size:0.62rem; opacity:0.8; font-weight:600; }
 /* ثيم أخضر زمردي */
 body.theme-emerald { --accent-color:#3FB984; --accent-light:#6FE3B0; }
+
+/* ===== أزرار المهام + ثيمات إضافية ===== */
+.ch-claim { background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; border:none; border-radius:10px; padding:7px 13px; font-weight:800; font-size:0.78rem; cursor:pointer; font-family:'Tajawal','Cairo',sans-serif; white-space:nowrap; }
+.ch-claim:active { transform:scale(0.94); }
+.ch-pts.done { color:#22c55e; }
+body.theme-night { --accent-color:#5B8DEF; --accent-light:#8FB4FF; }
+body.theme-rose  { --accent-color:#E08CA8; --accent-light:#F5B5CC; }
+
+/* ===== الوضع النهاري: ضمان وضوح كل العناصر الجديدة ===== */
+body.light-mode .pts-entry { background:linear-gradient(135deg, rgba(197,160,89,0.16), rgba(242,210,122,0.08)); }
+body.light-mode .pe-txt, body.light-mode .ch-name, body.light-mode .rw-name { color:var(--text-main); }
+body.light-mode .pe-txt b, body.light-mode .asc-main, body.light-mode .pts-sec-title, body.light-mode .gm-name { color:#9a6f12; }
+body.light-mode .ch-task { background:#FBF6EC; }
+body.light-mode .ch-task.done { background:rgba(34,150,80,0.1); }
+body.light-mode .rw-item { background:#FBF6EC; }
+body.light-mode .rw-item:not(.ok) { background:#F3EFE6; }
+body.light-mode .ath-shortcut-card { background:linear-gradient(135deg, rgba(13,90,70,0.12), rgba(197,160,89,0.14)); }
+body.light-mode .asc-label, body.light-mode .pts-explain, body.light-mode .pts-sub, body.light-mode .rw-left, body.light-mode .pts-sec-title span { color:#6b5d49; }
+body.light-mode .hm-cell { background:rgba(0,0,0,0.06); }
+body.light-mode .group-mem-block { background:#FBF6EC; }
+body.light-mode .gm-juz-chips .juz-chip { background:#fff; color:var(--text-main); }
+body.light-mode .sunan-cat-title, body.light-mode .sunan-item-title { color:var(--text-main); }
+body.light-mode .ch-name, body.light-mode .pe-txt { font-weight:700; }
+/* الهيرو يبقى داكناً فخماً حتى في الوضع النهاري (مقصود) — نصّه فاتح ومقروء */
