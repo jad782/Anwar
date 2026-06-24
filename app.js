@@ -122,8 +122,12 @@ window.goToTab = function(index) {
     navButtons.forEach(btn => btn.classList.remove('active'));
     navButtons[index].classList.add('active');
     tabSections.forEach(section => section.style.display = 'none');
-    tabSections[index].style.display = 'block';
+    const active = tabSections[index];
+    active.style.display = 'block';
+    // حركة دخول احترافية ناعمة
+    active.classList.remove('tab-enter-anim'); void active.offsetWidth; active.classList.add('tab-enter-anim');
     pageTitle.innerText = titles[index];
+    const ca = document.querySelector('.content-area'); if(ca) ca.scrollTo({top:0, behavior:'auto'});
     window.scrollTo(0,0);
 };
 
