@@ -655,3 +655,54 @@ body.light-mode .tj-madd { color: #c0392b; } body.light-mode .tj-ghunnah { color
 .sunan-item-txt { flex:1; display:flex; flex-direction:column; gap:4px; }
 .sunan-item-title { font-weight:600; font-size:0.95rem; line-height:1.5; }
 .sunan-item-note { font-size:0.82rem; color:var(--text-soft,#9a8f7a); line-height:1.6; }
+
+/* ===== نقاط الأنوار + المحفظة الروحانية ===== */
+.pt-toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(20px); background: linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; font-weight:800; padding:11px 22px; border-radius:30px; box-shadow:0 8px 24px rgba(0,0,0,0.4); z-index:2000; opacity:0; transition:.35s; pointer-events:none; font-family:'Tajawal','Cairo',sans-serif; }
+.pt-toast.show { opacity:1; transform: translateX(-50%) translateY(0); }
+.sp-portfolio { position:relative; overflow:hidden; background:linear-gradient(135deg, rgba(46,37,21,0.92), rgba(20,17,11,0.97)); border:1px solid rgba(197,160,89,0.4); border-radius:22px; padding:18px; margin:18px 0 14px; box-shadow:0 8px 28px rgba(0,0,0,0.4), inset 0 1px 0 rgba(242,210,122,0.2); }
+.sp-glow { position:absolute; top:-50%; left:-30%; width:55%; height:200%; background:linear-gradient(115deg,transparent,rgba(242,210,122,0.12),transparent); transform:skewX(-18deg); animation:ghcShine 5s ease-in-out infinite; pointer-events:none; }
+.sp-top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.sp-label { font-size:0.78rem; color:var(--text-soft,#9a8f7a); }
+.sp-balance { font-size:2rem; font-weight:800; color:var(--accent-light,#F2D27A); line-height:1.1; margin:2px 0; }
+.sp-balance i { font-size:1.3rem; }
+.sp-usd { font-size:0.72rem; color:var(--text-muted); }
+.sp-stats { display:flex; gap:10px; }
+.sp-stat { text-align:center; background:rgba(255,255,255,0.05); border-radius:12px; padding:8px 10px; min-width:54px; }
+.sp-stat b { display:block; color:var(--cream,#F2EAD9); font-size:1.05rem; }
+.sp-stat span { font-size:0.66rem; color:var(--text-muted); }
+.sp-hm-title { font-size:0.78rem; color:var(--text-soft,#9a8f7a); margin:14px 0 8px; }
+.hm-grid { display:grid; grid-template-columns:repeat(12,1fr); grid-auto-flow:row; gap:4px; direction:ltr; }
+.hm-cell { aspect-ratio:1; border-radius:3px; background:rgba(255,255,255,0.06); }
+.hm-l1 { background:rgba(197,160,89,0.35); } .hm-l2 { background:rgba(197,160,89,0.6); }
+.hm-l3 { background:rgba(242,210,122,0.8); } .hm-l4 { background:#F2D27A; box-shadow:0 0 6px rgba(242,210,122,0.6); }
+.sp-actions { display:flex; gap:10px; margin-top:14px; }
+.sp-btn { flex:1; padding:11px; border-radius:14px; border:1px solid var(--border-color); background:rgba(255,255,255,0.05); color:var(--cream,#F2EAD9); font-weight:700; cursor:pointer; font-family:'Tajawal','Cairo',sans-serif; font-size:0.85rem; }
+.sp-btn.gold { background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; border:none; }
+.sp-btn.dim { opacity:0.5; }
+
+/* اختصار الأذكار حسب الوقت */
+.ath-shortcut-card { display:flex; align-items:center; gap:13px; background:linear-gradient(135deg, rgba(13,59,46,0.25), rgba(197,160,89,0.12)); border:1px solid rgba(197,160,89,0.4); border-radius:18px; padding:14px 16px; margin-bottom:18px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.3); transition:.2s; }
+.ath-shortcut-card:active { transform:scale(0.98); }
+.asc-ico { width:46px; height:46px; flex:0 0 auto; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(242,210,122,0.18); color:var(--accent-light,#F2D27A); font-size:1.3rem; box-shadow:0 0 14px rgba(242,210,122,0.3); }
+.asc-txt { flex:1; display:flex; flex-direction:column; }
+.asc-label { font-size:0.74rem; color:var(--text-soft,#9a8f7a); }
+.asc-main { font-size:1.1rem; font-weight:800; color:var(--accent-light,#F2D27A); font-family:'Amiri',serif; }
+.asc-go { color:var(--accent-color); opacity:0.7; }
+
+/* التبرّع + الاشتراك */
+.donate-amount { text-align:center; font-size:1.3rem; font-weight:800; color:var(--accent-light,#F2D27A); margin:6px 0 14px; }
+.dn-field { display:block; margin-bottom:12px; }
+.dn-field span { display:block; font-size:0.8rem; color:var(--text-soft,#9a8f7a); margin-bottom:5px; }
+.plan-compare { width:100%; border-collapse:collapse; margin-bottom:16px; font-size:0.85rem; }
+.plan-compare th, .plan-compare td { padding:9px 8px; border-bottom:1px solid var(--border-color); text-align:center; }
+.plan-compare td:first-child, .plan-compare th:first-child { text-align:right; }
+.plan-compare .pc-pro { color:var(--accent-light,#F2D27A); font-weight:800; }
+.plan-compare .pc-free { color:var(--text-muted); }
+.plan-prices { display:flex; gap:10px; }
+.plan-card { position:relative; flex:1; padding:16px 10px; border-radius:16px; border:1px solid var(--border-color); background:rgba(255,255,255,0.05); color:var(--cream,#F2EAD9); cursor:pointer; display:flex; flex-direction:column; gap:4px; align-items:center; }
+.plan-card.best { border-color:var(--accent-color); background:linear-gradient(135deg, rgba(242,210,122,0.14), rgba(197,160,89,0.08)); box-shadow:0 0 14px rgba(197,160,89,0.25); }
+.pp-badge { position:absolute; top:-10px; background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; font-size:0.62rem; font-weight:800; padding:3px 10px; border-radius:20px; }
+.pp-name { font-size:0.85rem; color:var(--text-soft,#9a8f7a); }
+.pp-price { font-size:1.4rem; font-weight:800; color:var(--accent-light,#F2D27A); }
+.pp-price small { font-size:0.7rem; color:var(--text-muted); font-weight:500; }
+.pw-crown { width:64px; height:64px; margin:0 auto; border-radius:50%; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; font-size:1.7rem; box-shadow:0 0 22px rgba(242,210,122,0.5); }
