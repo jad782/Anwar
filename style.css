@@ -706,3 +706,41 @@ body.light-mode .tj-madd { color: #c0392b; } body.light-mode .tj-ghunnah { color
 .pp-price { font-size:1.4rem; font-weight:800; color:var(--accent-light,#F2D27A); }
 .pp-price small { font-size:0.7rem; color:var(--text-muted); font-weight:500; }
 .pw-crown { width:64px; height:64px; margin:0 auto; border-radius:50%; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; font-size:1.7rem; box-shadow:0 0 22px rgba(242,210,122,0.5); }
+
+/* ===== اختصار النقاط الصغير + صفحة النقاط ===== */
+.pts-entry { display:flex; align-items:center; gap:11px; background:linear-gradient(135deg, rgba(197,160,89,0.14), rgba(242,210,122,0.06)); border:1px solid rgba(197,160,89,0.35); border-radius:16px; padding:11px 14px; margin-bottom:18px; cursor:pointer; transition:.2s; }
+.pts-entry:active { transform:scale(0.98); }
+.pe-ico { width:38px; height:38px; flex:0 0 auto; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(242,210,122,0.18); color:var(--accent-light,#F2D27A); box-shadow:0 0 10px rgba(242,210,122,0.25); }
+.pe-txt { flex:1; font-size:0.9rem; color:var(--cream,#F2EAD9); }
+.pe-txt b { color:var(--accent-light,#F2D27A); font-size:1.05rem; }
+.pe-go { color:var(--accent-color); opacity:0.7; }
+
+.pts-hero { position:relative; overflow:hidden; text-align:center; background:linear-gradient(135deg, rgba(46,37,21,0.92), rgba(20,17,11,0.97)); border:1px solid rgba(197,160,89,0.4); border-radius:18px; padding:18px; margin-bottom:14px; }
+.pts-glow { position:absolute; top:-50%; left:-30%; width:55%; height:200%; background:linear-gradient(115deg,transparent,rgba(242,210,122,0.14),transparent); transform:skewX(-18deg); animation:ghcShine 5s ease-in-out infinite; }
+.pts-bal { display:block; font-size:2.2rem; font-weight:800; color:var(--accent-light,#F2D27A); }
+.pts-sub { font-size:0.76rem; color:var(--text-muted); }
+.pts-explain { font-size:0.82rem; color:var(--text-soft,#9a8f7a); line-height:1.7; margin-bottom:14px; text-align:center; }
+.pts-sec-title { display:flex; justify-content:space-between; align-items:center; font-weight:800; color:var(--accent-light,#F2D27A); margin:16px 0 9px; font-size:0.95rem; }
+.pts-sec-title span { font-size:0.78rem; color:var(--text-muted); font-weight:700; }
+.ch-task { display:flex; align-items:center; gap:11px; background:rgba(255,255,255,0.04); border:1px solid var(--border-color); border-radius:13px; padding:11px 13px; margin-bottom:8px; cursor:pointer; transition:.2s; }
+.ch-task.done { background:rgba(34,197,94,0.08); border-color:rgba(34,197,94,0.4); }
+.ch-task.locked { opacity:0.6; }
+.ch-ico { width:34px; height:34px; flex:0 0 auto; border-radius:9px; display:flex; align-items:center; justify-content:center; background:rgba(197,160,89,0.14); color:var(--accent-color); }
+.ch-name { flex:1; font-size:0.9rem; color:var(--cream,#F2EAD9); }
+.ch-pts { font-weight:800; color:var(--accent-light,#F2D27A); font-size:0.85rem; min-width:30px; text-align:center; }
+.ch-task.done .ch-pts { color:#22c55e; }
+.pts-upsell { display:flex; align-items:center; gap:8px; background:linear-gradient(135deg, rgba(242,210,122,0.14), rgba(197,160,89,0.06)); border:1px dashed rgba(242,210,122,0.5); color:var(--accent-light,#F2D27A); border-radius:13px; padding:11px 13px; margin:4px 0 6px; font-size:0.82rem; font-weight:700; cursor:pointer; }
+.rw-item { display:flex; align-items:center; gap:11px; padding:10px 13px; border-radius:13px; border:1px solid var(--border-color); margin-bottom:8px; opacity:0.6; }
+.rw-item.ok { opacity:1; background:rgba(197,160,89,0.07); }
+.rw-ico { width:34px; height:34px; flex:0 0 auto; border-radius:9px; display:flex; align-items:center; justify-content:center; background:rgba(242,210,122,0.16); color:var(--accent-light,#F2D27A); }
+.rw-name { flex:1; font-size:0.88rem; color:var(--cream,#F2EAD9); }
+.rw-need { font-size:0.76rem; color:var(--text-muted); font-weight:700; }
+.rw-done { color:#22c55e; }
+.rw-btn { padding:6px 14px; border-radius:10px; border:1px solid var(--accent-color); background:transparent; color:var(--accent-color); font-weight:700; cursor:pointer; font-size:0.78rem; font-family:'Tajawal','Cairo',sans-serif; }
+.rw-btn.on { background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; border:none; }
+
+/* خطوط المصحف القابلة للفتح */
+body.qfont-naskh .ayah, body.qfont-naskh .mushaf-ayah, body.qfont-naskh .ayah-day-text, body.qfont-naskh #mini-reader-body { font-family:'Noto Naskh Arabic','Amiri',serif !important; }
+body.qfont-othmani .ayah, body.qfont-othmani .mushaf-ayah, body.qfont-othmani .ayah-day-text, body.qfont-othmani #mini-reader-body { font-family:'Scheherazade New','Amiri',serif !important; }
+/* ثيم ذهبي ملكي */
+body.theme-royal { --accent-color:#E6BE5C; --accent-light:#FFD97A; }
