@@ -65,7 +65,7 @@ MUSHAF.renderJuzList = function(){
 // =======================================================
 // قارئ الصفحة (سحب صفحة-صفحة)
 // =======================================================
-let curPage = 1, tajOn = false;
+let curPage = 1, tajOn = false, _turnDir = 0;
 const _origScroll = window.openFreeReading;     // القارئ التفصيلي القديم (للمزايا)
 window.openFreeReadingScroll = _origScroll;
 
@@ -119,14 +119,16 @@ async function renderPage(page){
         </div>`;
     if (typeof applyReadingBg==='function') applyReadingBg();
     document.querySelector('.content-area').scrollTop = 0;
+    const _pg = cont.querySelector('.mushaf-page');
+    if (_pg && _turnDir){ _pg.classList.add(_turnDir>0?'pg-turn-next':'pg-turn-prev'); _turnDir=0; }
     window.CUR_READ = { type:'surah', num: ayahs[0].s, name: mainName, page };
     bindSwipe(cont);
     try{ localStorage.setItem('last_read', JSON.stringify({type:'page', num:page, name:'سورة '+mainName, ts:Date.now()})); }catch(e){}
     if (window.PRO2 && PRO2.checkBadges) setTimeout(()=>PRO2.checkBadges(), 50);
 }
 // في المصحف: الصفحة التالية على اليسار (سحب لليسار)، والسابقة على اليمين
-MUSHAF.next = function(){ if(curPage<604){ curPage++; renderPage(curPage); } };
-MUSHAF.prev = function(){ if(curPage>1){ curPage--; renderPage(curPage); } };
+MUSHAF.next = function(){ if(curPage<604){ _turnDir=1; curPage++; renderPage(curPage); } };
+MUSHAF.prev = function(){ if(curPage>1){ _turnDir=-1; curPage--; renderPage(curPage); } };
 MUSHAF.toggleTajweed = function(){ tajOn=!tajOn; const b=$('msf-taj'); if(b)b.classList.toggle('active',tajOn); renderPage(curPage); };
 MUSHAF.detailed = function(){ // افتح القارئ التفصيلي (صوت/ترجمة/تسجيل) للسورة الحالية
     const n = (window.CUR_READ&&window.CUR_READ.num)||1;

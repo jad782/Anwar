@@ -183,6 +183,32 @@ window.renderPointsPage = function(){
 };
 window.AnwarPoints2 = { open:function(){ ensureModal('points-modal', tr('نقاط الأنوار','PlusPoints')); renderPointsPage(); $('points-modal').classList.add('active'); } };
 
+// ---------- حسابي (ملف محلي — بلا تسجيل) ----------
+window.AnwarProfile = {
+    open:function(){
+        ensureModal('profile-modal', tr('حسابي','My Account'));
+        const p=loadPts(); const name=localStorage.getItem('anwar_name')||'';
+        const badge=isActive('badge');
+        const activeRewards=REWARDS.filter(r=>r.type==='rent'&&isActive(r.id)).map(r=>`<span class="prof-chip">${L()==='en'?r.en:r.ar} · ${daysLeft(r.id)}${tr('ي','d')}</span>`).join('') || `<span style="color:var(--text-muted);font-size:0.82rem;">${tr('لا مكافآت مؤقتة مفعّلة','No active rewards')}</span>`;
+        $('profile-modal-body').innerHTML=`
+          <div class="prof-head">
+            <div class="prof-avatar"><i class="fa-solid fa-user"></i></div>
+            <input id="prof-name" class="modal-input" style="text-align:center;margin:10px 0 4px;" placeholder="${tr('اكتب اسمك (اختياري)','Your name (optional)')}" value="${name.replace(/"/g,'&quot;')}" onchange="AnwarProfile.save()">
+            ${badge?`<div class="member-badge"><i class="fa-solid fa-medal"></i> ${tr('عضو الأنوار','Anwar Member')}</div>`:`<span style="color:var(--text-muted);font-size:0.78rem;">${tr('افتح شارة العضوية من المتجر','Unlock the member badge in the store')}</span>`}
+          </div>
+          <div class="prof-stats">
+            <div class="prof-stat"><b>${p.balance}</b><span>${tr('نقاطك','Points')}</span></div>
+            <div class="prof-stat"><b>${p.lifetime||0}</b><span>${tr('الإجمالي','Lifetime')}</span></div>
+            <div class="prof-stat"><b>${localStorage.getItem('streak_count')||0}</b><span>${tr('سلسلة','Streak')}</span></div>
+          </div>
+          <div class="pts-sec-title">${tr('مكافآتك المفعّلة','Active rewards')}</div>
+          <div class="prof-rewards">${activeRewards}</div>
+          <button class="tasbeeh-pill" style="width:100%;margin-top:14px;" onclick="document.getElementById('profile-modal').classList.remove('active');AnwarPoints2.open();"><i class="fa-solid fa-star"></i> ${tr('النقاط والمكافآت','Points & rewards')}</button>`;
+        $('profile-modal').classList.add('active');
+    },
+    save:function(){ const v=($('prof-name')||{}).value||''; localStorage.setItem('anwar_name', v.trim()); }
+};
+
 // ---------- اختصار صغير ----------
 window.renderPointsEntry = function(){
     const host=$('points-entry'); if(!host) return;
@@ -242,9 +268,12 @@ function inject(){
     }
     applyVisual(); renderAll();
     try{ const list=document.querySelector('#tab-settings .settings-list');
+        if(list && !$('account-row')){ const ar=document.createElement('div'); ar.className='setting-item'; ar.id='account-row';
+            ar.innerHTML=`<span class="set-ico"><i class="fa-solid fa-circle-user"></i></span><span class="set-label">${tr('حسابي','My Account')}</span><i class="fa-solid fa-chevron-left ath-chevron"></i>`;
+            ar.onclick=()=>AnwarProfile.open(); list.insertBefore(ar, list.firstChild); }
         if(list && !$('points-row')){ const row=document.createElement('div'); row.className='setting-item'; row.id='points-row';
             row.innerHTML=`<span class="set-ico"><i class="fa-solid fa-star"></i></span><span class="set-label">${tr('نقاط الأنوار والمكافآت','PlusPoints & rewards')}</span><i class="fa-solid fa-chevron-left ath-chevron"></i>`;
-            row.onclick=()=>AnwarPoints2.open(); list.appendChild(row); }
+            row.onclick=()=>AnwarPoints2.open(); if($('account-row')) list.insertBefore(row, $('account-row').nextSibling); else list.appendChild(row); }
     }catch(e){}
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', ()=>setTimeout(inject,800));
