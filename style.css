@@ -636,7 +636,10 @@ body.light-mode .tj-madd { color: #c0392b; } body.light-mode .tj-ghunnah { color
 
 /* ===== بوصلة القبلة ===== */
 .compass-circle { position: relative; }
-.compass-rose { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.compass-rose { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; transform-origin: center center; transition: transform 0.12s linear; will-change: transform; }
+/* مؤشّر القبلة الثابت بأعلى البوصلة */
+.qibla-top-pointer { position: absolute; top: -4px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 11px solid transparent; border-right: 11px solid transparent; border-top: 16px solid var(--accent-light, #F2D27A); z-index: 5; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); transition: border-top-color 0.3s; }
+.qibla-top-pointer.al { border-top-color: #22c55e; }
 .compass-rose .cr-card { fill: var(--accent-color); font-family: 'Tajawal', sans-serif; font-weight: 800; font-size: 15px; text-anchor: middle; dominant-baseline: middle; opacity: 0.85; }
 .compass-rose .cr-n { fill: #F2D27A; font-size: 17px; }
 .compass-kaaba { position: absolute; top: 50%; left: 50%; transform-origin: center center; transform: translate(-50%, -50%) translateY(-92px); font-size: 1.4rem; transition: transform 0.15s ease-out; filter: drop-shadow(0 0 4px rgba(212,168,67,0.5)); z-index: 3; }

@@ -486,7 +486,7 @@ window.requestCompassPermission = function() {
 }
 
 function startCompass() {
-    _smoothRot = null;
+    _smoothHeading = null;
     if (_orientationBound) return;
     if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', handleOrientation, true);
     else window.addEventListener('deviceorientation', handleOrientation, true);
@@ -500,38 +500,51 @@ window.closeQibla = function() {
     _orientationBound = false;
 }
 
-let _smoothRot = null; // زاوية مُنعّمة لتفادي الاهتزاز
+let _smoothHeading = null; // اتجاه الشمال المُنعّم لتفادي الاهتزاز
 function handleOrientation(e) {
-    // اتجاه الجهاز بالنسبة للشمال
+    // اتجاه أعلى الهاتف بالنسبة للشمال الحقيقي
     let heading;
-    if (typeof e.webkitCompassHeading === 'number') heading = e.webkitCompassHeading; // iOS
-    else if (e.absolute && typeof e.alpha === 'number') heading = 360 - e.alpha;
-    else if (typeof e.alpha === 'number') heading = 360 - e.alpha;
-    else return;
+    if (typeof e.webkitCompassHeading === 'number') {
+        heading = e.webkitCompassHeading;            // iOS: شمال حقيقي جاهز
+    } else if (typeof e.alpha === 'number') {
+        // أندرويد/غيره: عوّض دوران الشاشة
+        const so = (screen.orientation && typeof screen.orientation.angle === 'number')
+                   ? screen.orientation.angle : (window.orientation || 0);
+        heading = (360 - e.alpha + so) % 360;
+    } else return;
     if (qiblaBearing === null) return;
-    const target = (qiblaBearing - heading + 360) % 360;
-    // تنعيم بأقصر مسار زاوي (يمنع القفز عند 0/360)
-    if (_smoothRot === null) _smoothRot = target;
+
+    // تنعيم اتجاه الشمال بأقصر مسار زاوي (يمنع القفز عند 0/360 والاهتزاز)
+    if (_smoothHeading === null) _smoothHeading = heading;
     else {
-        let diff = ((target - _smoothRot + 540) % 360) - 180; // [-180,180]
-        if (Math.abs(diff) < 0.8) diff = 0;                    // تجاهل الاهتزاز الطفيف
-        _smoothRot = (_smoothRot + diff * 0.18 + 360) % 360;   // مرشّح منخفض التردد
+        let diff = ((heading - _smoothHeading + 540) % 360) - 180; // [-180,180]
+        if (Math.abs(diff) < 0.5) diff = 0;
+        _smoothHeading = (_smoothHeading + diff * 0.2 + 360) % 360;
     }
-    const rotation = _smoothRot;
-    const arrow = document.getElementById('compass-arrow');
+    const h = _smoothHeading;
+    // زاوية القبلة على الشاشة (موضع الكعبة بالنسبة لأعلى الهاتف)
+    const target = (qiblaBearing - h + 360) % 360;
+    const aligned = (target < 6 || target > 354);
+
+    // القرص يدور ليُظهر الشمال الحقيقي (بوصلة حقيقية)
+    const rose = document.getElementById('compass-rose');
+    if (rose) rose.style.transform = `rotate(${-h}deg)`;
+    // الكعبة تدور على حافة القرص عند اتجاه القبلة وتبقى منتصبة
     const kaaba = document.getElementById('compass-kaaba');
-    if (arrow) arrow.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
-    // الكعبة تدور على حافة البوصلة وتبقى منتصبة
-    if (kaaba) kaaba.style.transform = `translate(-50%, -50%) rotate(${rotation}deg) translateY(-92px) rotate(${-rotation}deg)`;
-    const aligned = (rotation < 5 || rotation > 355);
-    if (arrow) arrow.classList.toggle('al', aligned);
+    if (kaaba) kaaba.style.transform = `translate(-50%, -50%) rotate(${target}deg) translateY(-92px) rotate(${-target}deg)`;
+    // المؤشّر الثابت بالأعلى يتوهّج أخضر عند المحاذاة
+    const arrow = document.getElementById('compass-arrow');
+    if (arrow){ arrow.style.transform = `translate(-50%, -50%) rotate(${target}deg)`; arrow.classList.toggle('al', aligned); }
+    const topPtr = document.getElementById('qibla-top-pointer');
+    if (topPtr) topPtr.classList.toggle('al', aligned);
+
     const deg = document.getElementById('qibla-degree');
     if (deg) deg.innerText = Math.round(qiblaBearing) + '°' + (aligned ? ' ✓' : '');
     const banner = document.getElementById('qibla-banner');
-    if (banner){ banner.classList.toggle('aligned', aligned); banner.querySelector('span').innerText = aligned ? (currentLang==='en'?'Correct Qibla direction ✓':'الاتجاه الصحيح للقبلة ✓') : (currentLang==='en'?'Point the arrow up ☝':'وجّه السهم نحو الأعلى ☝'); }
-    // بوصلة الكاميرا (AR)
+    if (banner){ banner.classList.toggle('aligned', aligned); banner.querySelector('span').innerText = aligned ? (currentLang==='en'?'You are facing the Qibla ✓':'أنت تواجه القبلة ✓') : (currentLang==='en'?'Turn until the Kaaba reaches the top ☝':'أدِر الهاتف حتى تصل الكعبة للمؤشّر ☝'); }
+    // بوصلة الكاميرا (AR): السهم يشير لاتجاه القبلة
     const arArrow = document.getElementById('ar-arrow');
-    if (arArrow){ arArrow.style.transform = `rotate(${rotation}deg)`; arArrow.style.filter = aligned ? 'drop-shadow(0 0 12px #22c55e)' : 'none'; }
+    if (arArrow){ arArrow.style.transform = `rotate(${target}deg)`; arArrow.style.filter = aligned ? 'drop-shadow(0 0 12px #22c55e)' : 'none'; }
     const arDeg = document.getElementById('ar-deg');
     if (arDeg) arDeg.innerText = Math.round(qiblaBearing) + '° • ' + (aligned ? (currentLang==='en'?'Aligned ✓':'محاذاة ✓') : (currentLang==='en'?'Turn the phone':'أدر الهاتف'));
 }
