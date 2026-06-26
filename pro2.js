@@ -359,7 +359,8 @@ function injectExtras(){
     }
 }
 PRO2.shareApp = function(){ const msg=tr('حمّل تطبيق الأنوار الإسلامي 🌙','Get Al-Anwar Islamic app 🌙'); if(navigator.share) navigator.share({title:'الأنوار',text:msg}).catch(()=>{}); else { try{navigator.clipboard.writeText(msg);}catch(e){} alert(tr('تم نسخ رسالة المشاركة.','Share text copied.')); } };
-PRO2.rateApp = function(){ alert(tr('شكراً لك! سيتوفّر التقييم بعد نشر التطبيق على المتجر.','Thank you! Rating opens after the app is published.')); };
+PRO2.rateApp = function(){ try{ window.open('https://apps.apple.com/app/id6782741099?action=write-review','_blank'); }catch(e){} };
+PRO2.openSocial = function(){ try{ window.open('https://www.instagram.com/jad.s.a.y','_blank'); }catch(e){} };
 PRO2.reportProblem = function(){ const u='https://wa.me/905551517264?text='+encodeURIComponent(tr('السلام عليكم، لديّ ملاحظة على تطبيق الأنوار:','Feedback on Al-Anwar app:')); window.open(u,'_blank'); };
 PRO2.openAbout = function(){ alert(tr('تطبيق الأنوار الإسلامي\nمصحف أوفلاين + أذكار وأدعية + ختمات + قبلة + تنبيهات أذان.\nالإصدار 1.0','Al-Anwar Islamic App\nOffline Quran + Athkar + Khatmas + Qibla + Athan.\nVersion 1.0')); };
 PRO2.openPrivacy = function(){

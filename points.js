@@ -184,7 +184,14 @@ window.renderPointsPage = function(){
 window.AnwarPoints2 = { open:function(){ ensureModal('points-modal', tr('نقاط الأنوار','PlusPoints')); renderPointsPage(); $('points-modal').classList.add('active'); } };
 
 // ---------- حسابي (ملف محلي — بلا تسجيل) ----------
+function amRow(ico, ar, en, onclick, isNew){
+    return `<div class="am-row" onclick="${onclick}">
+        <span class="am-ico"><i class="fa-solid ${ico}"></i></span>
+        <span class="am-label">${L()==='en'?en:ar}${isNew?` <span class="am-new">${tr('جديد','NEW')}</span>`:''}</span>
+        <i class="fa-solid fa-chevron-left am-go"></i></div>`;
+}
 window.AnwarProfile = {
+    _toSettings:function(){ const m=$('profile-modal'); if(m) m.classList.remove('active'); if(typeof goToTab==='function') goToTab(3); },
     open:function(){
         ensureModal('profile-modal', tr('حسابي','My Account'));
         const p=loadPts(); const name=localStorage.getItem('anwar_name')||'';
@@ -203,7 +210,21 @@ window.AnwarProfile = {
           </div>
           <div class="pts-sec-title">${tr('مكافآتك المفعّلة','Active rewards')}</div>
           <div class="prof-rewards">${activeRewards}</div>
-          <button class="tasbeeh-pill" style="width:100%;margin-top:14px;" onclick="document.getElementById('profile-modal').classList.remove('active');AnwarPoints2.open();"><i class="fa-solid fa-star"></i> ${tr('النقاط والمكافآت','Points & rewards')}</button>`;
+          <div class="pts-sec-title">${tr('حسابي والإعدادات','Account & settings')}</div>
+          ${amRow('fa-star','نقاط الأنوار والمكافآت','Points & rewards',"AnwarPoints2.open()",true)}
+          ${amRow('fa-chart-simple','إحصائياتي الروحية','My spiritual stats',"window.QA&&QA.openStats&&QA.openStats()",true)}
+          ${amRow('fa-table-cells-large','تخصيص الصفحة الرئيسية','Customize home',"window.PRO2&&PRO2.openCustomizeHome()")}
+          ${amRow('fa-mosque','إعدادات مواقيت الصلاة','Prayer time settings',"AnwarProfile._toSettings()")}
+          ${amRow('fa-bell','إعدادات التنبيهات','Notification settings',"AnwarProfile._toSettings()")}
+          ${amRow('fa-globe','الواجهة واللغة','Interface & language',"AnwarProfile._toSettings()")}
+          ${amRow('fa-circle-info','عن التطبيق','About',"window.PRO2&&PRO2.openAbout()")}
+          ${amRow('fa-shield-halved','سياسة الخصوصية','Privacy policy',"window.PRO2&&PRO2.openPrivacy()")}
+          ${amRow('fa-share-nodes','تابعنا على إنستغرام','Follow us',"window.PRO2&&PRO2.openSocial()")}
+          ${amRow('fa-triangle-exclamation','الإبلاغ عن خلل / اقتراح','Report a problem',"window.PRO2&&PRO2.reportProblem()")}
+          <div class="prof-actions">
+            <button class="prof-act" onclick="window.PRO2&&PRO2.shareApp()"><i class="fa-solid fa-share-from-square"></i> ${tr('شارك التطبيق','Share')}</button>
+            <button class="prof-act gold" onclick="window.PRO2&&PRO2.rateApp()"><i class="fa-solid fa-star"></i> ${tr('قيّم التطبيق','Rate')}</button>
+          </div>`;
         $('profile-modal').classList.add('active');
     },
     save:function(){ const v=($('prof-name')||{}).value||''; localStorage.setItem('anwar_name', v.trim()); }

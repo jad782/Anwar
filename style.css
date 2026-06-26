@@ -812,3 +812,15 @@ body.readbg-night #ayahs-container, body.readbg-night .mushaf-page, body.readbg-
 .prof-rewards { display:flex; flex-wrap:wrap; gap:7px; }
 .prof-chip { background:rgba(197,160,89,0.12); border:1px solid rgba(197,160,89,0.35); color:var(--accent-light,#F2D27A); border-radius:18px; padding:5px 12px; font-size:0.78rem; font-weight:700; }
 body.light-mode .prof-stat b, body.light-mode .prof-chip { color:#9a6f12; }
+
+/* قائمة حسابي */
+.am-row { display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:14px; background:rgba(197,160,89,0.06); border:1px solid var(--border-color); margin-bottom:8px; cursor:pointer; transition:.15s; }
+.am-row:active { background:rgba(197,160,89,0.16); }
+.am-ico { width:34px; height:34px; flex:0 0 auto; border-radius:10px; display:flex; align-items:center; justify-content:center; background:rgba(242,210,122,0.15); color:var(--accent-color); }
+.am-label { flex:1; font-size:0.92rem; font-weight:700; color:var(--cream,#F2EAD9); }
+.am-new { font-size:0.6rem; background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; padding:2px 7px; border-radius:10px; margin-inline-start:6px; vertical-align:middle; }
+.am-go { color:var(--accent-color); opacity:0.6; }
+.prof-actions { display:flex; gap:10px; margin-top:14px; }
+.prof-act { flex:1; padding:12px; border-radius:14px; border:1px solid var(--border-color); background:rgba(255,255,255,0.05); color:var(--cream,#F2EAD9); font-weight:800; cursor:pointer; font-family:'Tajawal','Cairo',sans-serif; font-size:0.85rem; }
+.prof-act.gold { background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; border:none; }
+body.light-mode .am-label, body.light-mode .prof-act { color:var(--text-main); }
