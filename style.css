@@ -840,3 +840,5 @@ body.light-mode .key-label { color:#6b5d49; }
 .kc-ico { width:32px; height:32px; flex:0 0 auto; border-radius:9px; display:flex; align-items:center; justify-content:center; background:rgba(242,210,122,0.15); color:var(--accent-color); }
 .kc-name { flex:1; font-weight:700; font-size:0.9rem; color:var(--cream,#F2EAD9); }
 body.light-mode .kc-name { color:var(--text-main); }
+
+.support-status { text-align:center; font-size:0.8rem; color:var(--text-soft,#9a8f7a); margin:8px 0 4px; }

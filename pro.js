@@ -463,6 +463,7 @@ function initIAP(){
         SUPPORT_TIERS.forEach(t => store.register({ id:t.id, type:ProductType.CONSUMABLE, platform:Platform.APPLE_APPSTORE }));
         store.when().approved(tr2 => tr2.verify());
         store.when().verified(rc => { rc.finish(); if(typeof showBadgeToast==='function') showBadgeToast({emoji:'🤍', name:tr('جزاك الله خيراً','JazakAllah khayr'), desc:tr('شكراً لدعمك التطبيق','Thank you for your support')}); });
+        store.when().productUpdated(()=>{ try{ PRO._refreshDonatePrices && PRO._refreshDonatePrices(); }catch(e){} });
         store.initialize([Platform.APPLE_APPSTORE]);
         _iapReady = true;
     } catch(e){}
@@ -485,10 +486,30 @@ window.openDonate = function(){
             ${SUPPORT_TIERS.map(t=>`<button class="support-tier" onclick="PRO.support('${t.id}')">
                 <span class="st-emoji">${t.emoji}</span>
                 <span class="st-name">${L()==='en'?t.en:t.ar}</span>
-                <span class="st-price">${t.price}</span></button>`).join('')}
+                <span class="st-price" id="st-price-${t.id}">${t.price}</span></button>`).join('')}
         </div>
+        <p class="support-status" id="support-status"></p>
         <p class="support-note">${tr('الدفع يتم بأمان عبر حسابك في آبل (App Store).','Payment is processed securely via your Apple account.')}</p>`;
     $('donate-modal').classList.add('active');
+    PRO._refreshDonatePrices();
+};
+// يعرض السعر الحقيقي من آبل + مؤشّر اتصال المتجر (أداة تحقّق)
+PRO._refreshDonatePrices = function(){
+    const st = $('support-status'); let loaded = 0;
+    try {
+        const CdvPurchase = window.CdvPurchase;
+        if (CdvPurchase && _iapReady){
+            SUPPORT_TIERS.forEach(t=>{
+                const p = CdvPurchase.store.get(t.id, CdvPurchase.Platform.APPLE_APPSTORE);
+                const price = p && (p.pricing && p.pricing.price);
+                if (price){ loaded++; const el = $('st-price-'+t.id); if(el) el.textContent = price; }
+            });
+        }
+    } catch(e){}
+    if (st){
+        if (loaded > 0) st.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#22c55e"></i> ${tr('متّصل بمنتجات آبل ('+loaded+'/'+SUPPORT_TIERS.length+')','Connected to App Store ('+loaded+'/'+SUPPORT_TIERS.length+')')}`;
+        else st.innerHTML = `<i class="fa-solid fa-circle-info" style="color:#9aa0a6"></i> ${tr('سيظهر الدفع داخل نسخة App Store (TestFlight/المتجر).','Purchases appear in the App Store build (TestFlight/Store).')}`;
+    }
 };
 window.closeDonate = function(){ const m=$('donate-modal'); if(m) m.classList.remove('active'); };
 
