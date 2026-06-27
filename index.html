@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Al-Anwar">
     <title>تطبيق الأنوار الإسلامي</title>
-    <link rel="stylesheet" href="style.css?v=35">
+    <link rel="stylesheet" href="style.css?v=36">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@500;700&family=Scheherazade+New:wght@500;700&display=swap">
@@ -146,15 +146,10 @@
             </div>
 
             <div class="section-header" style="margin-top: 30px;">
-                <h3 data-i18n="your_apps">تطبيقاتك اليومية</h3>
+                <h3 data-i18n="your_apps">مفاتيح يومك</h3>
+                <button onclick="AnwarKeys.openCustomize()" class="tasbeeh-pill" style="width:auto; padding:6px 14px; font-size:0.82rem;"><i class="fa-solid fa-sliders" style="margin-left:5px;"></i><span data-i18n="customize">تخصيص</span></button>
             </div>
-            <div class="apps-scroll">
-                <div class="app-item" onclick="goToTab(2)"><div class="app-icon" style="background:rgba(197, 160, 89, 0.1); color:var(--accent-color);"><i class="fa-solid fa-ring"></i></div><span>المسبحة</span></div>
-                <div class="app-item" onclick="openQibla()"><div class="app-icon" style="background:rgba(13, 59, 46, 0.1); color:var(--primary-color);"><i class="fa-solid fa-compass"></i></div><span>القبلة</span></div>
-                <div class="app-item" onclick="goToTab(2)"><div class="app-icon" style="background:rgba(197, 160, 89, 0.1); color:var(--accent-color);"><i class="fa-solid fa-person-praying"></i></div><span>الأذكار</span></div>
-                <div class="app-item" onclick="goToTab(1)"><div class="app-icon" style="background:rgba(13, 59, 46, 0.1); color:var(--primary-color);"><i class="fa-solid fa-book-quran"></i></div><span>المصحف</span></div>
-                <div class="app-item" onclick="openSunan()"><div class="app-icon" style="background:rgba(197, 160, 89, 0.1); color:var(--accent-color);"><i class="fa-solid fa-star-and-crescent"></i></div><span>السنن</span></div>
-            </div>
+            <div class="apps-scroll keys-grid" id="keys-grid"></div>
 
             <a href="https://wa.me/905551517264?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%E2%80%8C%20%D8%A3%D9%88%D8%AF%20%D8%A7%D9%84%D8%AA%D8%A8%D8%B1%D8%B9" target="_blank" class="donate-card">
                 <div class="donate-icon"><i class="fa-brands fa-whatsapp"></i></div>
@@ -446,11 +441,12 @@
     <script src="firebase.js?v=1"></script>
     <script src="quran-data.js?v=1"></script>
     <script src="prayers.js?v=4"></script>
-    <script src="app.js?v=21"></script>
+    <script src="app.js?v=22"></script>
     <script src="features.js?v=16"></script>
     <script src="pro.js?v=10"></script>
     <script src="pro2.js?v=11"></script>
     <script src="points.js?v=7"></script>
+    <script src="keys.js?v=1"></script>
     <script src="sunan.js?v=1"></script>
     <script src="mushaf.js?v=4"></script>
     <script src="ambient.js?v=1"></script>

@@ -824,3 +824,19 @@ body.light-mode .prof-stat b, body.light-mode .prof-chip { color:#9a6f12; }
 .prof-act { flex:1; padding:12px; border-radius:14px; border:1px solid var(--border-color); background:rgba(255,255,255,0.05); color:var(--cream,#F2EAD9); font-weight:800; cursor:pointer; font-family:'Tajawal','Cairo',sans-serif; font-size:0.85rem; }
 .prof-act.gold { background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; border:none; }
 body.light-mode .am-label, body.light-mode .prof-act { color:var(--text-main); }
+
+/* ===== مفاتيح يومك (شبكة الاختصارات الذهبية) ===== */
+.apps-scroll.keys-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px 6px; overflow:visible; padding-bottom:0; }
+.key-tile { display:flex; flex-direction:column; align-items:center; gap:7px; cursor:pointer; transition:transform .15s; }
+.key-tile:active { transform:scale(0.92); }
+.key-circle { width:62px; height:62px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.45rem; color:var(--accent-light,#F2D27A); background:radial-gradient(circle at 50% 35%, rgba(242,210,122,0.18), rgba(46,37,21,0.9)); border:1px solid rgba(197,160,89,0.4); box-shadow:0 6px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(242,210,122,0.25); }
+.key-tile:active .key-circle { box-shadow:0 0 16px rgba(242,210,122,0.5), inset 0 1px 0 rgba(242,210,122,0.3); }
+.key-label { font-size:0.7rem; font-weight:700; color:var(--text-soft,#cbbfa6); text-align:center; line-height:1.3; }
+body.light-mode .key-circle { background:radial-gradient(circle at 50% 35%, #fff7e6, #f3ead4); color:#9a6f12; box-shadow:0 4px 12px rgba(0,0,0,0.06); }
+body.light-mode .key-label { color:#6b5d49; }
+/* صفوف تخصيص المفاتيح */
+.kc-row { display:flex; align-items:center; gap:10px; background:rgba(197,160,89,0.06); border:1px solid var(--border-color); border-radius:13px; padding:9px 12px; margin-bottom:8px; }
+.kc-move { display:flex; flex-direction:column; gap:3px; }
+.kc-ico { width:32px; height:32px; flex:0 0 auto; border-radius:9px; display:flex; align-items:center; justify-content:center; background:rgba(242,210,122,0.15); color:var(--accent-color); }
+.kc-name { flex:1; font-weight:700; font-size:0.9rem; color:var(--cream,#F2EAD9); }
+body.light-mode .kc-name { color:var(--text-main); }
