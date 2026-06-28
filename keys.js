@@ -32,7 +32,7 @@ const CATALOG = [
     { id:'group',    ar:'ختمة جماعية',      en:'Group Khatma',  ico:'fa-users',            act:"window.PRO&&PRO.openGroupKhatma()" },
     { id:'bookmarks',ar:'المفضّلة',         en:'Bookmarks',     ico:'fa-bookmark',         act:"window.PRO&&PRO.openBookmarks()" },
     { id:'radio',    ar:'إذاعة القرآن',     en:'Quran Radio',   ico:'fa-radio',            act:"toggleRadio()" },
-    { id:'cards',    ar:'بطاقات وتصاميم',   en:'Ayah Cards',    ico:'fa-wand-magic-sparkles',act:"shareAyahOfDay()" },
+    { id:'cards',    ar:'بطاقات وتصاميم',   en:'Ayah Cards',    ico:'fa-wand-magic-sparkles',act:"window.AnwarCards&&AnwarCards.open()" },
     { id:'points',   ar:'نقاط الأنوار',     en:'PlusPoints',    ico:'fa-star',             act:"window.AnwarPoints2&&AnwarPoints2.open()" },
     { id:'stats',    ar:'إحصائياتي',        en:'My Stats',      ico:'fa-chart-simple',     act:"window.QA&&QA.openStats&&QA.openStats()" },
     { id:'badges',   ar:'إنجازاتي',         en:'Badges',        ico:'fa-medal',            act:"window.PRO2&&PRO2.openBadges()" },

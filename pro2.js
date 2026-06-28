@@ -250,12 +250,67 @@ PRO2.openStory = function(){
     const a = window._lastAyah; if(!a){ return; }
     ensureStory();
     $('story-text').innerText = a.text || '';
-    $('story-ref').innerText = `﴿ ${tr('سورة','')} ${sN(a.surah)} : ${a.ayah} ﴾`;
+    $('story-ref').innerText = a.refText ? a.refText : `﴿ ${tr('سورة','')} ${sN(a.surah)} : ${a.ayah} ﴾`;
     const m=$('story-modal'); m.classList.add('active');
     // أعد تشغيل الأنيميشن
     const card=$('story-card'); card.style.animation='none'; void card.offsetWidth; card.style.animation='';
 };
 PRO2.closeStory = function(){ const m=$('story-modal'); if(m) m.classList.remove('active'); };
+
+// =======================================================
+// بطاقات وتصاميم — معرض آيات وأحاديث → صمّمها (لون/خلفية) واحفظها/انشرها
+// =======================================================
+const CARDS = [
+    // آيات قصيرة (مع مرجع سورة:آية)
+    {t:'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا', s:94, a:5},
+    {t:'وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ', s:53, a:39},
+    {t:'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ', s:13, a:28},
+    {t:'وَاللَّهُ يُحِبُّ الْمُحْسِنِينَ', s:3, a:134},
+    {t:'إِنَّ اللَّهَ مَعَ الصَّابِرِينَ', s:2, a:153},
+    {t:'وَقُل رَّبِّ زِدْنِي عِلْمًا', s:20, a:114},
+    {t:'فَاذْكُرُونِي أَذْكُرْكُمْ', s:2, a:152},
+    {t:'وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا', s:65, a:2},
+    {t:'وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ', s:57, a:4},
+    {t:'إِنَّ رَحْمَتَ اللَّهِ قَرِيبٌ مِّنَ الْمُحْسِنِينَ', s:7, a:56},
+    {t:'حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ', s:3, a:173},
+    {t:'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً', s:2, a:201},
+    // أحاديث قصيرة (مرجع نصّي)
+    {t:'الدِّينُ النَّصِيحَةُ', r:'رواه مسلم'},
+    {t:'مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ', r:'متفق عليه'},
+    {t:'لَا يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لِأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ', r:'متفق عليه'},
+    {t:'الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ', r:'متفق عليه'},
+    {t:'تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ صَدَقَةٌ', r:'رواه الترمذي'},
+    {t:'اتَّقِ اللَّهَ حَيْثُمَا كُنْتَ', r:'رواه الترمذي'},
+    {t:'الطُّهُورُ شَطْرُ الْإِيمَانِ', r:'رواه مسلم'},
+    {t:'إِنَّ اللَّهَ رَفِيقٌ يُحِبُّ الرِّفْقَ', r:'متفق عليه'},
+    {t:'مَنْ لَا يَرْحَمُ النَّاسَ لَا يَرْحَمُهُ اللَّهُ', r:'متفق عليه'},
+    {t:'الْكَلِمَةُ الطَّيِّبَةُ صَدَقَةٌ', r:'متفق عليه'},
+    {t:'خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ', r:'رواه البخاري'},
+    {t:'مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ طَرِيقًا إِلَى الْجَنَّةِ', r:'رواه مسلم'},
+];
+window.AnwarCards = {
+    open:function(){
+        let m=$('cards-modal');
+        if(!m){ m=document.createElement('div'); m.id='cards-modal'; m.className='qibla-overlay';
+            m.innerHTML=`<div class="qibla-modal" style="width:94%;max-width:460px;text-align:right;max-height:86vh;overflow-y:auto;">
+                <button class="close-qibla" onclick="document.getElementById('cards-modal').classList.remove('active')"><i class="fa-solid fa-xmark"></i></button>
+                <h2 style="color:var(--accent-color);margin-bottom:4px;text-align:center;"><i class="fa-solid fa-wand-magic-sparkles"></i> ${tr('بطاقات وتصاميم','Cards & Designs')}</h2>
+                <p style="color:var(--text-muted);font-size:0.82rem;text-align:center;margin-bottom:14px;">${tr('اختر آية أو حديثاً، صمّم لونه وخلفيته، ثم احفظه أو انشره.','Pick an ayah or hadith, design its color, then save or share.')}</p>
+                <div id="cards-grid" class="cards-grid"></div></div>`;
+            document.body.appendChild(m);
+            $('cards-grid').innerHTML = CARDS.map((c,i)=>`<div class="design-card" onclick="AnwarCards.design(${i})">
+                <span class="dc-quote">${c.t}</span>
+                <span class="dc-ref">${c.r ? c.r : ('﴿ '+sN(c.s)+' : '+c.a+' ﴾')}</span></div>`).join('');
+        }
+        m.classList.add('active');
+    },
+    design:function(i){
+        const c=CARDS[i]; if(!c) return;
+        window._lastAyah = c.r ? { text:c.t, refText:c.r } : { surah:c.s, ayah:c.a, text:c.t };
+        const m=$('cards-modal'); if(m) m.classList.remove('active');
+        PRO2.openStory();
+    }
+};
 function ensureStory(){
     if ($('story-modal')) return;
     const d=document.createElement('div'); d.id='story-modal'; d.className='story-overlay';
@@ -310,7 +365,7 @@ PRO2.saveStoryImage = async function(){
     const lines=_wrapText(ctx, a.text, W-300);
     let y=H/2 - (lines.length-1)*62; lines.forEach(l=>{ ctx.fillText(l, W/2, y); y+=124; });
     ctx.fillStyle='#D4A843'; ctx.font='46px Amiri, serif';
-    ctx.fillText('﴿ '+tr('سورة','')+' '+sN(a.surah)+' : '+a.ayah+' ﴾', W/2, y+30);
+    ctx.fillText(a.refText ? a.refText : ('﴿ '+tr('سورة','')+' '+sN(a.surah)+' : '+a.ayah+' ﴾'), W/2, y+30);
     ctx.fillStyle='rgba(250,246,238,0.5)'; ctx.font='32px Tajawal, sans-serif';
     ctx.fillText('anwar', W/2, H-110);
     cv.toBlob(async (blob)=>{

@@ -106,7 +106,39 @@ window.AnwarReward = {
         applyVisual(); renderPointsPage();
     }
 };
+const APP_THEMES = [
+    { id:'',             ar:'ليل ذهبي',   en:'Golden Night', dot:'linear-gradient(135deg,#D4A843,#14110B)' },
+    { id:'light',        ar:'نهاري فاتح', en:'Daylight',     dot:'linear-gradient(135deg,#FAF6EE,#D4A843)' },
+    { id:'emerald-deep', ar:'أخضر زمردي', en:'Emerald',      dot:'linear-gradient(135deg,#3FB984,#08160F)' },
+    { id:'navy',         ar:'أزرق ليلي',  en:'Night Blue',   dot:'linear-gradient(135deg,#5B8DEF,#070C18)' },
+    { id:'purple',       ar:'بنفسجي ملكي',en:'Royal Purple', dot:'linear-gradient(135deg,#B266E0,#120818)' },
+    { id:'rosewood',     ar:'خشب وردي',   en:'Rosewood',     dot:'linear-gradient(135deg,#D98E78,#1A0C0A)' },
+];
+function applyAppTheme(){
+    const t = localStorage.getItem('app_theme')||'';
+    document.body.classList.remove('light-mode','theme-emerald-deep','theme-navy','theme-purple','theme-rosewood');
+    if(t==='light') document.body.classList.add('light-mode');
+    else if(t==='emerald-deep') document.body.classList.add('theme-emerald-deep');
+    else if(t==='navy') document.body.classList.add('theme-navy');
+    else if(t==='purple') document.body.classList.add('theme-purple');
+    else if(t==='rosewood') document.body.classList.add('theme-rosewood');
+}
+window.applyAppTheme = applyAppTheme;
+window.AnwarTheme2 = {
+    open:function(){
+        ensureModal('apptheme-modal', tr('المظهر والخلفية','Theme & background'));
+        AnwarTheme2._render();
+        $('apptheme-modal').classList.add('active');
+    },
+    _render:function(){
+        const cur=localStorage.getItem('app_theme')||'';
+        $('apptheme-modal-body').innerHTML = `<p style="text-align:center;color:var(--text-muted);font-size:0.82rem;margin-bottom:14px;">${tr('اختر مظهراً فخماً — تبقى الكتابات واضحة في كل ثيم.','Pick a luxurious theme — text stays clear in all.')}</p>
+            <div class="theme-swatches2">${APP_THEMES.map(t=>`<div class="theme-sw2 ${t.id===cur?'on':''}" onclick="AnwarTheme2.set('${t.id}')"><div class="ts-dot" style="background:${t.dot}"></div><div class="ts-name">${L()==='en'?t.en:t.ar}</div></div>`).join('')}</div>`;
+    },
+    set:function(id){ localStorage.setItem('app_theme', id); applyAppTheme(); AnwarTheme2._render(); }
+};
 function applyVisual(){
+    applyAppTheme();
     // الخط
     let f=localStorage.getItem(FONT_KEY)||''; if(f && !isActive(f)){ f=''; localStorage.setItem(FONT_KEY,''); }
     document.body.classList.remove('qfont-naskh','qfont-othmani');
@@ -213,6 +245,7 @@ window.AnwarProfile = {
           <div class="pts-sec-title">${tr('حسابي والإعدادات','Account & settings')}</div>
           ${amRow('fa-star','نقاط الأنوار والمكافآت','Points & rewards',"AnwarPoints2.open()",true)}
           ${amRow('fa-chart-simple','إحصائياتي الروحية','My spiritual stats',"window.QA&&QA.openStats&&QA.openStats()",true)}
+          ${amRow('fa-palette','المظهر والخلفية','Theme & background',"AnwarTheme2.open()",true)}
           ${amRow('fa-table-cells-large','تخصيص الصفحة الرئيسية','Customize home',"window.PRO2&&PRO2.openCustomizeHome()")}
           ${amRow('fa-mosque','إعدادات مواقيت الصلاة','Prayer time settings',"AnwarProfile._toSettings()")}
           ${amRow('fa-bell','إعدادات التنبيهات','Notification settings',"AnwarProfile._toSettings()")}

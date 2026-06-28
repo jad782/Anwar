@@ -865,3 +865,26 @@ body.light-mode .info-p { color:#6b5d49; }
 /* تمييز الآية عند الوصول إليها من البحث */
 .ayah.ayah-highlight { background:linear-gradient(90deg, rgba(242,210,122,0.28), rgba(197,160,89,0.12)); border-radius:10px; box-shadow:0 0 0 2px rgba(242,210,122,0.5); transition:background .4s, box-shadow .4s; animation:ayahPulse 1.2s ease-in-out 2; }
 @keyframes ayahPulse { 0%,100%{ box-shadow:0 0 0 2px rgba(242,210,122,0.5);} 50%{ box-shadow:0 0 14px 3px rgba(242,210,122,0.7);} }
+
+/* ===== معرض البطاقات ===== */
+.cards-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.design-card { display:flex; flex-direction:column; justify-content:center; gap:8px; min-height:120px; padding:14px 12px; border-radius:16px; background:radial-gradient(circle at 50% 30%, rgba(242,210,122,0.1), rgba(46,37,21,0.92)); border:1px solid rgba(197,160,89,0.35); cursor:pointer; text-align:center; transition:.15s; }
+.design-card:active { transform:scale(0.96); box-shadow:0 0 14px rgba(242,210,122,0.4); }
+.dc-quote { font-family:'Amiri',serif; font-size:1.02rem; line-height:1.7; color:var(--cream,#F2EAD9); }
+.dc-ref { font-size:0.68rem; color:var(--accent-color); }
+body.light-mode .dc-quote { color:#2C1810; }
+body.light-mode .design-card { background:radial-gradient(circle at 50% 30%, #fff7e6, #f3ead4); }
+
+/* ===== ثيمات/خلفيات فخمة إضافية (نصوص واضحة) ===== */
+body.theme-emerald-deep { --primary-color:#7FE3B0; --light-bg:#08160F; --pill-bg:#0E2419; --white:#0F231A; --text-main:#E5F5EC; --text-muted:#8FB3A2; --border-color:rgba(63,185,132,0.2); --accent-color:#3FB984; --accent-light:#7FE3B0; --glow:rgba(63,185,132,0.28); }
+body.theme-navy { --primary-color:#9FC0FF; --light-bg:#070C18; --pill-bg:#0E1730; --white:#0F1A33; --text-main:#E6EDFA; --text-muted:#94A4C4; --border-color:rgba(91,141,239,0.22); --accent-color:#5B8DEF; --accent-light:#9FC0FF; --glow:rgba(91,141,239,0.28); }
+body.theme-purple { --primary-color:#E0B0FF; --light-bg:#120818; --pill-bg:#23102E; --white:#1E0F28; --text-main:#F2E6FA; --text-muted:#B79DC4; --border-color:rgba(190,120,230,0.22); --accent-color:#B266E0; --accent-light:#E0B0FF; --glow:rgba(178,102,224,0.28); }
+body.theme-rosewood { --primary-color:#F0B8A8; --light-bg:#1A0C0A; --pill-bg:#2C1512; --white:#26110F; --text-main:#F7E7E2; --text-muted:#C4A29A; --border-color:rgba(224,140,120,0.22); --accent-color:#D98E78; --accent-light:#F0B8A8; --glow:rgba(217,142,120,0.28); }
+/* خلفية الجسم تتبع الثيم */
+body { background: var(--light-bg); }
+/* بطاقة المظهر */
+.theme-swatches2 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.theme-sw2 { cursor:pointer; border-radius:16px; padding:14px 8px; text-align:center; border:2px solid transparent; transition:.15s; }
+.theme-sw2.on { border-color:#F2D27A; box-shadow:0 0 12px rgba(242,210,122,0.4); }
+.theme-sw2 .ts-dot { width:34px; height:34px; border-radius:50%; margin:0 auto 8px; border:2px solid rgba(255,255,255,0.25); }
+.theme-sw2 .ts-name { font-size:0.78rem; font-weight:700; }
