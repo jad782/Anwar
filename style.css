@@ -78,7 +78,8 @@ body.light-mode .bg-pattern { background-image: radial-gradient(circle at 50% -8
 .icon-btn.light-btn { background: var(--white); color: var(--primary-color); border: 1px solid var(--border-color); }
 .icon-btn:active { transform: scale(0.9); }
 
-.content-area { flex: 1; overflow-y: auto; padding: 10px 20px; padding-bottom: calc(130px + env(safe-area-inset-bottom, 0px)); scroll-behavior: smooth; z-index: 1; }
+.content-area { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 10px 20px; padding-bottom: calc(130px + env(safe-area-inset-bottom, 0px)); scroll-behavior: smooth; z-index: 1; }
+html, body { overflow-x: hidden; max-width: 100%; }
 
 .vip-card, .date-card-emerald, .prayer-card, .surah-card, .athkar-cat-card, .theker-read-card, .achievement-rings-card {
     background: var(--white); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 10px 28px rgba(0,0,0,0.35), inset 0 1px 0 rgba(212,168,67,0.06); transition: background 0.4s, border 0.4s; padding: 20px;
@@ -103,7 +104,7 @@ body.light-mode .vip-card, body.light-mode .date-card-emerald, body.light-mode .
 .section-header h3 { color: var(--primary-color); font-size: 1.2rem; font-weight: 700; }
 .location { font-size: 0.85rem; color: var(--text-muted); }
 
-.prayer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.prayer-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .prayer-card { padding: 15px 10px; text-align: center; display: flex; flex-direction: column; gap: 5px; color: var(--text-muted); background:var(--white); border-radius:15px; border:1px solid var(--border-color); }
 .prayer-card i { font-size: 1.3rem; margin-bottom: 5px; color: var(--accent-color); opacity: 0.9; }
 .prayer-card span { font-size: 0.8rem; }
@@ -752,7 +753,7 @@ body.qfont-othmani .ayah, body.qfont-othmani .mushaf-ayah, body.qfont-othmani .a
 body.theme-royal { --accent-color:#E6BE5C; --accent-light:#FFD97A; }
 
 /* ===== تحديثات النقاط: متجر مؤقت + خريطة بأرقام + شارة العضو ===== */
-.hm-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; direction:ltr; }
+.hm-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px; direction:ltr; }
 .hm-cell { aspect-ratio:1; border-radius:6px; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; font-size:0.62rem; font-weight:700; color:transparent; }
 .hm-cell.on { background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; box-shadow:0 0 6px rgba(242,210,122,0.4); }
 .member-badge { display:inline-flex; align-items:center; gap:6px; margin-top:10px; background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; font-weight:800; font-size:0.78rem; padding:5px 14px; border-radius:20px; }
@@ -826,7 +827,8 @@ body.light-mode .prof-stat b, body.light-mode .prof-chip { color:#9a6f12; }
 body.light-mode .am-label, body.light-mode .prof-act { color:var(--text-main); }
 
 /* ===== مفاتيح يومك (شبكة الاختصارات الذهبية) ===== */
-.apps-scroll.keys-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px 6px; overflow:visible; padding-bottom:0; }
+.apps-scroll.keys-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px 6px; overflow:visible; padding-bottom:0; }
+.key-label { word-break:break-word; }
 .key-tile { display:flex; flex-direction:column; align-items:center; gap:7px; cursor:pointer; transition:transform .15s; }
 .key-tile:active { transform:scale(0.92); }
 .key-circle { width:62px; height:62px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.45rem; color:var(--accent-light,#F2D27A); background:radial-gradient(circle at 50% 35%, rgba(242,210,122,0.18), rgba(46,37,21,0.9)); border:1px solid rgba(197,160,89,0.4); box-shadow:0 6px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(242,210,122,0.25); }
@@ -842,3 +844,24 @@ body.light-mode .key-label { color:#6b5d49; }
 body.light-mode .kc-name { color:var(--text-main); }
 
 .support-status { text-align:center; font-size:0.8rem; color:var(--text-soft,#9a8f7a); margin:8px 0 4px; }
+
+/* ===== مودالات عن التطبيق/الخصوصية/الإبلاغ ===== */
+.info-hero { text-align:center; margin-bottom:16px; }
+.info-ico { width:64px; height:64px; margin:0 auto 10px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; font-size:1.6rem; box-shadow:0 0 20px rgba(242,210,122,0.4); }
+.info-hero h2 { color:var(--accent-light,#F2D27A); font-size:1.3rem; }
+.info-p { text-align:center; color:var(--text-soft,#cbbfa6); font-size:0.9rem; line-height:1.7; margin-bottom:14px; }
+.info-feats { display:flex; flex-direction:column; gap:9px; }
+.info-feat { display:flex; align-items:center; gap:12px; background:rgba(197,160,89,0.07); border:1px solid var(--border-color); border-radius:13px; padding:11px 13px; }
+.info-feat i { width:30px; text-align:center; color:var(--accent-color); font-size:1.05rem; }
+.info-feat span { font-size:0.9rem; color:var(--cream,#F2EAD9); font-weight:600; }
+.info-list { display:flex; flex-direction:column; gap:10px; }
+.info-li { display:flex; gap:11px; align-items:flex-start; }
+.info-li i { color:#22c55e; margin-top:3px; }
+.info-li span { font-size:0.9rem; line-height:1.7; color:var(--cream,#F2EAD9); }
+.info-ver { text-align:center; color:var(--text-muted); font-size:0.78rem; margin-top:16px; }
+body.light-mode .info-feat span, body.light-mode .info-li span { color:var(--text-main); }
+body.light-mode .info-p { color:#6b5d49; }
+
+/* تمييز الآية عند الوصول إليها من البحث */
+.ayah.ayah-highlight { background:linear-gradient(90deg, rgba(242,210,122,0.28), rgba(197,160,89,0.12)); border-radius:10px; box-shadow:0 0 0 2px rgba(242,210,122,0.5); transition:background .4s, box-shadow .4s; animation:ayahPulse 1.2s ease-in-out 2; }
+@keyframes ayahPulse { 0%,100%{ box-shadow:0 0 0 2px rgba(242,210,122,0.5);} 50%{ box-shadow:0 0 14px 3px rgba(242,210,122,0.7);} }

@@ -361,12 +361,46 @@ function injectExtras(){
 PRO2.shareApp = function(){ const msg=tr('حمّل تطبيق الأنوار الإسلامي 🌙','Get Al-Anwar Islamic app 🌙'); if(navigator.share) navigator.share({title:'الأنوار',text:msg}).catch(()=>{}); else { try{navigator.clipboard.writeText(msg);}catch(e){} alert(tr('تم نسخ رسالة المشاركة.','Share text copied.')); } };
 PRO2.rateApp = function(){ try{ window.open('https://apps.apple.com/app/id6782741099?action=write-review','_blank'); }catch(e){} };
 PRO2.openSocial = function(){ try{ window.open('https://www.instagram.com/jad.s.a.y','_blank'); }catch(e){} };
-PRO2.reportProblem = function(){ const u='https://wa.me/905551517264?text='+encodeURIComponent(tr('السلام عليكم، لديّ ملاحظة على تطبيق الأنوار:','Feedback on Al-Anwar app:')); window.open(u,'_blank'); };
-PRO2.openAbout = function(){ alert(tr('تطبيق الأنوار الإسلامي\nمصحف أوفلاين + أذكار وأدعية + ختمات + قبلة + تنبيهات أذان.\nالإصدار 1.0','Al-Anwar Islamic App\nOffline Quran + Athkar + Khatmas + Qibla + Athan.\nVersion 1.0')); };
+// مودال عام أنيق
+function infoModal(id, title, icon, html){
+    let m=$(id);
+    if(!m){ m=document.createElement('div'); m.id=id; m.className='qibla-overlay';
+        m.innerHTML=`<div class="qibla-modal" style="width:94%;max-width:440px;text-align:right;max-height:86vh;overflow-y:auto;">
+            <button class="close-qibla" onclick="document.getElementById('${id}').classList.remove('active')"><i class="fa-solid fa-xmark"></i></button>
+            <div class="info-hero"><div class="info-ico"><i class="fa-solid ${icon}"></i></div><h2 id="${id}-t"></h2></div>
+            <div id="${id}-b"></div></div>`;
+        document.body.appendChild(m);
+    }
+    $(id+'-t').textContent=title; $(id+'-b').innerHTML=html; m.classList.add('active');
+}
+PRO2.openAbout = function(){
+    infoModal('about-modal', tr('عن التطبيق','About'), 'fa-circle-info',
+        `<p class="info-p">${tr('تطبيق الأنوار الإسلامي — رفيقك الإيماني المتكامل.','Al-Anwar — your complete faith companion.')}</p>
+         <div class="info-feats">
+           ${['fa-book-quran|مصحف كامل أوفلاين|Full offline Quran','fa-person-praying|أذكار وأدعية بمصادرها|Sourced adhkar & du\'a','fa-mosque|أوقات صلاة دقيقة + قبلة|Accurate prayer times & qibla','fa-bell|تنبيهات أذان تعمل والهاتف مقفل|Athan alerts when locked','fa-users|ختمة جماعية متزامنة|Live group khatma','fa-star|نقاط ومكافآت للتحفيز|Points & rewards'].map(f=>{const[i,a,e]=f.split('|');return `<div class="info-feat"><i class="fa-solid ${i}"></i><span>${L()==='en'?e:a}</span></div>`;}).join('')}
+         </div>
+         <p class="info-ver">${tr('تطبيق الأنوار · الإصدار 1.1','Al-Anwar · Version 1.1')}</p>`);
+};
 PRO2.openPrivacy = function(){
-    alert(tr(
-'سياسة الخصوصية — تطبيق الأنوار\n\n• لا نجمع أي بيانات شخصية ولا نشاركها مع أي طرف.\n• كل بياناتك (الختمات، المهام، المفضّلة) تُحفظ محلياً على جهازك فقط.\n• يُطلب الموقع فقط لحساب أوقات الصلاة والقبلة، ولا يُرسل لأي خادم.\n• الإشعارات والمايكروفون تُستخدم فقط بإذنك ولأغراض التطبيق.\n• نصوص القرآن والتفسير من مصادر معتمدة (مجمع الملك فهد / alquran.cloud).',
-'Privacy Policy — Al-Anwar\n\n• We collect NO personal data and share nothing.\n• All your data (khatmas, tasks, bookmarks) stays locally on your device.\n• Location is used only for prayer times & qibla, never sent to a server.\n• Notifications & microphone are used only with your permission.\n• Quran & tafsir texts are from trusted sources (KFGQPC / alquran.cloud).'));
+    const items = L()==='en'
+      ? ['We collect NO personal data and share nothing with anyone.','All your data (khatmas, tasks, bookmarks, points) stays locally on your device.','Location is used only to compute prayer times & qibla — never sent to any server.','Notifications & microphone are used only with your permission, for app features.','No account or login is required.','Quran & tafsir texts are from trusted sources (KFGQPC / alquran.cloud).']
+      : ['لا نجمع أي بيانات شخصية ولا نشاركها مع أي طرف.','كل بياناتك (الختمات، المهام، المفضّلة، النقاط) تُحفظ محلياً على جهازك فقط.','يُطلب الموقع فقط لحساب أوقات الصلاة والقبلة، ولا يُرسل لأي خادم.','الإشعارات والمايكروفون تُستخدم فقط بإذنك ولأغراض التطبيق.','لا حاجة لإنشاء حساب أو تسجيل دخول.','نصوص القرآن والتفسير من مصادر معتمدة (مجمع الملك فهد / alquran.cloud).'];
+    infoModal('privacy-modal', tr('سياسة الخصوصية','Privacy Policy'), 'fa-shield-halved',
+        `<div class="info-list">${items.map(t=>`<div class="info-li"><i class="fa-solid fa-check"></i><span>${t}</span></div>`).join('')}</div>
+         <p class="info-ver">${tr('آخر تحديث 2026 · بياناتك ملكك وحدك 🤍','Updated 2026 · Your data is yours only 🤍')}</p>`);
+};
+PRO2.reportProblem = function(){
+    infoModal('report-modal', tr('الإبلاغ عن مشكلة / اقتراح','Report a problem'), 'fa-bug',
+        `<p class="info-p">${tr('اكتب المشكلة أو الاقتراح وسيصلني مباشرة عبر واتساب 🤍','Write your issue or idea; it reaches me directly via WhatsApp 🤍')}</p>
+         <textarea id="report-text" class="modal-input" style="min-height:120px;resize:vertical;" placeholder="${tr('اكتب هنا...','Write here...')}"></textarea>
+         <button class="tasbeeh-pill" style="width:100%;margin-top:12px;" onclick="PRO2.sendReport()"><i class="fa-brands fa-whatsapp"></i> ${tr('إرسال','Send')}</button>`);
+};
+PRO2.sendReport = function(){
+    const t=($('report-text')||{}).value||''; if(!t.trim()){ alert(tr('اكتب رسالتك أولاً.','Write your message first.')); return; }
+    const head=tr('ملاحظة على تطبيق الأنوار:','Al-Anwar feedback:');
+    const u='https://wa.me/905551517264?text='+encodeURIComponent(head+'\n'+t.trim());
+    const m=$('report-modal'); if(m) m.classList.remove('active');
+    window.open(u,'_blank');
 };
 // إعادة تطبيق التجويد/الترجمة بعد إعادة رسم القراءة + رصد الإنجازات
 const _orr = window.onReadingRendered;

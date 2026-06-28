@@ -332,12 +332,24 @@ QA.searchQuran = async function(){
         const j = await r.json();
         if (!j.data || !j.data.matches || !j.data.matches.length){ res.innerHTML = `<p class="tasks-empty">${tr('لا نتائج','No results')}</p>`; return; }
         res.innerHTML = `<div class="search-head">${tr('النتائج','Results')}: ${j.data.count} — <button onclick="QA.clearSearch()">${tr('إغلاق','Close')}</button></div>` +
-            j.data.matches.slice(0,40).map(m => `<div class="search-item" onclick="QA.goToResult(${m.surah.number},'${(m.surah.name||'').replace(/'/g,'')}')">
+            j.data.matches.slice(0,40).map(m => `<div class="search-item" onclick="QA.goToResult(${m.surah.number},${m.numberInSurah})">
                 <div class="search-ayah">${m.text}</div>
-                <div class="search-ref">${m.surah.name} : ${m.numberInSurah}</div></div>`).join('');
+                <div class="search-ref">${m.surah.name} : ${m.numberInSurah} <i class="fa-solid fa-arrow-left-long" style="opacity:.5"></i></div></div>`).join('');
     }catch(e){ res.innerHTML = `<p class="tasks-empty">${tr('تعذّر البحث، تأكد من الإنترنت.','Search failed.')}</p>`; }
 };
-QA.goToResult = function(num, name){ QA.clearSearch(); openFreeReading('surah', num, surahNm(num)); };
+QA.goToResult = function(num, ayah){
+    QA.clearSearch();
+    if (typeof goToTab==='function') goToTab(1);
+    // افتح صفحة الآية مباشرة إن توفّرت بيانات المصحف، ثم ميّزها
+    let page=null;
+    try{ const QD=window.QURAN_DATA; if(QD&&QD.ayahs){ const a=QD.ayahs.find(x=>x.s===num && x.a===ayah); if(a) page=a.p; } }catch(e){}
+    if (page && window.MUSHAF && MUSHAF.openPage) MUSHAF.openPage(page);
+    else openFreeReading('surah', num, surahNm(num));
+    setTimeout(()=>{ try{
+        const el=document.querySelector(`.ayah[data-surah="${num}"][data-ayah="${ayah}"]`);
+        if(el){ el.scrollIntoView({block:'center'}); el.classList.add('ayah-highlight'); setTimeout(()=>el.classList.remove('ayah-highlight'),2800); }
+    }catch(e){} }, 600);
+};
 QA.clearSearch = function(){ $('quran-search-results').style.display='none'; $('quran-search-input').value=''; $('surah-list').style.display = document.getElementById('tab-btn-surahs').classList.contains('active')?'block':'none'; $('juz-list').style.display = document.getElementById('tab-btn-juzs').classList.contains('active')?'block':'none'; };
 
 // =======================================================
