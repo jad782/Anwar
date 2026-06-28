@@ -75,6 +75,7 @@ function showChrome(){
     const qs=$('quran-search-wrap'); if(qs) qs.style.display='none';
     const qr=$('quran-search-results'); if(qr) qr.style.display='none';
     $('reading-view').style.display='block';
+    document.body.classList.add('reading-fullscreen');
     const pt=$('page-title'); if(pt) pt.innerText = L()==='en'?'Quran':'المصحف';
     // أخفِ شريط مزايا القارئ التفصيلي في وضع الصفحة
     const tb=$('reading-toolbar'); if(tb) tb.style.display='none';
@@ -86,9 +87,18 @@ function ensureBar(){
     const host=$('reading-view'); const hdr=host.querySelector('.reading-header');
     const bar=document.createElement('div'); bar.id='msf-bar'; bar.className='msf-bar';
     bar.innerHTML = `<button class="rt-btn" id="msf-taj" onclick="MUSHAF.toggleTajweed()"><i class="fa-solid fa-palette"></i><span>${L()==='en'?'Tajweed':'تجويد'}</span></button>
-        <button class="rt-btn" onclick="MUSHAF.detailed()"><i class="fa-solid fa-sliders"></i><span>${L()==='en'?'Tools':'تفصيلي'}</span></button>`;
+        <button class="rt-btn" onclick="MUSHAF.detailed()"><i class="fa-solid fa-headphones"></i><span>${L()==='en'?'Listen':'سماع'}</span></button>
+        <button class="rt-btn" onclick="MUSHAF.font(-2)"><i class="fa-solid fa-minus"></i><span>${L()==='en'?'A-':'تصغير'}</span></button>
+        <button class="rt-btn" onclick="MUSHAF.font(2)"><i class="fa-solid fa-plus"></i><span>${L()==='en'?'A+':'تكبير'}</span></button>
+        <button class="rt-btn" onclick="MUSHAF.detailed()"><i class="fa-solid fa-sliders"></i><span>${L()==='en'?'Tools':'أدوات'}</span></button>`;
     hdr.insertAdjacentElement('afterend', bar);
 }
+MUSHAF.font = function(d){
+    try{ if(typeof currentFontSize==='undefined') return; }catch(e){ return; }
+    currentFontSize = Math.max(16, Math.min(44, currentFontSize + d));
+    try{ localStorage.setItem('fontSize', currentFontSize); }catch(e){}
+    document.querySelectorAll('#ayahs-container .ayah').forEach(a=>a.style.fontSize = currentFontSize+'px');
+};
 MUSHAF.openSurah = function(n){ tajOn=false; showChrome(); curPage = pageOfSurah(n); renderPage(curPage); };
 MUSHAF.openPage  = function(p){ tajOn=false; showChrome(); curPage = Math.max(1,Math.min(604,p)); renderPage(curPage); };
 
@@ -161,6 +171,7 @@ window.openFreeReading = function(type, num, name){
 // عند الرجوع: أعد إظهار القائمة والبحث وأخفِ شريط المصحف
 const _origClose = window.closeSurah;
 window.closeSurah = function(){
+    document.body.classList.remove('reading-fullscreen');
     if (typeof _origClose==='function') _origClose();
     const qs=$('quran-search-wrap'); if(qs) qs.style.display='flex';
     const bar=$('msf-bar'); if(bar) bar.style.display='none';
