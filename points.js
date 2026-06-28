@@ -322,6 +322,9 @@ function inject(){
     }
     applyVisual(); renderAll();
     try{ const list=document.querySelector('#tab-settings .settings-list');
+        if(list && !$('theme-row')){ const th=document.createElement('div'); th.className='setting-item'; th.id='theme-row';
+            th.innerHTML=`<span class="set-ico"><i class="fa-solid fa-palette"></i></span><span class="set-label">${tr('المظهر والخلفية','Theme & background')}</span><i class="fa-solid fa-chevron-left ath-chevron"></i>`;
+            th.onclick=()=>AnwarTheme2.open(); list.insertBefore(th, list.firstChild); }
         if(list && !$('account-row')){ const ar=document.createElement('div'); ar.className='setting-item'; ar.id='account-row';
             ar.innerHTML=`<span class="set-ico"><i class="fa-solid fa-circle-user"></i></span><span class="set-label">${tr('حسابي','My Account')}</span><i class="fa-solid fa-chevron-left ath-chevron"></i>`;
             ar.onclick=()=>AnwarProfile.open(); list.insertBefore(ar, list.firstChild); }
