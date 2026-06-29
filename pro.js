@@ -507,13 +507,19 @@ PRO._refreshDonatePrices = function(){
         }
     } catch(e){}
     if (st){
-        if (loaded > 0) st.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#22c55e"></i> ${tr('متّصل بمنتجات آبل ('+loaded+'/'+SUPPORT_TIERS.length+')','Connected to App Store ('+loaded+'/'+SUPPORT_TIERS.length+')')}`;
-        else st.innerHTML = `<i class="fa-solid fa-circle-info" style="color:#9aa0a6"></i> ${tr('سيظهر الدفع داخل نسخة App Store (TestFlight/المتجر).','Purchases appear in the App Store build (TestFlight/Store).')}`;
+        st.innerHTML = (loaded > 0) ? `<i class="fa-solid fa-circle-check" style="color:#22c55e"></i> ${tr('متّصل بمنتجات آبل','Connected to App Store')}` : '';
     }
 };
 window.closeDonate = function(){ const m=$('donate-modal'); if(m) m.classList.remove('active'); };
 
-function initPro(){ injectHomeEntries(); initIAP(); PRO.importRoomFromHash(); if(PRO._subscribeAll) PRO._subscribeAll(); }
+// إضافة آبل (CdvPurchase) تجهز بعد deviceready؛ نحاول مرّات حتى تتوفّر
+function tryInitIAP(n){
+    if (window.CdvPurchase && !_iapReady){ initIAP(); PRO._refreshDonatePrices && PRO._refreshDonatePrices(); return; }
+    if (_iapReady){ PRO._refreshDonatePrices && PRO._refreshDonatePrices(); return; }
+    if (n > 0) setTimeout(() => tryInitIAP(n-1), 1200);
+}
+document.addEventListener('deviceready', () => tryInitIAP(12));
+function initPro(){ injectHomeEntries(); tryInitIAP(12); PRO.importRoomFromHash(); if(PRO._subscribeAll) PRO._subscribeAll(); }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(initPro, 500));
 else setTimeout(initPro, 500);
 })();
