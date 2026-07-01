@@ -455,18 +455,22 @@ const SUPPORT_TIERS = [
     { id:'com.alanwar.quran.jad.tip10', emoji:'🌟', ar:'دعم سخيّ',  en:'Big support',    price:'$9.99' }
 ];
 let _iapReady = false;
+let _iapState = { plugin:false, initialized:false, err:'' };
 function initIAP(){
     try {
         const CdvPurchase = window.CdvPurchase;
+        _iapState.plugin = !!CdvPurchase;
         if (!CdvPurchase || _iapReady) return;
         const { store, ProductType, Platform } = CdvPurchase;
         SUPPORT_TIERS.forEach(t => store.register({ id:t.id, type:ProductType.CONSUMABLE, platform:Platform.APPLE_APPSTORE }));
         store.when().approved(tr2 => tr2.verify());
         store.when().verified(rc => { rc.finish(); if(typeof showBadgeToast==='function') showBadgeToast({emoji:'🤍', name:tr('جزاك الله خيراً','JazakAllah khayr'), desc:tr('شكراً لدعمك التطبيق','Thank you for your support')}); });
         store.when().productUpdated(()=>{ try{ PRO._refreshDonatePrices && PRO._refreshDonatePrices(); }catch(e){} });
+        if (typeof store.error === 'function') store.error(e => { _iapState.err = (e && ((e.code||'')+' '+(e.message||''))) || String(e); try{ PRO._refreshDonatePrices && PRO._refreshDonatePrices(); }catch(x){} });
         store.initialize([Platform.APPLE_APPSTORE]);
+        _iapState.initialized = true;
         _iapReady = true;
-    } catch(e){}
+    } catch(e){ _iapState.err = 'init: ' + (e && e.message || e); }
 }
 PRO.support = function(id){
     try {
@@ -507,7 +511,18 @@ PRO._refreshDonatePrices = function(){
         }
     } catch(e){}
     if (st){
-        st.innerHTML = (loaded > 0) ? `<i class="fa-solid fa-circle-check" style="color:#22c55e"></i> ${tr('متّصل بمنتجات آبل','Connected to App Store')}` : '';
+        if (loaded > 0){
+            st.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#22c55e"></i> ${tr('متّصل بمنتجات آبل ('+loaded+'/'+SUPPORT_TIERS.length+')','Connected ('+loaded+'/'+SUPPORT_TIERS.length+')')}`;
+        } else {
+            // تشخيص: يظهر سبب عدم عمل الدفع (صوّره وأرسله للمطوّر)
+            const ok='<span style="color:#22c55e">نعم</span>', no='<span style="color:#e0524d">لا</span>';
+            st.innerHTML = `<div style="text-align:right;font-size:0.72rem;line-height:1.9;background:rgba(0,0,0,0.2);border:1px solid var(--border-color);border-radius:10px;padding:8px 10px;">
+                <b style="color:var(--accent-color)">${tr('تشخيص الدفع','Payment diagnostics')}</b><br>
+                ${tr('إضافة آبل محمّلة','Plugin loaded')}: ${_iapState.plugin?ok:no}<br>
+                ${tr('تمّت التهيئة','Initialized')}: ${_iapState.initialized?ok:no}<br>
+                ${tr('منتجات محمّلة','Products loaded')}: ${loaded}/${SUPPORT_TIERS.length}<br>
+                ${_iapState.err?(tr('خطأ','Error')+': '+_iapState.err):''}</div>`;
+        }
     }
 };
 window.closeDonate = function(){ const m=$('donate-modal'); if(m) m.classList.remove('active'); };
