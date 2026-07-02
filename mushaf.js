@@ -11,7 +11,8 @@ const cf = () => (typeof currentFontSize !== 'undefined' ? currentFontSize : 22)
 window.MUSHAF = window.MUSHAF || {};
 const BAS = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ';
 
-function toArabic(n){ return String(n).replace(/[0-9]/g, d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+function toArabic(n){ if(localStorage.getItem('num_hindi')==='0') return String(n); return String(n).replace(/[0-9]/g, d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+MUSHAF.rerender = function(){ try{ renderPage(curPage); }catch(e){} };
 let _countsReady = false;
 function ensureCounts(){
     if (_countsReady || !QD()) return;
