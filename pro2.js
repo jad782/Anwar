@@ -320,9 +320,16 @@ function ensureStory(){
         'radial-gradient(circle at 50% 25%, #1B2A4A, #070C16 75%)',
         'radial-gradient(circle at 50% 30%, #3A2140, #140A18 75%)',
         'radial-gradient(circle at 50% 30%, #5A4410, #14110B 75%)',
-        'linear-gradient(160deg, #1A1A1A, #000)'
+        'linear-gradient(160deg, #1A1A1A, #000)',
+        'radial-gradient(circle at 50% 30%, #0B3B3B, #06181A 75%)',
+        'radial-gradient(circle at 50% 30%, #4A1420, #16090C 75%)',
+        'radial-gradient(circle at 50% 30%, #14294A, #05080F 75%)',
+        'radial-gradient(circle at 50% 30%, #2E2A12, #100E06 75%)'
     ];
     const swatches = bgs.map((b,i)=>`<button class="story-sw" style="background:${b}" onclick="PRO2.setStoryBg(${i})"></button>`).join('');
+    const ornNames=['بسيط','مزدوج','سميك','خطوط','نجوم'];
+    const ornEn=['Simple','Double','Thick','Lines','Stars'];
+    const orns = ornNames.map((n,i)=>`<button class="story-orn-btn" onclick="PRO2.setStoryOrn(${i})">${L()==='en'?ornEn[i]:n}</button>`).join('');
     d.innerHTML = `<button class="story-close" onclick="PRO2.closeStory()"><i class="fa-solid fa-xmark"></i></button>
         <div id="story-card" class="story-card">
             <div class="story-bismillah">﷽</div>
@@ -331,16 +338,24 @@ function ensureStory(){
             <div class="story-brand">anwar</div>
         </div>
         <div class="story-swatches">${swatches}</div>
+        <div class="story-orns">${orns}</div>
         <button class="story-save" onclick="PRO2.saveStoryImage()"><i class="fa-solid fa-download"></i> ${tr('حفظ الصورة بدقة عالية','Save HD image')}</button>
-        <p class="story-hint">${tr('اختر لون الخلفية ثم احفظ الصورة في جهازك','Pick a background then save to your device')}</p>`;
+        <p class="story-hint">${tr('اختر اللون والزخرفة ثم احفظ الصورة','Pick color & frame then save')}</p>`;
     document.body.appendChild(d);
     d._bgs = bgs;
-    const saved = localStorage.getItem('story_bg'); if(saved!=null) PRO2.setStoryBg(+saved);
+    const sb = localStorage.getItem('story_bg'); PRO2.setStoryBg(sb!=null?+sb:0);
+    const so = localStorage.getItem('story_orn'); PRO2.setStoryOrn(so!=null?+so:0);
 }
 PRO2.setStoryBg = function(i){
     const d=$('story-modal'); const card=$('story-card'); if(!d||!card||!d._bgs[i]) return;
     card.style.background = d._bgs[i]; localStorage.setItem('story_bg', i);
     d.querySelectorAll('.story-sw').forEach((b,bi)=>b.classList.toggle('on', bi===i));
+};
+PRO2.setStoryOrn = function(i){
+    const card=$('story-card'); const d=$('story-modal'); if(!card) return;
+    card.classList.remove('orn-0','orn-1','orn-2','orn-3','orn-4');
+    card.classList.add('orn-'+i); localStorage.setItem('story_orn', i);
+    if(d) d.querySelectorAll('.story-orn-btn').forEach((b,bi)=>b.classList.toggle('on', bi===i));
 };
 // لفّ نص عربي على أسطر بعرض محدّد
 function _wrapText(ctx, text, maxW){
@@ -352,13 +367,20 @@ function _wrapText(ctx, text, maxW){
 PRO2.saveStoryImage = async function(){
     const a=window._lastAyah; if(!a){ return; }
     const idx=+(localStorage.getItem('story_bg')||0);
-    const pairs=[['#4A2C1A','#14110B'],['#0D3B2E','#07160F'],['#1B2A4A','#070C16'],['#3A2140','#140A18'],['#5A4410','#14110B'],['#262626','#000000']];
+    const orn=+(localStorage.getItem('story_orn')||0);
+    const pairs=[['#4A2C1A','#14110B'],['#0D3B2E','#07160F'],['#1B2A4A','#070C16'],['#3A2140','#140A18'],['#5A4410','#14110B'],['#262626','#000000'],['#0B3B3B','#06181A'],['#4A1420','#16090C'],['#14294A','#05080F'],['#2E2A12','#100E06']];
     const [c1,c2]=pairs[idx]||pairs[0];
     const W=1080,H=1920; const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const ctx=cv.getContext('2d');
     try{ await document.fonts.load('64px Amiri'); await document.fonts.load('120px Amiri'); }catch(e){}
     const g=ctx.createRadialGradient(W/2,H*0.30,60,W/2,H*0.30,H); g.addColorStop(0,c1); g.addColorStop(1,c2);
     ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-    ctx.strokeStyle='rgba(212,168,67,0.45)'; ctx.lineWidth=5; ctx.strokeRect(46,46,W-92,H-92);
+    // الزخرفة (الإطار)
+    const GD='rgba(242,210,122,0.75)', GD2='rgba(212,168,67,0.4)';
+    if(orn===0){ ctx.strokeStyle=GD2; ctx.lineWidth=5; ctx.strokeRect(46,46,W-92,H-92); }
+    else if(orn===1){ ctx.strokeStyle=GD; ctx.lineWidth=6; ctx.strokeRect(40,40,W-80,H-80); ctx.strokeStyle=GD2; ctx.lineWidth=3; ctx.strokeRect(64,64,W-128,H-128); }
+    else if(orn===2){ ctx.strokeStyle=GD; ctx.lineWidth=16; ctx.strokeRect(56,56,W-112,H-112); }
+    else if(orn===3){ ctx.strokeStyle=GD; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(120,150); ctx.lineTo(W-120,150); ctx.moveTo(120,H-150); ctx.lineTo(W-120,H-150); ctx.stroke(); }
+    else if(orn===4){ ctx.strokeStyle=GD2; ctx.lineWidth=4; ctx.strokeRect(50,50,W-100,H-100); ctx.fillStyle=GD; ctx.font='70px Amiri, serif'; ctx.textAlign='center'; ['۞'].forEach(()=>{}); ctx.fillText('۞',110,130); ctx.fillText('۞',W-110,130); ctx.fillText('۞',110,H-90); ctx.fillText('۞',W-110,H-90); }
     ctx.textAlign='center'; try{ctx.direction='rtl';}catch(e){}
     ctx.fillStyle='rgba(212,168,67,0.6)'; ctx.font='150px Amiri, serif'; ctx.fillText('﷽', W/2, 360);
     ctx.fillStyle='#FAF6EE'; ctx.font='66px Amiri, serif';

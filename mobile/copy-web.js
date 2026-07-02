@@ -20,6 +20,7 @@ const INCLUDE = [
   'pro2.js',
   'points.js',
   'keys.js',
+  'update.js',
   'sunan.js',
   'mushaf.js',
   'live-activity.js',

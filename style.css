@@ -900,3 +900,20 @@ body.reading-fullscreen #msf-bar::-webkit-scrollbar { display:none; }
 body.reading-fullscreen #msf-bar .rt-btn { flex: 0 0 auto; }
 /* بطاقة الصفحة أفخم في وضع ملء الشاشة */
 body.reading-fullscreen .mushaf-page { background: linear-gradient(180deg, rgba(255,255,255,0.015), transparent); border: 1px solid var(--border-color); border-radius: 18px; padding: 20px 16px; box-shadow: inset 0 0 40px rgba(0,0,0,0.25); }
+
+/* ===== زخارف بطاقة القصة ===== */
+.story-orns { display:flex; gap:7px; margin-top:12px; flex-wrap:wrap; justify-content:center; }
+.story-orn-btn { background:rgba(255,255,255,0.08); border:1px solid rgba(242,210,122,0.35); color:#F2D27A; border-radius:16px; padding:6px 14px; font-size:0.78rem; font-weight:700; cursor:pointer; font-family:'Tajawal','Cairo',sans-serif; }
+.story-orn-btn.on { background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; border:none; }
+/* الإطارات على البطاقة */
+.story-card.orn-0 { border:1px solid rgba(212,168,67,0.35); }
+.story-card.orn-1 { border:2px solid rgba(242,210,122,0.7); box-shadow:0 20px 60px rgba(0,0,0,0.5), inset 0 0 0 10px rgba(242,210,122,0); outline:2px solid rgba(212,168,67,0.35); outline-offset:-14px; }
+.story-card.orn-2 { border:10px solid rgba(242,210,122,0.6); }
+.story-card.orn-3 { border:none; position:relative; }
+.story-card.orn-3::before, .story-card.orn-3::after { content:''; position:absolute; left:12%; right:12%; height:3px; background:linear-gradient(90deg,transparent,rgba(242,210,122,0.8),transparent); }
+.story-card.orn-3::before { top:22px; } .story-card.orn-3::after { bottom:22px; }
+.story-card.orn-4 { border:1px solid rgba(212,168,67,0.4); }
+.story-card.orn-4::before { content:'۞ ۞'; position:absolute; top:8px; left:0; right:0; text-align:center; color:rgba(242,210,122,0.7); font-size:1rem; letter-spacing:230px; }
+
+/* أيقونة نافذة التحديث */
+.upd-ico { width:66px; height:66px; margin:0 auto; border-radius:50%; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#C5A059,#F2D27A); color:#14110B; font-size:1.7rem; box-shadow:0 0 22px rgba(242,210,122,0.5); }
