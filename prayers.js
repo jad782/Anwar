@@ -221,6 +221,8 @@ function injectSettings(){
         <label class="switch"><input type="checkbox" id="pl-travel" ${cfg.travel?'checked':''}><span class="slider round"></span></label></div>
       <div class="setting-item"><span class="set-ico"><i class="fa-solid fa-hashtag"></i></span><span class="set-label">${L()==='en'?'Numerals':'شكل الأرقام'}</span>
         <div class="lang-switch"><button class="lang-btn ${!hindi?'active':''}" id="num-ar">123</button><button class="lang-btn ${hindi?'active':''}" id="num-hi">١٢٣</button></div></div>
+      <div class="setting-item" style="justify-content:space-between;"><span class="set-ico"><i class="fa-solid fa-mobile-screen-button"></i></span><span class="set-label">${L()==='en'?'Haptic feedback':'الاهتزاز اللمسي'}</span>
+        <label class="switch"><input type="checkbox" id="pl-haptics" ${localStorage.getItem('haptics')!=='0'?'checked':''}><span class="slider round"></span></label></div>
       <div class="off-title">${L()==='en'?'Manual offsets (minutes)':'تعديل يدوي للأوقات (دقائق)'}</div>
       ${offRows}
       <button class="off-restore" onclick="PRAYERS.restoreDefaults()"><i class="fa-solid fa-rotate-left"></i> ${L()==='en'?'Restore defaults':'استعادة الإعدادات الافتراضية'}</button>`;
@@ -232,9 +234,39 @@ function injectSettings(){
     $('pl-city').onchange = save; $('pl-method').onchange = save;
     $('pl-travel').onchange = (e)=>{ const c=PRAYERS.getConfig(); c.travel=e.target.checked; PRAYERS.saveConfig(c); };
     $('num-ar').onclick = ()=>PRAYERS.setDigits(false); $('num-hi').onclick = ()=>PRAYERS.setDigits(true);
+    $('pl-haptics').onchange = (e)=>{ localStorage.setItem('haptics', e.target.checked?'1':'0'); if(e.target.checked && window.HAP) HAP.medium(); };
     const pid=document.createElement('span'); pid.id='pl-mode'; pid.style.display='none'; w.appendChild(pid);
     PRAYERS.updatePreview();
 }
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ()=>setTimeout(injectSettings, 800));
-else setTimeout(injectSettings, 800);
+
+// ===== أوقات الكراهة (شروق، زوال، غروب) =====
+function timeAdd(hhmm, mins){
+    const w = String(hhmm).replace(/[٠-٩]/g, d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+    const p = w.split(':'); const h=+p[0], m=+p[1]; if(isNaN(h)) return hhmm;
+    let t=((h*60+m+mins)%1440+1440)%1440; const H=Math.floor(t/60),M=t%60;
+    return fmtDigits(String(H).padStart(2,'0')+':'+String(M).padStart(2,'0'));
+}
+PRAYERS.renderMakruh = function(){
+    const box=$('makruh-body'); if(!box) return;
+    let pt; try{ pt=(typeof prayerTimings!=='undefined')?prayerTimings:null; }catch(e){ pt=null; }
+    if(!pt||!pt.Sunrise){ box.innerHTML=''; return; }
+    const rows=[
+        [L()==='en'?'After sunrise':'بعد الشروق', pt.Sunrise, timeAdd(pt.Sunrise,15), 'fa-sun'],
+        [L()==='en'?'Solar noon':'وقت الزوال (الاستواء)', timeAdd(pt.Dhuhr,-6), pt.Dhuhr, 'fa-circle-half-stroke'],
+        [L()==='en'?'Before sunset':'قبيل الغروب', timeAdd(pt.Maghrib,-15), pt.Maghrib, 'fa-cloud-sun']
+    ];
+    box.innerHTML = rows.map(r=>`<div class="mk-row"><span><i class="fa-solid ${r[3]}"></i> ${r[0]}</span><b>${r[1]} — ${r[2]}</b></div>`).join('');
+};
+function initMakruh(){
+    const grid=document.querySelector('#tab-home .prayer-grid'); if(!grid || $('makruh-card')) return;
+    const c=document.createElement('div'); c.id='makruh-card'; c.className='makruh-card';
+    c.innerHTML=`<div class="mk-title"><i class="fa-solid fa-ban"></i> ${L()==='en'?'Disliked prayer times':'أوقات الكراهة'}</div><div id="makruh-body"></div>`;
+    grid.insertAdjacentElement('afterend', c);
+    const _sp=window.setPrayerTimings;
+    window.setPrayerTimings=function(){ const r=(typeof _sp==='function')?_sp.apply(this,arguments):undefined; try{PRAYERS.renderMakruh();}catch(e){} return r; };
+    setTimeout(()=>{ try{PRAYERS.renderMakruh();}catch(e){} }, 600);
+}
+function boot(){ injectSettings(); initMakruh(); }
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ()=>setTimeout(boot, 800));
+else setTimeout(boot, 800);
 })();

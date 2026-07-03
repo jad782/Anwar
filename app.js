@@ -407,9 +407,9 @@ window.closeSurah = function() { readingView.style.display = 'none'; document.qu
 // 7. الأذكار والقبلة والمسبحة
 // =====================================
 window.countTasbeeh = function() { 
-    tasbeehCount++; document.getElementById('misbaha-count').innerText = tasbeehCount; 
-    if(tasbeehCount % 33 === 0 && navigator.vibrate) navigator.vibrate([100]); // هزاز ذكي
-    if(tasbeehCount === 100 && navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    tasbeehCount++; document.getElementById('misbaha-count').innerText = tasbeehCount;
+    if(window.HAP){ if(tasbeehCount % 33 === 0) HAP.success(); else HAP.light(); }
+    else { if(tasbeehCount % 33 === 0 && navigator.vibrate) navigator.vibrate([100]); }
     localStorage.setItem('tasbeehCount', tasbeehCount); 
     updateAchievementState('tasbeeh');
 }
@@ -444,12 +444,34 @@ const KAABA_LAT = 21.422487, KAABA_LNG = 39.826206;
 let qiblaBearing = null;       // اتجاه القبلة من الشمال (ثابت حسب الموقع)
 let _orientationBound = false;
 
-function computeQiblaBearing(lat, lng) {
-    const toRad = d => d * Math.PI / 180, toDeg = r => r * 180 / Math.PI;
-    const dLng = toRad(KAABA_LNG - lng);
-    const y = Math.sin(dLng) * Math.cos(toRad(KAABA_LAT));
-    const x = Math.cos(toRad(lat)) * Math.sin(toRad(KAABA_LAT)) - Math.sin(toRad(lat)) * Math.cos(toRad(KAABA_LAT)) * Math.cos(dLng);
-    return (toDeg(Math.atan2(y, x)) + 360) % 360;
+// اتجاه القبلة بدقة عالية عبر صيغة Vincenty (تعتبر الأرض بيضويّة)
+function computeQiblaBearing(lat1, lng1) {
+    const lat2 = 21.4224779, lng2 = 39.8251832; // إحداثيات الكعبة الدقيقة
+    const a = 6378137, f = 1/298.257223563;      // WGS-84
+    const rad = d => d*Math.PI/180;
+    const φ1 = rad(lat1), φ2 = rad(lat2), Ll = rad(lng2 - lng1);
+    const U1 = Math.atan((1-f)*Math.tan(φ1)), U2 = Math.atan((1-f)*Math.tan(φ2));
+    const sinU1=Math.sin(U1),cosU1=Math.cos(U1),sinU2=Math.sin(U2),cosU2=Math.cos(U2);
+    let λ=Ll, λʹ, i=0, sinλ, cosλ, sinσ, cosσ, σ, cosSqα, cos2σM;
+    do {
+        sinλ=Math.sin(λ); cosλ=Math.cos(λ);
+        const sinSqσ=(cosU2*sinλ)*(cosU2*sinλ)+(cosU1*sinU2-sinU1*cosU2*cosλ)*(cosU1*sinU2-sinU1*cosU2*cosλ);
+        sinσ=Math.sqrt(sinSqσ); if(sinσ===0){ return computeQiblaGC(lat1,lng1); }
+        cosσ=sinU1*sinU2+cosU1*cosU2*cosλ; σ=Math.atan2(sinσ,cosσ);
+        const sinα=cosU1*cosU2*sinλ/sinσ; cosSqα=1-sinα*sinα;
+        cos2σM = cosSqα!==0 ? cosσ-2*sinU1*sinU2/cosSqα : 0;
+        const C=f/16*cosSqα*(4+f*(4-3*cosSqα)); λʹ=λ;
+        λ=Ll+(1-C)*f*sinα*(σ+C*sinσ*(cos2σM+C*cosσ*(-1+2*cos2σM*cos2σM)));
+    } while (Math.abs(λ-λʹ) > 1e-12 && ++i < 200);
+    const α1 = Math.atan2(cosU2*Math.sin(λ), cosU1*sinU2 - sinU1*cosU2*Math.cos(λ));
+    return (α1*180/Math.PI + 360) % 360;
+}
+// احتياطي: دائرة عظمى (لو تعذّرت Vincenty)
+function computeQiblaGC(lat, lng){
+    const toRad=d=>d*Math.PI/180,toDeg=r=>r*180/Math.PI, dLng=toRad(KAABA_LNG-lng);
+    const y=Math.sin(dLng)*Math.cos(toRad(KAABA_LAT));
+    const x=Math.cos(toRad(lat))*Math.sin(toRad(KAABA_LAT))-Math.sin(toRad(lat))*Math.cos(toRad(KAABA_LAT))*Math.cos(dLng);
+    return (toDeg(Math.atan2(y,x))+360)%360;
 }
 
 window.openQibla = function() {
@@ -500,7 +522,7 @@ window.closeQibla = function() {
     _orientationBound = false;
 }
 
-let _smoothHeading = null; // اتجاه الشمال المُنعّم لتفادي الاهتزاز
+let _smoothHeading = null, _headVel = 0, _wasAligned = false, _lastPulse = 0; // حركة نابضة + توجيه لمسي
 function handleOrientation(e) {
     // اتجاه أعلى الهاتف بالنسبة للشمال الحقيقي
     let heading;
@@ -514,12 +536,18 @@ function handleOrientation(e) {
     } else return;
     if (qiblaBearing === null) return;
 
-    // تنعيم اتجاه الشمال بأقصر مسار زاوي (يمنع القفز عند 0/360 والاهتزاز)
-    if (_smoothHeading === null) _smoothHeading = heading;
+    // كاشف التشويش المغناطيسي (iOS): دقّة سالبة أو عالية = تداخل
+    const acc = e.webkitCompassAccuracy;
+    const magWarn = document.getElementById('qibla-magwarn');
+    if (magWarn && typeof acc === 'number') magWarn.style.display = (acc < 0 || acc > 25) ? 'flex' : 'none';
+
+    // حركة نابضة (Spring) بأقصر مسار زاوي — سلاسة بلا رجّة
+    if (_smoothHeading === null){ _smoothHeading = heading; _headVel = 0; }
     else {
         let diff = ((heading - _smoothHeading + 540) % 360) - 180; // [-180,180]
-        if (Math.abs(diff) < 0.5) diff = 0;
-        _smoothHeading = (_smoothHeading + diff * 0.2 + 360) % 360;
+        _headVel = _headVel * 0.62 + diff * 0.22;                  // زنبرك مخمّد
+        if (Math.abs(diff) < 0.25 && Math.abs(_headVel) < 0.05) _headVel = 0;
+        _smoothHeading = (_smoothHeading + _headVel + 360) % 360;
     }
     const h = _smoothHeading;
     // زاوية القبلة على الشاشة (موضع الكعبة بالنسبة لأعلى الهاتف)
@@ -537,6 +565,18 @@ function handleOrientation(e) {
     if (arrow){ arrow.style.transform = `translate(-50%, -50%) rotate(${target}deg)`; arrow.classList.toggle('al', aligned); }
     const topPtr = document.getElementById('qibla-top-pointer');
     if (topPtr) topPtr.classList.toggle('al', aligned);
+
+    // توجيه بالاهتزاز اللمسي: نبضات تتسارع كلما اقتربت، ونبضة قوية عند المحاذاة
+    if (window.HAP){
+        const angDist = Math.min(target, 360 - target);
+        if (aligned && !_wasAligned) HAP.success();
+        else if (!aligned && angDist < 45){
+            const now = Date.now();
+            const interval = 60 + angDist * 24; // كل ما اقتربت قلّت الفترة
+            if (now - _lastPulse > interval){ _lastPulse = now; HAP.light(); }
+        }
+    }
+    _wasAligned = aligned;
 
     const deg = document.getElementById('qibla-degree');
     if (deg) deg.innerText = Math.round(qiblaBearing) + '°' + (aligned ? ' ✓' : '');

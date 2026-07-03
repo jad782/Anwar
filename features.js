@@ -316,26 +316,37 @@ function injectSearchBar(){
     const w = document.createElement('div');
     w.id = 'quran-search-wrap'; w.className='quran-search-wrap';
     w.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i>
-      <input id="quran-search-input" placeholder="${tr('ابحث في القرآن... مثال: الصبر','Search the Quran...')}" onkeydown="if(event.key==='Enter')QA.searchQuran()">
-      <button onclick="QA.searchQuran()">${tr('بحث','Go')}</button>`;
+      <input id="quran-search-input" placeholder="${tr('ابحث في القرآن... مثال: الصبر','Search the Quran...')}" oninput="QA.searchDebounced()">
+      <button onclick="QA.clearSearch()"><i class="fa-solid fa-xmark"></i></button>`;
     tabs.insertAdjacentElement('beforebegin', w);
     const res = document.createElement('div'); res.id='quran-search-results'; res.className='quran-search-results'; res.style.display='none';
     tabs.insertAdjacentElement('afterend', res);
 }
-QA.searchQuran = async function(){
-    const q = $('quran-search-input').value.trim(); if(!q) return;
-    const res = $('quran-search-results'); res.style.display='block';
-    res.innerHTML = `<div style="text-align:center;padding:20px;"><i class="fa-solid fa-spinner fa-spin"></i></div>`;
-    $('surah-list').style.display='none'; $('juz-list').style.display='none';
-    try{
-        const r = await fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(q)}/all/quran-simple-clean`);
-        const j = await r.json();
-        if (!j.data || !j.data.matches || !j.data.matches.length){ res.innerHTML = `<p class="tasks-empty">${tr('لا نتائج','No results')}</p>`; return; }
-        res.innerHTML = `<div class="search-head">${tr('النتائج','Results')}: ${j.data.count} — <button onclick="QA.clearSearch()">${tr('إغلاق','Close')}</button></div>` +
-            j.data.matches.slice(0,40).map(m => `<div class="search-item" onclick="QA.goToResult(${m.surah.number},${m.numberInSurah})">
-                <div class="search-ayah">${m.text}</div>
-                <div class="search-ref">${m.surah.name} : ${m.numberInSurah} <i class="fa-solid fa-arrow-left-long" style="opacity:.5"></i></div></div>`).join('');
-    }catch(e){ res.innerHTML = `<p class="tasks-empty">${tr('تعذّر البحث، تأكد من الإنترنت.','Search failed.')}</p>`; }
+// فهرس بحث أوفلاين فائق السرعة (يُبنى مرّة من QURAN_DATA)
+let _searchIndex = null;
+function normQ(s){ return (s||'')
+    .replace(/[ؐ-ًؚ-ٰٟۖ-ۭـ]/g,'') // تشكيل + علامات قرآنية + تطويل
+    .replace(/[أإآٱا]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي')
+    .replace(/\s+/g,' ').trim(); }
+function buildSearchIndex(){ const QD=window.QURAN_DATA; if(!QD||!QD.ayahs) return null;
+    return QD.ayahs.map(a=>({ s:a.s, a:a.a, t:a.t, n:normQ(a.t) })); }
+let _searchTimer=null;
+QA.searchDebounced = function(){ clearTimeout(_searchTimer); _searchTimer=setTimeout(QA.searchQuran, 30); };
+QA.searchQuran = function(){
+    const raw = ($('quran-search-input').value||'').trim();
+    const q = normQ(raw);
+    const res = $('quran-search-results');
+    if (q.length < 2){ res.style.display='none'; $('surah-list').style.display = document.getElementById('tab-btn-surahs').classList.contains('active')?'block':'none'; $('juz-list').style.display = document.getElementById('tab-btn-juzs').classList.contains('active')?'block':'none'; return; }
+    if (!_searchIndex) _searchIndex = buildSearchIndex();
+    if (!_searchIndex){ res.style.display='block'; res.innerHTML=`<p class="tasks-empty">${tr('جاري تحميل المصحف...','Loading...')}</p>`; return; }
+    $('surah-list').style.display='none'; $('juz-list').style.display='none'; res.style.display='block';
+    const out=[]; for(let i=0;i<_searchIndex.length && out.length<60;i++){ if(_searchIndex[i].n.indexOf(q)>=0) out.push(_searchIndex[i]); }
+    if (!out.length){ res.innerHTML = `<p class="tasks-empty">${tr('لا نتائج','No results')}</p>`; return; }
+    const cnt = window.fmtDigits ? fmtDigits(out.length) : out.length;
+    res.innerHTML = `<div class="search-head">${tr('النتائج','Results')}: ${cnt}${out.length>=60?'+':''} — <button onclick="QA.clearSearch()">${tr('إغلاق','Close')}</button></div>` +
+        out.map(m=>`<div class="search-item" onclick="QA.goToResult(${m.s},${m.a})">
+            <div class="search-ayah">${m.t}</div>
+            <div class="search-ref">${surahNm(m.s)} : ${window.fmtDigits?fmtDigits(m.a):m.a} <i class="fa-solid fa-arrow-left-long" style="opacity:.5"></i></div></div>`).join('');
 };
 QA.goToResult = function(num, ayah){
     QA.clearSearch();

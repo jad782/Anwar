@@ -138,8 +138,8 @@ async function renderPage(page){
     if (window.PRO2 && PRO2.checkBadges) setTimeout(()=>PRO2.checkBadges(), 50);
 }
 // في المصحف: الصفحة التالية على اليسار (سحب لليسار)، والسابقة على اليمين
-MUSHAF.next = function(){ if(curPage<604){ _turnDir=1; curPage++; renderPage(curPage); } };
-MUSHAF.prev = function(){ if(curPage>1){ _turnDir=-1; curPage--; renderPage(curPage); } };
+MUSHAF.next = function(){ if(curPage<604){ _turnDir=1; curPage++; renderPage(curPage); if(window.HAP)HAP.light(); } };
+MUSHAF.prev = function(){ if(curPage>1){ _turnDir=-1; curPage--; renderPage(curPage); if(window.HAP)HAP.light(); } };
 MUSHAF.toggleTajweed = function(){ tajOn=!tajOn; const b=$('msf-taj'); if(b)b.classList.toggle('active',tajOn); renderPage(curPage); };
 MUSHAF.detailed = function(){ // افتح القارئ التفصيلي (صوت/ترجمة/تسجيل) للسورة الحالية
     const n = (window.CUR_READ&&window.CUR_READ.num)||1;

@@ -14,6 +14,7 @@ const INCLUDE = [
   'firebase.js',
   'prayers.js',
   'ambient.js',
+  'haptics.js',
   'app.js',
   'features.js',
   'pro.js',

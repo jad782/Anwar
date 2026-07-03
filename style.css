@@ -932,3 +932,16 @@ body.reading-fullscreen .mushaf-page { background: linear-gradient(180deg, rgba(
 .off-val { min-width:38px; text-align:center; font-weight:800; color:var(--accent-light,#F2D27A); }
 .off-restore { width:100%; margin-top:10px; padding:12px; border-radius:13px; border:1px dashed rgba(224,82,77,0.5); background:rgba(224,82,77,0.08); color:#e0524d; font-weight:700; cursor:pointer; font-family:'Tajawal','Cairo',sans-serif; }
 body.light-mode .pv-cell b, body.light-mode .off-val { color:#9a6f12; }
+
+/* تحذير التشويش المغناطيسي للبوصلة */
+.qibla-magwarn { display:flex; align-items:center; gap:8px; justify-content:center; margin-top:12px; background:rgba(231,124,58,0.15); border:1px solid rgba(231,124,58,0.5); color:#e77c3a; border-radius:12px; padding:9px 12px; font-size:0.78rem; font-weight:700; line-height:1.5; }
+
+/* أوقات الكراهة */
+.makruh-card { background:rgba(231,124,58,0.08); border:1px solid rgba(231,124,58,0.3); border-radius:16px; padding:12px 14px; margin:0 0 20px; }
+.mk-title { font-weight:800; color:#e77c3a; font-size:0.9rem; margin-bottom:8px; }
+.mk-row { display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; padding:5px 0; color:var(--text-main); }
+.mk-row + .mk-row { border-top:1px dashed rgba(231,124,58,0.2); }
+.mk-row span { color:var(--text-soft,#cbbfa6); }
+.mk-row span i { color:#e77c3a; width:18px; }
+.mk-row b { color:#e77c3a; }
+body.light-mode .mk-row { color:var(--text-main); }
