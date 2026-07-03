@@ -315,9 +315,10 @@ function renderAll(){ window.renderPointsEntry&&renderPointsEntry(); window.rend
 // ---------- الحقن ----------
 function inject(){
     const home=$('tab-home'); if(!home) return;
-    const hero=home.querySelector('.hero-section');
-    if(hero && !$('athkar-shortcut')){
-        const a=document.createElement('div'); a.id='athkar-shortcut'; hero.insertAdjacentElement('afterend', a);
+    // ضع اختصار الأذكار وبطاقة النقاط بعد آية اليوم (أوقات الصلاة تبقى بالأعلى)
+    const anchor = home.querySelector('#ayah-of-day-card') || home.querySelector('.prayer-grid') || home.querySelector('.hero-section');
+    if(anchor && !$('athkar-shortcut')){
+        const a=document.createElement('div'); a.id='athkar-shortcut'; anchor.insertAdjacentElement('afterend', a);
         const e=document.createElement('div'); e.id='points-entry'; a.insertAdjacentElement('afterend', e);
     }
     applyVisual(); renderAll();
