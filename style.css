@@ -945,3 +945,31 @@ body.light-mode .pv-cell b, body.light-mode .off-val { color:#9a6f12; }
 .mk-row span i { color:#e77c3a; width:18px; }
 .mk-row b { color:#e77c3a; }
 body.light-mode .mk-row { color:var(--text-main); }
+
+/* خريطة مسار القبلة المصغّرة */
+.qibla-route { margin-top: 14px; display: flex; justify-content: center; }
+
+/* ============================================================
+   تحسين المساحات والتسلسل البصري (Global UI Polish)
+   مساحات موحّدة + هرمية أوضح + بطاقات متناسقة عبر كل الشاشات
+   ============================================================ */
+/* إيقاع الأقسام: مسافة تنفّس ثابتة قبل كل عنوان قسم */
+.section-header { margin-top: 30px; margin-bottom: 16px; }
+.section-header:first-child, .hero-section + .section-header { margin-top: 8px; }
+.section-header h3 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.2px; line-height: 1.3; }
+/* الكروت: حشوة وهوامش موحّدة */
+.vip-card, .achievement-rings-card { padding: 22px; margin-bottom: 24px; }
+.ayah-of-day-card, .makruh-card { margin-bottom: 24px; }
+.prayer-grid { gap: 12px; }
+.prayer-card { padding: 16px 10px; }
+/* عناوين المجموعات في الإعدادات */
+.set-group-title { margin-top: 24px; margin-bottom: 10px; font-weight: 800; opacity: 0.9; }
+.settings-list > .setting-item { margin-bottom: 10px; }
+/* اختصارات/بطاقات صغيرة: تباعد مريح */
+.pts-entry, .ath-shortcut-card { margin-bottom: 20px; }
+/* نصوص فرعية أهدأ (هرمية) */
+.section-header .location, .pv-cell span, .set-label + * { font-weight: 500; }
+/* أزرار أنعم وموحّدة */
+.tasbeeh-pill { border-radius: 26px; }
+/* مسافة سفلية للمحتوى الأخير قبل الشريط */
+.donate-card { margin-top: 6px; }

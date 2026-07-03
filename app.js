@@ -473,6 +473,33 @@ function computeQiblaGC(lat, lng){
     const x=Math.cos(toRad(lat))*Math.sin(toRad(KAABA_LAT))-Math.sin(toRad(lat))*Math.cos(toRad(KAABA_LAT))*Math.cos(dLng);
     return (toDeg(Math.atan2(y,x))+360)%360;
 }
+// المسافة إلى الكعبة (هافرسين، كم)
+function distanceToKaaba(lat, lng){
+    const R=6371, toRad=d=>d*Math.PI/180;
+    const dLat=toRad(KAABA_LAT-lat), dLng=toRad(KAABA_LNG-lng);
+    const a=Math.sin(dLat/2)**2 + Math.cos(toRad(lat))*Math.cos(toRad(KAABA_LAT))*Math.sin(dLng/2)**2;
+    return Math.round(2*R*Math.asin(Math.sqrt(a)));
+}
+// خريطة مسار مصغّرة أوفلاين: موقعك ← الكعبة باتجاه القبلة الحقيقي
+function renderQiblaRoute(lat, lng, bearing){
+    const box = document.getElementById('qibla-route'); if(!box) return;
+    const km = distanceToKaaba(lat, lng);
+    const cx=90, cy=70, R=54;
+    const rad = (bearing-90)*Math.PI/180;      // الشمال للأعلى
+    const kx = cx + R*Math.cos(rad), ky = cy + R*Math.sin(rad);
+    const en = (typeof currentLang!=='undefined' && currentLang==='en');
+    const kmTxt = (window.fmtDigits?fmtDigits(km.toLocaleString('en-US')):km.toLocaleString('en-US')) + (en?' km':' كم');
+    box.innerHTML = `<svg viewBox="0 0 180 148" width="100%" style="max-width:230px">
+        <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="rgba(212,168,67,0.25)" stroke-width="1"/>
+        <circle cx="${cx}" cy="${cy}" r="${R*0.6}" fill="none" stroke="rgba(212,168,67,0.12)" stroke-width="1"/>
+        <line x1="${cx}" y1="${cy}" x2="${kx.toFixed(1)}" y2="${ky.toFixed(1)}" stroke="url(#rg)" stroke-width="2.5" stroke-dasharray="4 3"/>
+        <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#C5A059"/><stop offset="1" stop-color="#F2D27A"/></linearGradient></defs>
+        <circle cx="${cx}" cy="${cy}" r="4.5" fill="#F2D27A"/>
+        <text x="${cx}" y="${cy+16}" text-anchor="middle" fill="#A1917A" font-size="8">${en?'You':'موقعك'}</text>
+        <text x="${kx.toFixed(1)}" y="${(ky-8).toFixed(1)}" text-anchor="middle" font-size="12">🕋</text>
+        <text x="90" y="140" text-anchor="middle" fill="#D4A843" font-size="10" font-weight="bold">${en?'Kaaba • ':'الكعبة • '}${kmTxt}</text>
+    </svg>`;
+}
 
 window.openQibla = function() {
     document.getElementById('qibla-overlay').classList.add('active');
@@ -483,14 +510,16 @@ window.openQibla = function() {
         navigator.geolocation.getCurrentPosition(pos => {
             qiblaBearing = computeQiblaBearing(pos.coords.latitude, pos.coords.longitude);
             document.getElementById('qibla-degree').innerText = Math.round(qiblaBearing) + '°';
+            renderQiblaRoute(pos.coords.latitude, pos.coords.longitude, qiblaBearing);
             startCompass();
         }, () => {
             // بدون موقع: استخدم إسطنبول كافتراضي
             qiblaBearing = computeQiblaBearing(41.0082, 28.9784);
             document.getElementById('qibla-degree').innerText = Math.round(qiblaBearing) + (currentLang==='en'?'° (approx)':'° (تقريبي)');
+            renderQiblaRoute(41.0082, 28.9784, qiblaBearing);
             startCompass();
         }, { timeout: 8000, maximumAge: 600000, enableHighAccuracy: false });
-    } else { qiblaBearing = computeQiblaBearing(41.0082, 28.9784); document.getElementById('qibla-degree').innerText = Math.round(qiblaBearing) + '°'; }
+    } else { qiblaBearing = computeQiblaBearing(41.0082, 28.9784); document.getElementById('qibla-degree').innerText = Math.round(qiblaBearing) + '°'; renderQiblaRoute(41.0082, 28.9784, qiblaBearing); }
 
     // 2) إذن البوصلة على iOS 13+
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
