@@ -973,3 +973,32 @@ body.light-mode .mk-row { color:var(--text-main); }
 .tasbeeh-pill { border-radius: 26px; }
 /* مسافة سفلية للمحتوى الأخير قبل الشريط */
 .donate-card { margin-top: 6px; }
+
+/* ============================================================
+   تهدئة بصرية (Declutter) — ظلال أخف + مساحات أوسع + هرمية أنعم
+   يطبَّق على الرئيسية والإعدادات وكل الشاشات
+   ============================================================ */
+/* بطاقات أخف وزناً (تقليل الازدحام البصري) */
+.vip-card, .achievement-rings-card, .ayah-of-day-card, .makruh-card, .khatma-manager-card {
+    box-shadow: 0 4px 14px rgba(0,0,0,0.18) !important;
+    border-color: rgba(212,168,67,0.12);
+}
+body.light-mode .vip-card, body.light-mode .achievement-rings-card, body.light-mode .ayah-of-day-card { box-shadow: 0 3px 10px rgba(0,0,0,0.04) !important; }
+
+/* الإعدادات: عناصر أهدأ + مجموعات أوضح */
+.settings-list .setting-item { box-shadow: 0 3px 10px rgba(0,0,0,0.14) !important; margin-bottom: 9px; padding: 14px 16px; }
+.set-group-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.85; margin: 26px 6px 12px; position: relative; padding-top: 14px; }
+.set-group-title::before { content: ''; position: absolute; top: 0; right: 0; left: 0; height: 1px; background: linear-gradient(90deg, var(--border-color), transparent); }
+.set-group-title:first-child { margin-top: 6px; padding-top: 0; }
+.set-group-title:first-child::before { display: none; }
+.settings-list { padding-bottom: 24px; }
+
+/* الرئيسية: تنفّس أكبر بين الأقسام + عناصر ثانوية أهدأ */
+#tab-home > .section-header { margin-top: 34px; }
+#tab-home > .hero-section + .section-header { margin-top: 10px; }
+.makruh-card { padding: 12px 16px; opacity: 0.96; }
+.mk-title { font-size: 0.82rem; }
+/* قوائم البطاقات الصغيرة تباعد مريح */
+.pts-entry, .ath-shortcut-card, #daily-extra { margin-bottom: 22px; }
+/* عناوين البطاقات الداخلية موحّدة */
+.vip-card h3, .khatma-manager-card h3 { font-size: 1.1rem; font-weight: 800; }

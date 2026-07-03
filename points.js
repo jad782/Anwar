@@ -328,6 +328,7 @@ function inject(){
         if(list && !$('account-row')){ const ar=document.createElement('div'); ar.className='setting-item'; ar.id='account-row';
             ar.innerHTML=`<span class="set-ico"><i class="fa-solid fa-circle-user"></i></span><span class="set-label">${tr('حسابي','My Account')}</span><i class="fa-solid fa-chevron-left ath-chevron"></i>`;
             ar.onclick=()=>AnwarProfile.open(); list.insertBefore(ar, list.firstChild); }
+        if(list && !$('acct-grp')){ const g=document.createElement('div'); g.className='set-group-title'; g.id='acct-grp'; g.textContent=tr('حسابي والمظهر','Account & appearance'); list.insertBefore(g, list.firstChild); }
         if(list && !$('points-row')){ const row=document.createElement('div'); row.className='setting-item'; row.id='points-row';
             row.innerHTML=`<span class="set-ico"><i class="fa-solid fa-star"></i></span><span class="set-label">${tr('نقاط الأنوار والمكافآت','PlusPoints & rewards')}</span><i class="fa-solid fa-chevron-left ath-chevron"></i>`;
             row.onclick=()=>AnwarPoints2.open(); if($('account-row')) list.insertBefore(row, $('account-row').nextSibling); else list.appendChild(row); }
