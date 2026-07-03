@@ -454,6 +454,10 @@ const SUPPORT_TIERS = [
     { id:'com.alanwar.donation.medium', emoji:'🌿', ar:'دعم كريم',  en:'Generous',       price:'$4.99' },
     { id:'com.alanwar.donation.large',  emoji:'🌟', ar:'دعم سخيّ',  en:'Big support',    price:'$9.99' }
 ];
+// منتجات الاشتراك المميّز (تُنشأ في App Store Connect)
+const SUB_IDS = ['com.alanwar.premium.monthly','com.alanwar.premium.yearly'];
+const LIFETIME_ID = 'com.alanwar.premium.lifetime';
+window.PREMIUM_PRODUCTS = { subs: SUB_IDS, lifetime: LIFETIME_ID };
 let _iapReady = false;
 let _iapState = { plugin:false, initialized:false, err:'' };
 function initIAP(){
@@ -463,15 +467,38 @@ function initIAP(){
         if (!CdvPurchase || _iapReady) return;
         const { store, ProductType, Platform } = CdvPurchase;
         SUPPORT_TIERS.forEach(t => store.register({ id:t.id, type:ProductType.CONSUMABLE, platform:Platform.APPLE_APPSTORE }));
+        SUB_IDS.forEach(id => store.register({ id:id, type:ProductType.PAID_SUBSCRIPTION, platform:Platform.APPLE_APPSTORE }));
+        store.register({ id:LIFETIME_ID, type:ProductType.NON_CONSUMABLE, platform:Platform.APPLE_APPSTORE });
         store.when().approved(tr2 => tr2.verify());
-        store.when().verified(rc => { rc.finish(); if(typeof showBadgeToast==='function') showBadgeToast({emoji:'🤍', name:tr('جزاك الله خيراً','JazakAllah khayr'), desc:tr('شكراً لدعمك التطبيق','Thank you for your support')}); });
-        store.when().productUpdated(()=>{ try{ PRO._refreshDonatePrices && PRO._refreshDonatePrices(); }catch(e){} });
+        store.when().verified(rc => {
+            rc.finish();
+            const isPrem = rc.id && (SUB_IDS.includes(rc.id) || rc.id===LIFETIME_ID);
+            if (isPrem){ localStorage.setItem('anwar_premium','true'); if(window.AnwarPremium&&AnwarPremium.onUnlocked) AnwarPremium.onUnlocked(); }
+            else if(typeof showBadgeToast==='function') showBadgeToast({emoji:'🤍', name:tr('جزاك الله خيراً','JazakAllah khayr'), desc:tr('شكراً لدعمك التطبيق','Thank you for your support')});
+        });
+        store.when().productUpdated(()=>{ try{ PRO._refreshDonatePrices && PRO._refreshDonatePrices(); if(window.AnwarPremium&&AnwarPremium.refreshPrices) AnwarPremium.refreshPrices(); }catch(e){} });
         if (typeof store.error === 'function') store.error(e => { _iapState.err = (e && ((e.code||'')+' '+(e.message||''))) || String(e); try{ PRO._refreshDonatePrices && PRO._refreshDonatePrices(); }catch(x){} });
         store.initialize([Platform.APPLE_APPSTORE]);
         _iapState.initialized = true;
         _iapReady = true;
     } catch(e){ _iapState.err = 'init: ' + (e && e.message || e); }
 }
+// شراء اشتراك/مدى الحياة
+PRO.subscribe = function(id){
+    try {
+        const CdvPurchase = window.CdvPurchase;
+        if (CdvPurchase && _iapReady){
+            const p = CdvPurchase.store.get(id, CdvPurchase.Platform.APPLE_APPSTORE);
+            if (p && p.getOffer){ CdvPurchase.store.order(p.getOffer()); return; }
+        }
+    } catch(e){}
+    alert(tr('يُفعّل الاشتراك داخل نسخة App Store بعد اعتماد المنتجات.','Subscription activates in the App Store build after products are approved.'));
+};
+PRO.restorePurchases = function(){
+    try { const CdvPurchase = window.CdvPurchase; if (CdvPurchase && CdvPurchase.store && CdvPurchase.store.restorePurchases){ CdvPurchase.store.restorePurchases(); alert(tr('جاري استعادة مشترياتك...','Restoring your purchases...')); return; } } catch(e){}
+    alert(tr('الاستعادة متاحة داخل نسخة App Store.','Restore is available in the App Store build.'));
+};
+PRO.premiumPrice = function(id){ try{ const C=window.CdvPurchase; if(C&&_iapReady){ const p=C.store.get(id,C.Platform.APPLE_APPSTORE); return p&&p.pricing&&p.pricing.price; } }catch(e){} return null; };
 PRO.support = function(id){
     try {
         const CdvPurchase = window.CdvPurchase;
