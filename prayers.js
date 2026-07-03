@@ -252,10 +252,13 @@ PRAYERS.renderMakruh = function(){
     if(!pt||!pt.Sunrise){ box.innerHTML=''; return; }
     const rows=[
         [L()==='en'?'After sunrise':'بعد الشروق', pt.Sunrise, timeAdd(pt.Sunrise,15), 'fa-sun'],
-        [L()==='en'?'Solar noon':'وقت الزوال (الاستواء)', timeAdd(pt.Dhuhr,-6), pt.Dhuhr, 'fa-circle-half-stroke'],
+        [L()==='en'?'Zenith':'الزوال', timeAdd(pt.Dhuhr,-6), pt.Dhuhr, 'fa-circle-half-stroke'],
         [L()==='en'?'Before sunset':'قبيل الغروب', timeAdd(pt.Maghrib,-15), pt.Maghrib, 'fa-cloud-sun']
     ];
-    box.innerHTML = rows.map(r=>`<div class="mk-row"><span><i class="fa-solid ${r[3]}"></i> ${r[0]}</span><b>${r[1]} — ${r[2]}</b></div>`).join('');
+    box.innerHTML = `<div class="mk-grid">` + rows.map(r=>`<div class="mk-item">
+        <span class="mk-ic"><i class="fa-solid ${r[3]}"></i></span>
+        <span class="mk-name">${r[0]}</span>
+        <span class="mk-time">${r[1]} - ${r[2]}</span></div>`).join('') + `</div>`;
 };
 function initMakruh(){
     const grid=document.querySelector('#tab-home .prayer-grid'); if(!grid || $('makruh-card')) return;
