@@ -1147,3 +1147,49 @@ body.light-mode .nc-name { color:#9a6f12; }
 .wp-thumb { aspect-ratio:9/16; border-radius:16px; display:flex; align-items:center; justify-content:center; text-align:center; padding:16px; cursor:pointer; border:1px solid rgba(242,210,122,0.3); }
 .wp-thumb span { font-family:'Amiri',serif; color:#F7EFDC; font-size:0.9rem; line-height:1.9; }
 .wp-thumb:active { transform:scale(0.96); }
+
+/* ============================================================
+   لمسة الفخامة النهائية (Luxury Polish v3)
+   إيقاع بصري + تفاصيل ذهبية + انسيابية عبر كل الشاشات
+   ============================================================ */
+/* شريط ذهبي أنيق قبل كل عنوان قسم (هوية فخمة) */
+.section-header h3 { position:relative; padding-right:15px; }
+.section-header h3::before { content:''; position:absolute; right:0; top:50%; transform:translateY(-50%); width:4px; height:22px; border-radius:3px; background:linear-gradient(180deg, var(--accent-light,#F2D27A), var(--accent-color)); box-shadow:0 0 10px var(--glow); }
+
+/* الترحيب أنعم وأفخم */
+.greeting { font-size:1.55rem; font-weight:800; letter-spacing:-0.5px; }
+
+/* خيط ذهبي علوي رقيق على البطاقات (لمعان زجاجي) */
+.vip-card, .achievement-rings-card, .ayah-of-day-card, .khatma-manager-card, .makruh-card, .premium-banner, .group-home-card {
+    position:relative; overflow:hidden;
+}
+.vip-card::after, .achievement-rings-card::after, .ayah-of-day-card::after, .khatma-manager-card::after {
+    content:''; position:absolute; top:0; left:12%; right:12%; height:1px;
+    background:linear-gradient(90deg, transparent, rgba(242,210,122,0.4), transparent); pointer-events:none;
+}
+
+/* الصلاة القادمة تتوهّج بأناقة */
+.active-prayer { box-shadow:0 8px 26px var(--glow), inset 0 1px 0 rgba(242,210,122,0.25) !important; }
+.active-prayer::before { content:''; position:absolute; inset:0; border-radius:inherit; background:radial-gradient(circle at 50% 0%, rgba(242,210,122,0.14), transparent 65%); pointer-events:none; }
+.prayer-card { position:relative; overflow:hidden; }
+
+/* تفاعلات لمس ناعمة وموحّدة */
+.prayer-card:active, .app-item:active, .ring-item:active, .occ-item:active { transform:scale(0.97); }
+.prayer-card, .app-item, .ring-item, .name-card, .rec-item { transition:transform .15s ease, box-shadow .2s ease, background .2s ease; }
+
+/* آية اليوم بمسافة قراءة مريحة */
+.ayah-day-text { line-height:2.35; }
+.ayah-day-label { letter-spacing:0.3px; }
+
+/* عناوين المودالات موحّدة وأنيقة */
+.qibla-modal h2 { letter-spacing:-0.3px; }
+
+/* دخول ناعم للمودالات */
+.qibla-overlay .qibla-modal { transition:transform .35s cubic-bezier(0.22,1,0.36,1), opacity .3s ease; }
+
+/* شريط تمرير رفيع أنيق داخل المودالات */
+.qibla-modal::-webkit-scrollbar { width:5px; }
+.qibla-modal::-webkit-scrollbar-thumb { background:rgba(212,168,67,0.3); border-radius:3px; }
+
+/* التاريخ في الهيرو أوضح */
+.date-card-emerald .day { text-shadow:0 1px 8px rgba(0,0,0,0.3); }
