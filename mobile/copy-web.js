@@ -24,6 +24,7 @@ const INCLUDE = [
   'premium.js',
   'hajj.js',
   'recitations.js',
+  'premium-features.js',
   'update.js',
   'sunan.js',
   'mushaf.js',

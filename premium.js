@@ -15,18 +15,18 @@ AnwarPremium.setForTesting = function(v){ localStorage.setItem('anwar_premium', 
 
 // الميزات المميّزة (شرح مبسّط لكل واحدة)
 const FEATURES = [
-    { ico:'fa-kaaba',            ar:'رفيق العمرة والحج',        d:'أدلة المناسك خطوة بخطوة + عدّاد أشواط الطواف والسعي + أدعية كل موقف.' },
-    { ico:'fa-calendar-star',    ar:'تقويم إسلامي كامل',        d:'رمضان والعشر وعاشوراء والأيام البيض... مع تنبيهات وأعمال كل مناسبة.' },
-    { ico:'fa-headphones',       ar:'مكتبة تلاوات بلا نت',       d:'تحميل سور كاملة بأصوات كبار القرّاء للاستماع أوفلاين وبالخلفية.' },
-    { ico:'fa-palette',          ar:'حزمة التخصيص الكاملة',      d:'كل الثيمات وخطوط المصحف والخلفيات الفاخرة — دائمة بلا نقاط.' },
-    { ico:'fa-clapperboard',     ar:'استوديو الآيات السينمائي',  d:'حوّل الآية لفيديو متحرّك بخلفية وتلاوة، جاهز للنشر على السوشال.' },
-    { ico:'fa-moon',             ar:'الوضع الليلي التأمّلي',      d:'شاشة قراءة غامرة للقيام والتهجّد بلا مشتّتات وأجواء هادئة.' },
-    { ico:'fa-image',            ar:'لوحات فنية للآيات',         d:'خلفيات جوّال فنية 4K بالخط العربي تتجدّد يومياً.' },
-    { ico:'fa-cube',             ar:'القبلة بالواقع المعزّز 3D',  d:'كعبة ثلاثية الأبعاد تطفو بالكاميرا وتوجّهك بدقّة.' },
-    { ico:'fa-tower-broadcast',  ar:'ختمة جماعية مباشرة',        d:'غرفة ختمة لحظية: كلٌّ يقرأ جزءه وشريط تقدّم مباشر ودعاء ختم جماعي.' },
-    { ico:'fa-hands-praying',    ar:'أسماء الله الحسنى التفاعلية',d:'الـ99 اسماً بتصميم فخم مع المعاني وطريقة الدعاء وبطاقات مشاركة.' },
-    { ico:'fa-star-and-crescent',ar:'رفيق رمضان الكامل',        d:'إمساكية وعدّاد صيام وورد تراويح وأهداف ختمة — يتفعّل تلقائياً برمضان.' },
-    { ico:'fa-wand-magic-sparkles',ar:'صانع الثيمات الشخصي',    d:'صمّم ثيمك الخاص باختيار لونين ويتناسق التطبيق كله معك.' },
+    { ico:'fa-kaaba',            ar:'رفيق العمرة والحج',        d:'أدلة المناسك خطوة بخطوة + عدّاد أشواط الطواف والسعي + أدعية كل موقف.', act:"AnwarHajj&&AnwarHajj.open()" },
+    { ico:'fa-calendar-star',    ar:'تقويم إسلامي كامل',        d:'رمضان والعشر وعاشوراء والأيام البيض... مع تنبيهات وأعمال كل مناسبة.', act:"PRO&&PRO.openCalendar()" },
+    { ico:'fa-headphones',       ar:'مكتبة تلاوات بلا نت',       d:'تحميل سور كاملة بأصوات كبار القرّاء للاستماع أوفلاين وبالخلفية.', act:"AnwarRecite&&AnwarRecite.open()" },
+    { ico:'fa-palette',          ar:'حزمة التخصيص الكاملة',      d:'كل الثيمات وخطوط المصحف والخلفيات الفاخرة — دائمة بلا نقاط.', act:"AnwarTheme2&&AnwarTheme2.open()" },
+    { ico:'fa-clapperboard',     ar:'استوديو الآيات السينمائي',  d:'صمّم الآيات والأحاديث بتأثيرات متحرّكة واحفظها/انشرها بجودة عالية.', act:"AnwarCards&&AnwarCards.open()" },
+    { ico:'fa-moon',             ar:'الوضع الليلي التأمّلي',      d:'شاشة قراءة غامرة للقيام والتهجّد بلا مشتّتات وأجواء هادئة.', act:"AnwarFocus&&AnwarFocus.open()" },
+    { ico:'fa-image',            ar:'لوحات فنية للآيات',         d:'خلفيات جوّال فنية بالخط العربي تُحفظ في جهازك.', act:"AnwarWallpaper&&AnwarWallpaper.open()" },
+    { ico:'fa-cube',             ar:'القبلة بالواقع المعزّز',    d:'كاميرا توجّهك نحو القبلة بسهم فوق الواقع + توجيه بالاهتزاز.', act:"openQibla()" },
+    { ico:'fa-tower-broadcast',  ar:'ختمة جماعية مباشرة',        d:'غرفة ختمة لحظية متزامنة: كلٌّ يقرأ جزءه وشريط تقدّم مباشر للجميع.', act:"PRO&&PRO.openGroupKhatma()" },
+    { ico:'fa-hands-praying',    ar:'أسماء الله الحسنى',        d:'الـ99 اسماً بتصميم فخم مع المعاني وبطاقات مشاركة.', act:"AnwarNames&&AnwarNames.open()" },
+    { ico:'fa-star-and-crescent',ar:'رفيق رمضان الكامل',        d:'إمساكية وعدّاد صيام وأعمال رمضان — يعتمد على أوقات صلاتك.', act:"AnwarRamadan&&AnwarRamadan.open()" },
+    { ico:'fa-wand-magic-sparkles',ar:'صانع الثيمات الشخصي',    d:'صمّم ثيمك الخاص باختيار لونين ويتناسق التطبيق كله معك.', act:"AnwarThemeMaker&&AnwarThemeMaker.open()" },
 ];
 const PLANS = [
     { id:'com.alanwar.premium.monthly',  ar:'شهري',      en:'Monthly',  price:'$1.99',  per:'/شهر',  perEn:'/mo' },
@@ -48,9 +48,14 @@ AnwarPremium.openPlans = function(){
 AnwarPremium._render = function(){
     const body=$('premium-body'); if(!body) return;
     if(isPrem()){
+        const launch = FEATURES.map(f=>`<div class="prem-feat prem-launch" onclick="try{${f.act}}catch(e){}">
+            <span class="pf-ico"><i class="fa-solid ${f.ico}"></i></span>
+            <div class="pf-txt"><b>${f.ar}</b><span>${f.d}</span></div>
+            <i class="fa-solid fa-chevron-left" style="color:var(--accent-color);opacity:.6"></i></div>`).join('');
         body.innerHTML=`<div class="prem-hero"><div class="prem-crown"><i class="fa-solid fa-crown"></i></div>
-            <h2>${tr('أنت عضو مميّز 🤍','You are Premium 🤍')}</h2>
-            <p>${tr('شكراً لدعمك — كل الميزات مفتوحة لك.','Thank you — all features unlocked.')}</p></div>`;
+            <h2>${tr('عضو مميّز 🤍','Premium 🤍')}</h2>
+            <p>${tr('كل الميزات مفتوحة — اضغط أيّها لتفتحه.','All features unlocked — tap any to open.')}</p></div>
+            <div class="prem-feats">${launch}</div>`;
         return;
     }
     const feats = FEATURES.map(f=>`<div class="prem-feat"><span class="pf-ico"><i class="fa-solid ${f.ico}"></i></span>

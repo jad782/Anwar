@@ -1,0 +1,129 @@
+// =======================================================
+//  premium-features.js — ميزات مميّزة إضافية (Premium)
+//  أسماء الله الحسنى · رفيق رمضان · صانع الثيمات · الوضع التأمّلي · لوحات فنية
+// =======================================================
+(function(){
+'use strict';
+function $(id){ return document.getElementById(id); }
+function L(){ return (window.currentLang) || localStorage.getItem('lang') || 'ar'; }
+function tr(a,e){ return L()==='en' ? e : a; }
+function gate(ar,en){ return !(window.requirePremium) || requirePremium(ar,en); }
+function modal(id, title, icon, bodyHtml){
+    let m=$(id);
+    if(!m){ m=document.createElement('div'); m.id=id; m.className='qibla-overlay';
+        m.innerHTML=`<div class="qibla-modal" style="width:95%;max-width:460px;text-align:right;max-height:90vh;overflow-y:auto;">
+            <button class="close-qibla" onclick="document.getElementById('${id}').classList.remove('active')"><i class="fa-solid fa-xmark"></i></button>
+            <h2 style="color:var(--accent-color);text-align:center;margin-bottom:12px;"><i class="fa-solid ${icon}"></i> ${title}</h2>
+            <div id="${id}-body"></div></div>`;
+        document.body.appendChild(m);
+    }
+    $(id+'-body').innerHTML = bodyHtml; m.classList.add('active'); return m;
+}
+
+// ===== (10) أسماء الله الحسنى =====
+const NAMES = [
+'الرحمن|الرحيم|الملك|القدوس|السلام|المؤمن|المهيمن|العزيز|الجبار|المتكبر',
+'الخالق|البارئ|المصور|الغفار|القهار|الوهاب|الرزاق|الفتاح|العليم|القابض',
+'الباسط|الخافض|الرافع|المعز|المذل|السميع|البصير|الحكم|العدل|اللطيف',
+'الخبير|الحليم|العظيم|الغفور|الشكور|العلي|الكبير|الحفيظ|المقيت|الحسيب',
+'الجليل|الكريم|الرقيب|المجيب|الواسع|الحكيم|الودود|المجيد|الباعث|الشهيد',
+'الحق|الوكيل|القوي|المتين|الولي|الحميد|المحصي|المبدئ|المعيد|المحيي',
+'المميت|الحي|القيوم|الواجد|الماجد|الواحد|الأحد|الصمد|القادر|المقتدر',
+'المقدم|المؤخر|الأول|الآخر|الظاهر|الباطن|الوالي|المتعالي|البر|التواب',
+'المنتقم|العفو|الرؤوف|مالك الملك|ذو الجلال والإكرام|المقسط|الجامع|الغني|المغني|المانع',
+'الضار|النافع|النور|الهادي|البديع|الباقي|الوارث|الرشيد|الصبور'
+].join('|').split('|');
+window.AnwarNames = { open:function(){ if(!gate('أسماء الله الحسنى','99 Names')) return;
+    const cards = NAMES.map((n,i)=>`<div class="name-card"><span class="nc-num">${i+1}</span><span class="nc-name">${n}</span></div>`).join('');
+    const m = modal('names-modal', tr('أسماء الله الحسنى','99 Names of Allah'), 'fa-hands-praying',
+        `<p style="text-align:center;color:var(--text-muted);font-size:0.8rem;margin-bottom:14px;">${tr('«إنّ لله تسعةً وتسعين اسماً، مَن أحصاها دخل الجنّة» (متفق عليه)','“Allah has 99 names; whoever preserves them enters Paradise.”')}</p><div class="names-grid">${cards}</div>`);
+}};
+
+// ===== (11) رفيق رمضان =====
+function pt(){ try{ return (typeof prayerTimings!=='undefined')?prayerTimings:null; }catch(e){ return null; } }
+window.AnwarRamadan = { open:function(){ if(!gate('رفيق رمضان','Ramadan companion')) return;
+    const p=pt(); const suhoor = p?p.Fajr:'--:--', iftar = p?p.Maghrib:'--:--';
+    const fasted = +(localStorage.getItem('ramadan_fasted')||0);
+    const body = `
+        <div class="ram-times">
+            <div class="ram-t"><span>${tr('الإمساك (السحور)','Suhoor ends')}</span><b>${suhoor}</b></div>
+            <div class="ram-t iftar"><span>${tr('الإفطار (المغرب)','Iftar')}</span><b>${iftar}</b></div>
+        </div>
+        <div class="pts-sec-title">${tr('عدّاد الصيام','Fasting counter')}</div>
+        <div class="ram-counter"><button class="off-btn" onclick="AnwarRamadan.fast(-1)">−</button>
+            <div class="ram-count"><b id="ram-count">${fasted}</b><span>${tr('يوم صيام','days fasted')}</span></div>
+            <button class="off-btn" onclick="AnwarRamadan.fast(1)">+</button></div>
+        <div class="pts-sec-title">${tr('أعمال رمضان','Ramadan deeds')}</div>
+        ${['صلاة التراويح','ورد القرآن اليومي','صدقة اليوم','قيام ليل','دعاء الإفطار'].map((d,i)=>{
+            const done=(localStorage.getItem('ram_deed_'+i)==='1');
+            return `<div class="ch-task ${done?'done':''}" onclick="AnwarRamadan.deed(${i})"><span class="ch-ico"><i class="fa-solid fa-star"></i></span><span class="ch-name">${d}</span><span class="ch-pts">${done?'<i class="fa-solid fa-check"></i>':'✓'}</span></div>`;
+        }).join('')}
+        <p style="text-align:center;color:var(--text-muted);font-size:0.72rem;margin-top:12px;">${tr('الإمساك والإفطار محسوبان من أوقات صلاتك تلقائياً.','Times computed from your prayer settings.')}</p>`;
+    modal('ramadan-modal', tr('رفيق رمضان','Ramadan Companion'), 'fa-star-and-crescent', body);
+},
+fast:function(d){ let v=+(localStorage.getItem('ramadan_fasted')||0)+d; v=Math.max(0,Math.min(30,v)); localStorage.setItem('ramadan_fasted',v); const e=$('ram-count'); if(e)e.textContent=v; if(window.HAP)HAP.light(); },
+deed:function(i){ const k='ram_deed_'+i; localStorage.setItem(k, localStorage.getItem(k)==='1'?'0':'1'); if(window.HAP)HAP.light(); AnwarRamadan.open(); } };
+
+// ===== (12) صانع الثيمات الشخصي =====
+window.AnwarThemeMaker = { open:function(){ if(!gate('صانع الثيمات','Theme maker')) return;
+    const c1=localStorage.getItem('custom_c1')||'#D4A843', c2=localStorage.getItem('custom_c2')||'#F2D27A';
+    const body = `<p style="text-align:center;color:var(--text-muted);font-size:0.82rem;margin-bottom:16px;">${tr('اختر لونين ويتناسق التطبيق كله معك.','Pick two colors; the whole app adapts.')}</p>
+        <div class="tm-row"><span>${tr('اللون الأساسي','Primary')}</span><input type="color" id="tm-c1" value="${c1}"></div>
+        <div class="tm-row"><span>${tr('اللون الفاتح','Highlight')}</span><input type="color" id="tm-c2" value="${c2}"></div>
+        <div class="tm-preview" id="tm-preview"></div>
+        <button class="tasbeeh-pill" style="width:100%;margin-top:14px;" onclick="AnwarThemeMaker.apply()"><i class="fa-solid fa-check"></i> ${tr('تطبيق الثيم','Apply theme')}</button>
+        <button class="prem-restore" onclick="AnwarThemeMaker.reset()">${tr('إلغاء الثيم المخصّص','Remove custom theme')}</button>`;
+    modal('thememaker-modal', tr('صانع الثيمات','Theme Maker'), 'fa-wand-magic-sparkles', body);
+    const upd=()=>{ const pv=$('tm-preview'); if(pv) pv.style.background=`linear-gradient(135deg, ${$('tm-c1').value}, ${$('tm-c2').value})`; };
+    $('tm-c1').oninput=upd; $('tm-c2').oninput=upd; upd();
+},
+apply:function(){ const a=$('tm-c1').value, b=$('tm-c2').value; localStorage.setItem('custom_c1',a); localStorage.setItem('custom_c2',b); localStorage.setItem('custom_theme','1'); AnwarThemeMaker._apply(); if(window.HAP)HAP.success(); },
+_apply:function(){ if(localStorage.getItem('custom_theme')==='1'){ const a=localStorage.getItem('custom_c1'), b=localStorage.getItem('custom_c2'); document.documentElement.style.setProperty('--accent-color',a); document.documentElement.style.setProperty('--accent-light',b); document.documentElement.style.setProperty('--primary-color',b); } },
+reset:function(){ localStorage.setItem('custom_theme','0'); document.documentElement.style.removeProperty('--accent-color'); document.documentElement.style.removeProperty('--accent-light'); document.documentElement.style.removeProperty('--primary-color'); if(window.applyAppTheme)applyAppTheme(); const m=$('thememaker-modal'); if(m)m.classList.remove('active'); } };
+
+// ===== (6) الوضع الليلي التأمّلي (Focus Mode) =====
+window.AnwarFocus = { open:function(){ if(!gate('الوضع التأمّلي','Focus mode')) return;
+    let f=$('focus-mode');
+    if(!f){ f=document.createElement('div'); f.id='focus-mode'; f.className='focus-overlay';
+        f.innerHTML=`<div class="focus-stars"></div>
+            <button class="focus-close" onclick="document.getElementById('focus-mode').classList.remove('active')"><i class="fa-solid fa-xmark"></i></button>
+            <div class="focus-inner"><div class="focus-ayah" id="focus-ayah"></div><div class="focus-dhikr" id="focus-dhikr"></div></div>`;
+        document.body.appendChild(f);
+    }
+    const ayahs=(window.FEATURED_AYAHS)||[{text:'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ',ref:'الرعد'}];
+    const a=ayahs[new Date().getDate()%ayahs.length];
+    $('focus-ayah').textContent=a.text; $('focus-dhikr').textContent='﴿ '+(a.ref||'')+' ﴾';
+    f.classList.add('active');
+}};
+
+// ===== (7) لوحات فنية للآيات (Wallpapers) =====
+const WP_BG=[['#0D3B2E','#04120C'],['#1B2A4A','#05080F'],['#3A2140','#0E0714'],['#4A2C1A','#100B06'],['#14294A','#04070E'],['#2E2A12','#0B0A04']];
+window.AnwarWallpaper = { open:function(){ if(!gate('لوحات فنية للآيات','Ayah wallpapers')) return;
+    const ayahs=(window.FEATURED_AYAHS)||[{text:'وَاللَّهُ خَيْرٌ حَافِظًا',ref:''}];
+    const body = `<p style="text-align:center;color:var(--text-muted);font-size:0.82rem;margin-bottom:12px;">${tr('خلفية جوّال فنية بالآية — اختر واحدة واحفظها.','Artistic phone wallpaper — pick one and save.')}</p>
+        <div class="wp-grid">${WP_BG.map((g,i)=>`<div class="wp-thumb" style="background:linear-gradient(160deg,${g[0]},${g[1]})" onclick="AnwarWallpaper.save(${i})"><span>${ayahs[i%ayahs.length].text.slice(0,22)}…</span></div>`).join('')}</div>`;
+    modal('wallpaper-modal', tr('لوحات فنية للآيات','Ayah Wallpapers'), 'fa-image', body);
+},
+save:async function(i){
+    const ayahs=(window.FEATURED_AYAHS)||[{text:'وَاللَّهُ خَيْرٌ حَافِظًا',ref:''}];
+    const a=ayahs[i%ayahs.length]; const [c1,c2]=WP_BG[i];
+    const W=1080,H=1920,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
+    try{ await document.fonts.load('70px Amiri'); }catch(e){}
+    const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,c1); g.addColorStop(1,c2); x.fillStyle=g; x.fillRect(0,0,W,H);
+    x.strokeStyle='rgba(242,210,122,0.35)'; x.lineWidth=4; x.strokeRect(60,60,W-120,H-120);
+    x.textAlign='center'; try{x.direction='rtl';}catch(e){}
+    x.fillStyle='#F7EFDC'; x.font='72px Amiri, serif';
+    const words=(a.text||'').split(/\s+/); const lines=[]; let ln='';
+    words.forEach(w=>{ const t=ln?ln+' '+w:w; if(x.measureText(t).width>W-280&&ln){lines.push(ln);ln=w;}else ln=t; }); if(ln)lines.push(ln);
+    let y=H/2-(lines.length-1)*66; lines.forEach(l=>{ x.fillText(l,W/2,y); y+=132; });
+    x.fillStyle='#D4A843'; x.font='40px Amiri, serif'; x.fillText('﴿ '+(a.ref||'')+' ﴾',W/2,y+20);
+    x.fillStyle='rgba(247,239,220,0.4)'; x.font='30px Tajawal, sans-serif'; x.fillText('anwar',W/2,H-100);
+    cv.toBlob(async b=>{ if(!b)return; const f=new File([b],'anwar-wallpaper.png',{type:'image/png'});
+        try{ if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f]}); return; } }catch(e){}
+        const u=URL.createObjectURL(b); const link=document.createElement('a'); link.href=u; link.download='anwar-wallpaper.png'; link.click(); setTimeout(()=>URL.revokeObjectURL(u),1500);
+    },'image/png');
+}};
+
+// طبّق الثيم المخصّص عند الإقلاع
+setTimeout(()=>{ try{ AnwarThemeMaker._apply(); }catch(e){} }, 300);
+})();
