@@ -80,14 +80,14 @@ AnwarPremium.onUnlocked = function(){ try{ AnwarPremium._render(); updateBanner(
 // ---------- نقاط الدخول ----------
 function updateBanner(){ const b=$('premium-banner'); if(b) b.style.display = isPrem() ? 'none' : 'flex'; }
 function inject(){
-    // بانر بارز على الرئيسية (بعد مفاتيح يومك)
-    const keys=$('keys-grid');
-    if(keys && !$('premium-banner')){
+    // بانر بارز على الرئيسية (بعد آية اليوم — مكان واضح قرب الأعلى)
+    const anchor = $('ayah-of-day-card') || document.querySelector('#tab-home .prayer-grid') || $('keys-grid');
+    if(anchor && anchor.parentNode && !$('premium-banner')){
         const b=document.createElement('div'); b.id='premium-banner'; b.className='premium-banner'; b.onclick=AnwarPremium.openPlans;
         b.innerHTML=`<div class="pb-left"><div class="pb-ico"><i class="fa-solid fa-crown"></i></div>
             <div class="pb-txt"><b>${tr('الأنوار بريميوم','Al-Anwar Premium')}</b><span>${tr('افتح كل الميزات الفاخرة','Unlock all premium features')}</span></div></div>
             <i class="fa-solid fa-chevron-left pb-go"></i>`;
-        keys.parentNode.insertBefore(b, keys.nextSibling);
+        anchor.parentNode.insertBefore(b, anchor.nextSibling);
         updateBanner();
     }
     // صف في الإعدادات (بأعلى مجموعة الحساب)

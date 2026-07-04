@@ -1031,3 +1031,41 @@ body.light-mode .vip-card, body.light-mode .achievement-rings-card, body.light-m
 .prem-restore { width:100%; margin-top:14px; padding:11px; border-radius:12px; border:1px solid var(--border-color); background:transparent; color:var(--accent-color); font-weight:700; cursor:pointer; font-family:'Tajawal','Cairo',sans-serif; }
 .prem-terms { text-align:center; font-size:0.66rem; color:var(--text-muted); margin-top:10px; line-height:1.6; }
 body.light-mode .pf-txt b { color:var(--text-main); }
+
+/* ============================================================
+   نظام التصميم الموحّد (Design System v2) — فخامة + وضوح + انسيابية
+   يوحّد المسافات والزوايا والظلال والخطوط عبر التطبيق كله
+   ============================================================ */
+:root{ --r-lg:22px; --r-md:15px; --shadow-soft:0 4px 18px rgba(0,0,0,0.16); }
+body.light-mode{ --shadow-soft:0 4px 14px rgba(0,0,0,0.05); }
+
+/* مساحة تنفّس أوسع حول المحتوى */
+.content-area{ padding-left:18px; padding-right:18px; }
+
+/* الأقسام: إيقاع موحّد وعناوين واضحة */
+.section-header{ margin:32px 2px 15px !important; }
+#tab-home > .hero-section + .section-header{ margin-top:14px !important; }
+.section-header h3{ font-size:1.3rem !important; font-weight:800 !important; letter-spacing:-0.3px; }
+.section-header .location,.streak-badge{ font-size:0.8rem; }
+
+/* كل البطاقات: زوايا وظلال موحّدة ناعمة */
+.vip-card,.achievement-rings-card,.ayah-of-day-card,.khatma-manager-card,.makruh-card,
+.premium-banner,.group-home-card,.sp-portfolio{
+    border-radius:var(--r-lg) !important;
+    box-shadow:var(--shadow-soft) !important;
+    border-color:var(--border-color) !important;
+}
+.vip-card,.achievement-rings-card,.khatma-manager-card{ padding:22px !important; margin-bottom:24px !important; }
+.ayah-of-day-card,.makruh-card,.premium-banner,.pts-entry,.ath-shortcut-card{ margin-bottom:22px !important; }
+
+/* الاختصارات الصغيرة والمفاتيح: زوايا متناسقة */
+.pts-entry,.ath-shortcut-card,.am-row,.key-circle,.ch-task,.rw-item,.setting-item{ border-radius:var(--r-md); }
+
+/* أزرار موحّدة وأنعم */
+.tasbeeh-pill{ padding:13px 26px; border-radius:28px; font-size:1.05rem; }
+
+/* عناوين داخل البطاقات موحّدة */
+.vip-card h3,.khatma-manager-card h3{ font-size:1.12rem !important; font-weight:800 !important; }
+
+/* انتقالات ناعمة عامة */
+.setting-item,.key-tile,.am-row,.prayer-card,.ch-task,.rw-item,.nav-item{ transition:transform .15s ease, background .2s ease, box-shadow .2s ease; }
