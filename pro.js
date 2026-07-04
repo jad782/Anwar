@@ -140,14 +140,43 @@ PRO.openCalendar = function(){
     $('calendar-modal').classList.add('active');
 };
 PRO.closeCalendar = function(){ const m=$('calendar-modal'); if(m) m.classList.remove('active'); };
+// تنبيهات المناسبات (مميّزة): تجدول إشعاراً قبل كل مناسبة بيوم
+PRO.toggleOccasionReminders = function(){
+    const on = localStorage.getItem('occ_reminders')==='1';
+    if(!on){
+        if(window.requirePremium && !requirePremium('تنبيهات المناسبات','Event reminders')) return;
+        localStorage.setItem('occ_reminders','1');
+        PRO.scheduleOccasionReminders();
+        const st=$('cal-remind-state'); if(st) st.textContent=tr('مفعّلة ✓','On ✓');
+        alert(tr('تم تفعيل تنبيهات المناسبات — سيصلك تذكير قبل كل مناسبة.','Event reminders enabled — you’ll be notified before each event.'));
+    } else {
+        localStorage.setItem('occ_reminders','0');
+        const st=$('cal-remind-state'); if(st) st.textContent=tr('تفعيل','Enable');
+    }
+};
+PRO.scheduleOccasionReminders = function(){
+    try{
+        const LN = window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.LocalNotifications;
+        if(!LN) return;
+        const notifs = [];
+        OCCASIONS.forEach((o,idx)=>{ const u=daysUntilHijri(o.m,o.d); if(!u) return;
+            const at = new Date(u.date); at.setDate(at.getDate()-1); at.setHours(9,0,0,0);
+            if(at.getTime() < Date.now()) return;
+            notifs.push({ id: 5000+idx, title:'🌙 '+(L()==='en'?o.en:o.ar), body: L()==='en'?'Tomorrow is a blessed occasion.':'غداً مناسبة مباركة، استعدّ لها.', schedule:{ at } });
+        });
+        if(notifs.length) LN.schedule({ notifications: notifs });
+    }catch(e){}
+};
 function ensureCalendarModal(){
     if ($('calendar-modal')) return;
     const d=document.createElement('div'); d.id='calendar-modal'; d.className='qibla-overlay';
     d.innerHTML = `<div class="qibla-modal" style="width:94%;max-width:440px;">
         <button class="close-qibla" onclick="PRO.closeCalendar()"><i class="fa-solid fa-xmark"></i></button>
         <h2 style="color:var(--primary-color);margin-bottom:6px;"><i class="fa-regular fa-calendar"></i> ${tr('التقويم والمناسبات','Calendar & Events')}</h2>
-        <div id="cal-today" style="font-family:'Amiri',serif;font-size:1.5rem;color:var(--accent-color);font-weight:700;margin-bottom:16px;"></div>
-        <div id="cal-list" style="max-height:55vh;overflow-y:auto;text-align:right;"></div>
+        <div id="cal-today" style="font-family:'Amiri',serif;font-size:1.5rem;color:var(--accent-color);font-weight:700;margin-bottom:12px;"></div>
+        <div class="cal-remind" onclick="PRO.toggleOccasionReminders()"><span><i class="fa-solid fa-bell"></i> ${tr('تنبيهات المناسبات','Event reminders')}</span>
+            <span id="cal-remind-state" class="cal-remind-state">${localStorage.getItem('occ_reminders')==='1'?tr('مفعّلة ✓','On ✓'):tr('تفعيل','Enable')}</span></div>
+        <div id="cal-list" style="max-height:52vh;overflow-y:auto;text-align:right;"></div>
         <p style="font-size:0.72rem;color:var(--text-muted);margin-top:12px;">${tr('* حسب تقويم أم القرى؛ قد يختلف اليوم الفعلي حسب رؤية الهلال.','* Per Umm al-Qura calendar; actual day may vary by moon sighting.')}</p></div>`;
     document.body.appendChild(d);
 }
