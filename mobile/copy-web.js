@@ -22,6 +22,7 @@ const INCLUDE = [
   'points.js',
   'keys.js',
   'premium.js',
+  'hajj.js',
   'update.js',
   'sunan.js',
   'mushaf.js',

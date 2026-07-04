@@ -827,13 +827,14 @@ body.light-mode .prof-stat b, body.light-mode .prof-chip { color:#9a6f12; }
 body.light-mode .am-label, body.light-mode .prof-act { color:var(--text-main); }
 
 /* ===== مفاتيح يومك (شبكة الاختصارات الذهبية) ===== */
-.apps-scroll.keys-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px 6px; overflow:visible; padding-bottom:0; }
-.key-label { word-break:break-word; }
-.key-tile { display:flex; flex-direction:column; align-items:center; gap:7px; cursor:pointer; transition:transform .15s; }
+/* صف أفقي أنيق يوفّر المساحة (بدل شبكة كبيرة) */
+.apps-scroll.keys-grid { display:flex; gap:14px; overflow-x:auto; overflow-y:visible; padding:4px 2px 10px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.apps-scroll.keys-grid::-webkit-scrollbar { display:none; }
+.key-tile { flex:0 0 auto; width:62px; display:flex; flex-direction:column; align-items:center; gap:7px; cursor:pointer; transition:transform .15s; }
 .key-tile:active { transform:scale(0.92); }
-.key-circle { width:62px; height:62px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.45rem; color:var(--accent-light,var(--accent-light,#F2D27A)); background:radial-gradient(circle at 50% 35%, rgba(242,210,122,0.18), rgba(46,37,21,0.9)); border:1px solid rgba(197,160,89,0.4); box-shadow:0 6px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(242,210,122,0.25); }
-.key-tile:active .key-circle { box-shadow:0 0 16px rgba(242,210,122,0.5), inset 0 1px 0 rgba(242,210,122,0.3); }
-.key-label { font-size:0.7rem; font-weight:700; color:var(--text-soft,#cbbfa6); text-align:center; line-height:1.3; }
+.key-circle { width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.35rem; color:var(--accent-light,#F2D27A); background:radial-gradient(circle at 50% 35%, rgba(242,210,122,0.16), rgba(46,37,21,0.9)); border:1px solid rgba(197,160,89,0.35); box-shadow:0 4px 12px rgba(0,0,0,0.28); }
+.key-tile:active .key-circle { box-shadow:0 0 16px rgba(242,210,122,0.5); }
+.key-label { font-size:0.66rem; font-weight:700; color:var(--text-soft,#cbbfa6); text-align:center; line-height:1.3; width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 body.light-mode .key-circle { background:radial-gradient(circle at 50% 35%, #fff7e6, #f3ead4); color:#9a6f12; box-shadow:0 4px 12px rgba(0,0,0,0.06); }
 body.light-mode .key-label { color:#6b5d49; }
 /* صفوف تخصيص المفاتيح */
@@ -1069,3 +1070,28 @@ body.light-mode{ --shadow-soft:0 4px 14px rgba(0,0,0,0.05); }
 
 /* انتقالات ناعمة عامة */
 .setting-item,.key-tile,.am-row,.prayer-card,.ch-task,.rw-item,.nav-item{ transition:transform .15s ease, background .2s ease, box-shadow .2s ease; }
+
+/* ===== رفيق الحج والعمرة ===== */
+.hajj-tabs { display:flex; gap:6px; margin:12px 0 14px; }
+.hajj-tab { flex:1; padding:8px; border-radius:12px; border:1px solid var(--border-color); background:rgba(197,160,89,0.06); color:var(--text-soft,#cbbfa6); font-weight:700; font-size:0.8rem; cursor:pointer; font-family:'Tajawal','Cairo',sans-serif; }
+.hajj-tab.active { background:linear-gradient(135deg,var(--accent-color),var(--accent-light)); color:#14110B; border:none; }
+.hajj-hint { text-align:center; color:var(--text-soft,#cbbfa6); font-size:0.8rem; line-height:1.7; margin-bottom:14px; }
+.hajj-counters { display:flex; gap:14px; }
+.hajj-cc { flex:1; text-align:center; }
+.hcc-name { font-weight:800; color:var(--accent-light,#F2D27A); margin-bottom:10px; }
+.hcc-ring { position:relative; width:120px; height:120px; margin:0 auto; border-radius:50%; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; background:conic-gradient(var(--accent-color) var(--p,0%), rgba(255,255,255,0.07) 0); transition:transform .1s; }
+.hcc-ring:active { transform:scale(0.95); }
+.hcc-ring::before { content:''; position:absolute; inset:9px; border-radius:50%; background:var(--white); }
+.hcc-val { position:relative; font-size:2.2rem; font-weight:800; color:var(--accent-light,#F2D27A); z-index:1; }
+.hcc-of { position:relative; font-size:0.72rem; color:var(--text-muted); z-index:1; }
+.hcc-done { position:absolute; top:14px; color:#22c55e; font-size:1.1rem; transition:opacity .3s; z-index:1; }
+.hcc-reset { margin-top:12px; background:none; border:1px solid var(--border-color); color:var(--text-muted); border-radius:12px; padding:6px 14px; cursor:pointer; font-size:0.78rem; font-family:'Tajawal','Cairo',sans-serif; }
+.manasik { display:flex; flex-direction:column; gap:10px; }
+.manasik-step { display:flex; gap:12px; background:rgba(197,160,89,0.06); border:1px solid var(--border-color); border-radius:14px; padding:12px 14px; }
+.ms-num { width:28px; height:28px; min-width:28px; border-radius:50%; background:linear-gradient(135deg,var(--accent-color),var(--accent-light)); color:#14110B; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.85rem; }
+.ms-txt { display:flex; flex-direction:column; gap:3px; }
+.ms-txt b { color:var(--cream,#F2EAD9); font-size:0.95rem; }
+.ms-txt span { color:var(--text-soft,#cbbfa6); font-size:0.82rem; line-height:1.7; }
+.hajj-duas { display:flex; flex-direction:column; gap:12px; }
+.hajj-dua { background:rgba(197,160,89,0.07); border:1px solid var(--border-color); border-right:3px solid var(--accent-color); border-radius:12px; padding:14px; font-family:'Amiri',serif; font-size:1.15rem; line-height:2; color:var(--cream,#F2EAD9); text-align:center; }
+body.light-mode .ms-txt b, body.light-mode .hajj-dua { color:var(--text-main); }

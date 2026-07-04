@@ -27,6 +27,7 @@ const CATALOG = [
     { id:'wake',     ar:'أذكار الاستيقاظ',  en:'Waking',        ico:'fa-mug-hot',          act:"AnwarKeys.athkar('wake')" },
     { id:'duaa',     ar:'الأدعية',          en:'Du\'a',         ico:'fa-hands-praying',    act:"AnwarKeys.duaa()" },
     { id:'sunan',    ar:'السنن',            en:'Sunnah',        ico:'fa-star-and-crescent',act:"openSunan()" },
+    { id:'hajj',     ar:'الحج والعمرة',     en:'Hajj & Umrah',  ico:'fa-kaaba',            act:"window.AnwarHajj&&AnwarHajj.open()" },
     { id:'occasions',ar:'المناسبات الإسلامية',en:'Occasions',   ico:'fa-calendar-day',     act:"window.PRO&&PRO.openCalendar()" },
     { id:'continue', ar:'أكمل الختمة',      en:'Continue Khatma',ico:'fa-book-open-reader',act:"continueKhatma()" },
     { id:'group',    ar:'ختمة جماعية',      en:'Group Khatma',  ico:'fa-users',            act:"window.PRO&&PRO.openGroupKhatma()" },

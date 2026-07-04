@@ -72,7 +72,10 @@ const REWARDS = [
     { id:'readbg_night',  type:'rent', ar:'خلفية قراءة: ليل مرصّع',en:'Starry reading bg',  ico:'fa-star',    kind:'readbg' },
 ];
 const RENT_OPTS = [ {days:30, cost:200, ar:'شهر', en:'1 month'}, {days:90, cost:350, ar:'3 أشهر', en:'3 months'} ];
-function isActive(id){ const r=REWARDS.find(x=>x.id===id); if(!r) return false; const u=loadUnlocks();
+function isActive(id){ const r=REWARDS.find(x=>x.id===id); if(!r) return false;
+    // عضو بريميوم: حزمة التخصيص الكاملة مفتوحة دائماً (خطوط + ثيمات + خلفيات)
+    if(localStorage.getItem('anwar_premium')==='true') return true;
+    const u=loadUnlocks();
     if(r.type==='perm') return u[id]===true;
     return (u[id]||0) > Date.now();
 }

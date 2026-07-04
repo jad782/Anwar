@@ -74,6 +74,12 @@ AnwarPremium._render = function(){
         <p class="prem-terms">${tr('يُدار الاشتراك عبر حسابك في App Store ويتجدّد تلقائياً ما لم يُلغَ قبل 24 ساعة من نهاية المدة.','Billed via your App Store account; auto-renews unless canceled 24h before the period ends.')}</p>`;
 };
 AnwarPremium.buy = function(id){ if(window.PRO&&PRO.subscribe) PRO.subscribe(id); };
+// جدار الحماية: تُستدعى قبل أي ميزة مميّزة
+window.requirePremium = function(featAr, featEn){
+    if(isPrem()) return true;
+    AnwarPremium.openPlans();
+    return false;
+};
 AnwarPremium.refreshPrices = function(){ if($('premium-modal') && $('premium-modal').classList.contains('active')) AnwarPremium._render(); };
 AnwarPremium.onUnlocked = function(){ try{ AnwarPremium._render(); updateBanner(); if(typeof showBadgeToast==='function') showBadgeToast({emoji:'👑', name:tr('أهلاً بك في بريميوم','Welcome to Premium'), desc:tr('كل الميزات مفتوحة','All features unlocked')}); }catch(e){} };
 
