@@ -1,5 +1,5 @@
 // Update Version 5
-const CACHE_NAME = 'anwar-cache-v75';
+const CACHE_NAME = 'anwar-cache-v76';
 
 const urlsToCache = [
   './',
@@ -26,8 +26,9 @@ const urlsToCache = [
   './ambient.js?v=1',
   './live-activity.js?v=1',
   './widget-bridge.js?v=1',
-  './notifications.js?v=3',
+  './notifications.js?v=4',
   './athan.mp3',
+  './athan.caf',
   './manifest.json',
   './icon-192.png?v=2',
   './icon-512.png?v=2',

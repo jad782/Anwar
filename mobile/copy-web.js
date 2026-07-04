@@ -35,6 +35,7 @@ const INCLUDE = [
   'manifest.json',
   'service-worker.js',
   'athan.mp3',
+  'athan.caf',
   'icon-192.png',
   'icon-512.png',
   'apple-icon.jpg'

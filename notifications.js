@@ -17,6 +17,11 @@ function isNative(){
         && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications);
 }
 function lang(){ return (typeof currentLang !== 'undefined') ? currentLang : 'ar'; }
+// اسم ملف صوت الأذان بحسب المنصّة: iOS يطلب .caf (≤30ث) مضمّناً بالحزمة، وأندرويد raw .mp3
+function athanSoundFile(){
+    try{ if (window.Capacitor && Capacitor.getPlatform && Capacitor.getPlatform() === 'ios') return 'athan.caf'; }catch(e){}
+    return 'athan.mp3';
+}
 function lbl(k){ return lang()==='en' ? LABELS_EN[k] : LABELS[k]; }
 
 async function ensurePermission(LN){
@@ -38,7 +43,7 @@ window.scheduleNativeAthan = async function(){
     try {
         if (LN.createChannel) await LN.createChannel({
             id: 'athan', name: 'تنبيهات الأذان', description: 'صوت الأذان عند دخول الوقت',
-            importance: 5, sound: 'athan.mp3', visibility: 1, vibration: true
+            importance: 5, sound: athanSoundFile(), visibility: 1, vibration: true
         });
     } catch(e){}
 
@@ -59,7 +64,7 @@ window.scheduleNativeAthan = async function(){
                 title: (lang()==='en' ? 'Time for ' : 'حان وقت ') + lbl(k),
                 body: lang()==='en' ? "Don't forget your prayer" : 'لا تنسَ الصلاة',
                 schedule: { on: { hour: h, minute: m }, allowWhileIdle: true, repeats: true },
-                sound: 'athan.mp3',
+                sound: athanSoundFile(),
                 channelId: 'athan'
             });
         }
