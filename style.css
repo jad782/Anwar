@@ -1010,6 +1010,30 @@ body.light-mode .vip-card, body.light-mode .achievement-rings-card, body.light-m
 .pb-txt b { color:var(--accent-light,#F2D27A); font-size:1rem; }
 .pb-txt span { color:var(--text-soft,#cbbfa6); font-size:0.78rem; }
 .pb-go { color:var(--accent-color); opacity:0.7; }
+
+/* ===== قسم البريميوم المستقل على الرئيسية ===== */
+.premium-section { position:relative; overflow:hidden; background:linear-gradient(135deg, rgba(201,162,75,0.16), rgba(46,37,21,0.55)); border:1px solid rgba(242,210,122,0.42); border-radius:20px; padding:16px 14px 14px; margin:4px 0 24px; box-shadow:0 8px 22px rgba(0,0,0,0.28); }
+.premium-section::before { content:''; position:absolute; top:-45px; inset-inline-start:-30px; width:130px; height:130px; border-radius:50%; background:radial-gradient(circle, rgba(242,210,122,0.22), transparent 70%); pointer-events:none; }
+.ps-head { display:flex; align-items:center; gap:12px; cursor:pointer; position:relative; z-index:1; }
+.ps-crown { width:46px; height:46px; border-radius:14px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--accent-color),var(--accent-light)); color:#14110B; font-size:1.25rem; box-shadow:0 4px 14px rgba(201,162,75,0.45); flex:0 0 auto; }
+.ps-titles { flex:1; min-width:0; }
+.ps-titles b { display:block; color:var(--accent-light,#F2D27A); font-size:1.06rem; font-weight:800; }
+.ps-titles span { display:block; color:var(--text-soft,#cbbfa6); font-size:0.76rem; margin-top:2px; }
+.ps-go { color:var(--accent-color); opacity:0.6; flex:0 0 auto; }
+.ps-scroll { display:flex; gap:10px; overflow-x:auto; padding:14px 2px 4px; scrollbar-width:none; -webkit-overflow-scrolling:touch; position:relative; z-index:1; }
+.ps-scroll::-webkit-scrollbar { display:none; }
+.ps-chip { flex:0 0 auto; width:72px; display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; transition:transform .15s; }
+.ps-chip:active { transform:scale(0.93); }
+.ps-chip-ico { width:54px; height:54px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:1.25rem; color:var(--accent-light,#F2D27A); background:radial-gradient(circle at 50% 35%, rgba(242,210,122,0.18), rgba(46,37,21,0.9)); border:1px solid rgba(197,160,89,0.4); box-shadow:0 3px 10px rgba(0,0,0,0.25); }
+.ps-chip-lbl { font-size:0.64rem; font-weight:700; color:var(--text-soft,#cbbfa6); text-align:center; line-height:1.25; width:100%; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.ps-cta { width:100%; margin-top:6px; padding:12px; border:none; border-radius:14px; cursor:pointer; background:linear-gradient(135deg,var(--accent-color),var(--accent-light)); color:#14110B; font-weight:800; font-size:0.9rem; box-shadow:0 4px 14px rgba(201,162,75,0.35); position:relative; z-index:1; transition:transform .15s; }
+.ps-cta:active { transform:scale(0.98); }
+body.light-mode .premium-section { background:linear-gradient(135deg,#fff7e6,#f6eed8); border-color:rgba(154,111,18,0.28); }
+body.light-mode .ps-titles b { color:#9a6f12; }
+body.light-mode .ps-titles span { color:#6b5d49; }
+body.light-mode .ps-chip-ico { background:radial-gradient(circle at 50% 35%,#fff7e6,#f3ead4); color:#9a6f12; box-shadow:0 3px 10px rgba(0,0,0,0.06); }
+body.light-mode .ps-chip-lbl { color:#6b5d49; }
+
 .prem-hero { text-align:center; margin-bottom:16px; }
 .prem-crown { width:70px; height:70px; margin:0 auto 12px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--accent-color),var(--accent-light)); color:#14110B; font-size:1.9rem; box-shadow:0 0 26px rgba(242,210,122,0.5); }
 .prem-hero h2 { color:var(--accent-light,#F2D27A); font-size:1.4rem; }

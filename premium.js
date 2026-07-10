@@ -88,18 +88,49 @@ window.requirePremium = function(featAr, featEn){
 AnwarPremium.refreshPrices = function(){ if($('premium-modal') && $('premium-modal').classList.contains('active')) AnwarPremium._render(); };
 AnwarPremium.onUnlocked = function(){ try{ AnwarPremium._render(); updateBanner(); if(typeof showBadgeToast==='function') showBadgeToast({emoji:'👑', name:tr('أهلاً بك في بريميوم','Welcome to Premium'), desc:tr('كل الميزات مفتوحة','All features unlocked')}); }catch(e){} };
 
-// ---------- نقاط الدخول ----------
-function updateBanner(){ const b=$('premium-banner'); if(b) b.style.display = isPrem() ? 'none' : 'flex'; }
+// ---------- قسم البريميوم المستقل على الرئيسية ----------
+// نقرة على ميزة: إن كان مشتركاً تُفتح مباشرة، وإلا تُعرض خطط الاشتراك
+AnwarPremium.tapFeature = function(i){
+    const f=FEATURES[i]; if(!f) return;
+    if(isPrem()){ try{ eval(f.act); }catch(e){} }
+    else AnwarPremium.openPlans();
+};
+function renderSection(){
+    const sec=$('premium-section'); if(!sec) return;
+    const chips = FEATURES.map((f,i)=>`<div class="ps-chip" onclick="AnwarPremium.tapFeature(${i})">
+        <div class="ps-chip-ico"><i class="fa-solid ${f.ico}"></i></div>
+        <span class="ps-chip-lbl">${f.ar}</span></div>`).join('');
+    const prem=isPrem();
+    sec.innerHTML=`
+        <div class="ps-head" onclick="AnwarPremium.openPlans()">
+            <div class="ps-crown"><i class="fa-solid fa-crown"></i></div>
+            <div class="ps-titles">
+                <b>${tr('الأنوار بريميوم','Al-Anwar Premium')} ${prem?'🤍':''}</b>
+                <span>${prem?tr('عضو مميّز — كل الميزات مفتوحة','Premium — all unlocked'):tr('ميزات فاخرة تُثري رحلتك مع القرآن','Luxurious features for your journey')}</span>
+            </div>
+            <i class="fa-solid fa-chevron-left ps-go"></i>
+        </div>
+        <div class="ps-scroll" id="ps-scroll">${chips}</div>
+        ${prem?'':`<button class="ps-cta" onclick="AnwarPremium.openPlans()"><i class="fa-solid fa-gift"></i> ${tr('افتح كل الميزات — جرّب 7 أيام مجاناً','Unlock all — 7-day free trial')}</button>`}`;
+    // سكرول أفقي بعجلة الماوس/السحب لصف الميزات
+    const sc=$('ps-scroll');
+    if(sc && !sc._b){ sc._b=1;
+        sc.addEventListener('wheel',e=>{ if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){ sc.scrollLeft+=e.deltaY; e.preventDefault(); } },{passive:false});
+        let d=false,sx=0,sl=0,mv=false;
+        sc.addEventListener('mousedown',e=>{ d=true;mv=false;sx=e.pageX;sl=sc.scrollLeft; });
+        window.addEventListener('mousemove',e=>{ if(!d)return; const dx=e.pageX-sx; if(Math.abs(dx)>3)mv=true; sc.scrollLeft=sl-dx; });
+        window.addEventListener('mouseup',()=>{ d=false; });
+        sc.addEventListener('click',e=>{ if(mv){ e.stopPropagation(); e.preventDefault(); mv=false; } },true);
+    }
+}
+function updateBanner(){ renderSection(); }
 function inject(){
-    // بانر بارز على الرئيسية (بعد آية اليوم — مكان واضح قرب الأعلى)
+    // قسم بريميوم مستقل على الرئيسية (بعد آية اليوم — مكان واضح قرب الأعلى)
     const anchor = $('ayah-of-day-card') || document.querySelector('#tab-home .prayer-grid') || $('keys-grid');
-    if(anchor && anchor.parentNode && !$('premium-banner')){
-        const b=document.createElement('div'); b.id='premium-banner'; b.className='premium-banner'; b.onclick=AnwarPremium.openPlans;
-        b.innerHTML=`<div class="pb-left"><div class="pb-ico"><i class="fa-solid fa-crown"></i></div>
-            <div class="pb-txt"><b>${tr('الأنوار بريميوم','Al-Anwar Premium')}</b><span>${tr('افتح كل الميزات الفاخرة','Unlock all premium features')}</span></div></div>
-            <i class="fa-solid fa-chevron-left pb-go"></i>`;
-        anchor.parentNode.insertBefore(b, anchor.nextSibling);
-        updateBanner();
+    if(anchor && anchor.parentNode && !$('premium-section')){
+        const sec=document.createElement('div'); sec.id='premium-section'; sec.className='premium-section';
+        anchor.parentNode.insertBefore(sec, anchor.nextSibling);
+        renderSection();
     }
     // صف في الإعدادات (بأعلى مجموعة الحساب)
     const list=document.querySelector('#tab-settings .settings-list');
