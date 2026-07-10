@@ -55,7 +55,9 @@ AnwarPremium._render = function(){
         body.innerHTML=`<div class="prem-hero"><div class="prem-crown"><i class="fa-solid fa-crown"></i></div>
             <h2>${tr('عضو مميّز 🤍','Premium 🤍')}</h2>
             <p>${tr('كل الميزات مفتوحة — اضغط أيّها لتفتحه.','All features unlocked — tap any to open.')}</p></div>
-            <div class="prem-feats">${launch}</div>`;
+            <div class="prem-feats">${launch}</div>
+            <button class="prem-manage" onclick="window.PRO&&PRO.manageSubscriptions&&PRO.manageSubscriptions()"><i class="fa-solid fa-gear"></i> ${tr('إدارة الاشتراك / تغيير الخطة','Manage / change plan')}</button>
+            <button class="prem-restore" onclick="window.PRO&&PRO.restorePurchases()">${tr('استعادة المشتريات','Restore purchases')}</button>`;
         return;
     }
     const feats = FEATURES.map(f=>`<div class="prem-feat"><span class="pf-ico"><i class="fa-solid ${f.ico}"></i></span>

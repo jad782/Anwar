@@ -504,14 +504,40 @@ function initIAP(){
             const isPrem = rc.id && (SUB_IDS.includes(rc.id) || rc.id===LIFETIME_ID);
             if (isPrem){ localStorage.setItem('anwar_premium','true'); if(window.AnwarPremium&&AnwarPremium.onUnlocked) AnwarPremium.onUnlocked(); }
             else if(typeof showBadgeToast==='function') showBadgeToast({emoji:'🤍', name:tr('جزاك الله خيراً','JazakAllah khayr'), desc:tr('شكراً لدعمك التطبيق','Thank you for your support')});
+            PRO.syncPremium();
         });
-        store.when().productUpdated(()=>{ try{ PRO._refreshDonatePrices && PRO._refreshDonatePrices(); if(window.AnwarPremium&&AnwarPremium.refreshPrices) AnwarPremium.refreshPrices(); }catch(e){} });
+        store.when().productUpdated(()=>{ try{ PRO._refreshDonatePrices && PRO._refreshDonatePrices(); if(window.AnwarPremium&&AnwarPremium.refreshPrices) AnwarPremium.refreshPrices(); }catch(e){} PRO.syncPremium(); });
+        if (store.when().receiptUpdated) { try{ store.when().receiptUpdated(()=>PRO.syncPremium()); }catch(e){} }
         if (typeof store.error === 'function') store.error(e => { _iapState.err = (e && ((e.code||'')+' '+(e.message||''))) || String(e); try{ PRO._refreshDonatePrices && PRO._refreshDonatePrices(); }catch(x){} });
         store.initialize([Platform.APPLE_APPSTORE]);
         _iapState.initialized = true;
         _iapReady = true;
+        // فحوصات ملكية متأخّرة بعد تحميل الإيصالات (يفتح البريميوم إن كان الاشتراك فعّالاً)
+        [1500, 4000, 8000].forEach(ms => setTimeout(()=>{ try{ PRO.syncPremium(); }catch(e){} }, ms));
     } catch(e){ _iapState.err = 'init: ' + (e && e.message || e); }
 }
+// يتحقّق من ملكية أي منتج مميّز (اشتراك فعّال أو مدى الحياة) ويفتح البريميوم — يُستدعى عند كل تشغيل
+// ملاحظة: منح فقط (لا يسحب) لتجنّب قفل مشترك بسبب تأخّر تحميل الإيصالات
+PRO.syncPremium = function(){
+    try{
+        const C=window.CdvPurchase; if(!C||!C.store) return false;
+        const ids=[LIFETIME_ID].concat(SUB_IDS);
+        let owned=false;
+        for(let i=0;i<ids.length;i++){
+            try{ const p=C.store.get(ids[i], C.Platform.APPLE_APPSTORE); if(p && p.owned){ owned=true; break; } }catch(e){}
+        }
+        if(owned && localStorage.getItem('anwar_premium')!=='true'){
+            localStorage.setItem('anwar_premium','true');
+            if(window.AnwarPremium&&AnwarPremium.onUnlocked) AnwarPremium.onUnlocked();
+        }
+        return owned;
+    }catch(e){ return false; }
+};
+// إدارة/تغيير خطة الاشتراك — يفتح شاشة اشتراكات آبل
+PRO.manageSubscriptions = function(){
+    try{ const C=window.CdvPurchase; if(C&&C.store&&C.store.manageSubscriptions){ C.store.manageSubscriptions(); return; } }catch(e){}
+    window.open('https://apps.apple.com/account/subscriptions','_blank');
+};
 // شراء اشتراك/مدى الحياة
 PRO.subscribe = function(id){
     try {
@@ -524,7 +550,7 @@ PRO.subscribe = function(id){
     alert(tr('يُفعّل الاشتراك داخل نسخة App Store بعد اعتماد المنتجات.','Subscription activates in the App Store build after products are approved.'));
 };
 PRO.restorePurchases = function(){
-    try { const CdvPurchase = window.CdvPurchase; if (CdvPurchase && CdvPurchase.store && CdvPurchase.store.restorePurchases){ CdvPurchase.store.restorePurchases(); alert(tr('جاري استعادة مشترياتك...','Restoring your purchases...')); return; } } catch(e){}
+    try { const CdvPurchase = window.CdvPurchase; if (CdvPurchase && CdvPurchase.store && CdvPurchase.store.restorePurchases){ CdvPurchase.store.restorePurchases(); alert(tr('جاري استعادة مشترياتك...','Restoring your purchases...')); [2000,5000,9000].forEach(ms=>setTimeout(()=>{ try{ PRO.syncPremium(); }catch(e){} }, ms)); return; } } catch(e){}
     alert(tr('الاستعادة متاحة داخل نسخة App Store.','Restore is available in the App Store build.'));
 };
 PRO.premiumPrice = function(id){
