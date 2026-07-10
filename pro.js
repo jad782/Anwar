@@ -527,7 +527,25 @@ PRO.restorePurchases = function(){
     try { const CdvPurchase = window.CdvPurchase; if (CdvPurchase && CdvPurchase.store && CdvPurchase.store.restorePurchases){ CdvPurchase.store.restorePurchases(); alert(tr('جاري استعادة مشترياتك...','Restoring your purchases...')); return; } } catch(e){}
     alert(tr('الاستعادة متاحة داخل نسخة App Store.','Restore is available in the App Store build.'));
 };
-PRO.premiumPrice = function(id){ try{ const C=window.CdvPurchase; if(C&&_iapReady){ const p=C.store.get(id,C.Platform.APPLE_APPSTORE); return p&&p.pricing&&p.pricing.price; } }catch(e){} return null; };
+PRO.premiumPrice = function(id){
+    try{
+        const C=window.CdvPurchase; if(!(C&&_iapReady)) return null;
+        const p=C.store.get(id,C.Platform.APPLE_APPSTORE); if(!p) return null;
+        const isZero = v => !v || /^\D*0(?:[.,]0+)?\D*$/.test(String(v)); // "0" أو "$0.00"
+        // للاشتراكات: السعر الفعلي في المرحلة المتكرّرة (نتجاهل مرحلة التجربة المجانية = 0)
+        try{
+            const off = p.getOffer && p.getOffer();
+            const phases = off && off.pricingPhases;
+            if(phases && phases.length){
+                for(let i=phases.length-1;i>=0;i--){ const pr=phases[i]&&phases[i].price; if(!isZero(pr)) return pr; }
+            }
+        }catch(e){}
+        // لغير الاشتراكات (مدى الحياة/الدعم): السعر المباشر
+        if(p.pricing && !isZero(p.pricing.price)) return p.pricing.price;
+        return null;
+    }catch(e){}
+    return null;
+};
 PRO.support = function(id){
     try {
         const CdvPurchase = window.CdvPurchase;
