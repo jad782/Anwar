@@ -59,7 +59,23 @@ AnwarKeys.render = function(){
             <div class="key-circle"><i class="fa-solid ${c.ico}"></i></div>
             <span class="key-label">${L()==='en'?c.en:c.ar}</span>
         </div>`).join('');
+    enableDragScroll(host);
 };
+// تمكين السكرول الأفقي بعجلة الماوس + السحب (باللمس يعمل أصلاً)
+function enableDragScroll(el){
+    if(el._dragBound) return; el._dragBound=true;
+    // عجلة الماوس العمودية → تمرير أفقي
+    el.addEventListener('wheel', e=>{
+        if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){ el.scrollLeft += e.deltaY; e.preventDefault(); }
+    }, {passive:false});
+    // السحب بالماوس (سطح المكتب)
+    let down=false, sx=0, sl=0, moved=false;
+    el.addEventListener('mousedown', e=>{ down=true; moved=false; sx=e.pageX; sl=el.scrollLeft; });
+    window.addEventListener('mousemove', e=>{ if(!down) return; const dx=e.pageX-sx; if(Math.abs(dx)>3) moved=true; el.scrollLeft=sl-dx; });
+    window.addEventListener('mouseup', ()=>{ down=false; });
+    // امنع فتح المفتاح إذا كان سحباً وليس نقرة
+    el.addEventListener('click', e=>{ if(moved){ e.stopPropagation(); e.preventDefault(); moved=false; } }, true);
+}
 
 // نافذة التخصيص: إظهار/إخفاء + ترتيب بالأسهم
 AnwarKeys.openCustomize = function(){

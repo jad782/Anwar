@@ -10,6 +10,22 @@ const QD = () => window.QURAN_DATA;
 const cf = () => (typeof currentFontSize !== 'undefined' ? currentFontSize : 22);
 window.MUSHAF = window.MUSHAF || {};
 const BAS = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ';
+// تُزيل البسملة من بداية النص (نص أول آية يتضمّنها في البيانات).
+// تقارن الحروف الأساسية فقط وتتجاهل التشكيل/المسافات (لأن ترتيب التشكيل قد يختلف بين المصادر).
+const _BAS_BASE = 'بسماللهالرحمنالرحيم'; // حروف البسملة الأساسية (الألف واللام موحّدة)
+function _isDiac(ch){ return /[ً-ْٰـ﻿]/.test(ch); }
+function stripBasmalah(t){
+    t = t.replace(/^[﻿﻿\s]+/, '');
+    let count=0, i=0; const need=_BAS_BASE.length;
+    while(i<t.length && count<need){
+        const ch=t[i];
+        if(_isDiac(ch) || /\s/.test(ch)){ i++; continue; }
+        const norm = /[اٱأإآ]/.test(ch) ? 'ا' : ch;
+        if(_BAS_BASE[count]===norm){ count++; i++; }
+        else break;
+    }
+    return count===need ? t.slice(i).replace(/^[ً-ْٰـ﻿\s]+/, '') : t;
+}
 
 function toArabic(n){ if(localStorage.getItem('num_hindi')==='0') return String(n); return String(n).replace(/[0-9]/g, d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
 MUSHAF.rerender = function(){ try{ renderPage(curPage); }catch(e){} };
@@ -112,13 +128,19 @@ async function renderPage(page){
         try { const d = await fetchOffline(`https://api.alquran.cloud/v1/page/${page}/quran-tajweed`); tajMap={}; (d.data.ayahs||[]).forEach(a=>tajMap[a.number]=a.text); }
         catch(e){ tajOn=false; const tb=$('msf-taj'); if(tb)tb.classList.remove('active'); }
     }
-    // اسم السورة الرئيسية في الصفحة للعنوان
-    const mainName = nameOf(ayahs[0].s);
+    // السورة الغالبة على الصفحة (الأكثر آيات) لعنوان الصفحة — يتجنّب إظهار اسم السورة السابقة
+    const _counts={}; ayahs.forEach(a=>_counts[a.s]=(_counts[a.s]||0)+1);
+    let mainS=ayahs[0].s, _best=0;
+    for(const s in _counts){ if(_counts[s]>_best){ _best=_counts[s]; mainS=+s; } }
+    const mainName = nameOf(mainS);
     document.getElementById('current-surah-name').innerText = 'سورة ' + mainName;
     let html=''; let curS=0;
     ayahs.forEach(a=>{
-        if (a.s !== curS){ html += banner(a.s); curS=a.s; if(a.s!==1 && a.s!==9) html += `<div class="basmalah">${BAS}</div>`; }
+        // البانر والبسملة يظهران فقط عند بداية السورة فعلياً (آية ١)، لا عند استكمال سورة من صفحة سابقة
+        if (a.s !== curS){ curS=a.s; if (a.a===1){ html += banner(a.s); if(a.s!==1 && a.s!==9) html += `<div class="basmalah">${BAS}</div>`; } }
         let raw = (tajMap && tajMap[a.g]!==undefined) ? parseTaj(tajMap[a.g]) : a.t;
+        // البسملة مضمّنة في نص أول آية بالبيانات، وهي معروضة كسطر مستقل — أزِلها من الآية لتجنّب التكرار
+        if (a.a===1 && a.s!==1 && a.s!==9) raw = stripBasmalah(raw);
         html += `<div class="ayah" data-surah="${a.s}" data-ayah="${a.a}" data-global="${a.g}" onclick="onAyahTap(${a.s},${a.a},${a.g})" style="font-size:${cf()}px;">${raw} <span class="ayah-number">${toArabic(a.a)}</span></div>`;
     });
     const legend = tajOn ? `<div class="tajweed-legend"><span><b class="tj-madd">المدّ</b></span><span><b class="tj-ghunnah">الغنّة</b></span><span><b class="tj-qalqalah">القلقلة</b></span><span><b class="tj-ikhfa">الإخفاء</b></span><span><b class="tj-idgham">الإدغام</b></span><span><b class="tj-iqlab">الإقلاب</b></span></div>` : '';
@@ -132,7 +154,7 @@ async function renderPage(page){
     document.querySelector('.content-area').scrollTop = 0;
     const _pg = cont.querySelector('.mushaf-page');
     if (_pg && _turnDir){ _pg.classList.add(_turnDir>0?'pg-turn-next':'pg-turn-prev'); _turnDir=0; }
-    window.CUR_READ = { type:'surah', num: ayahs[0].s, name: mainName, page };
+    window.CUR_READ = { type:'surah', num: mainS, name: mainName, page };
     bindSwipe(cont);
     try{ localStorage.setItem('last_read', JSON.stringify({type:'page', num:page, name:'سورة '+mainName, ts:Date.now()})); }catch(e){}
     if (window.PRO2 && PRO2.checkBadges) setTimeout(()=>PRO2.checkBadges(), 50);
