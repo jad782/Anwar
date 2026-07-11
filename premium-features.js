@@ -60,30 +60,71 @@ window.AnwarLuxe = {
     _apply:function(){ try{ window.applyAnwarVisual&&applyAnwarVisual(); }catch(e){} if(window.HAP)HAP.light(); AnwarLuxe._render(); }
 };
 
-// ===== (11) رفيق رمضان =====
+// ===== (11) رفيق رمضان الكامل =====
 function pt(){ try{ return (typeof prayerTimings!=='undefined')?prayerTimings:null; }catch(e){ return null; } }
-window.AnwarRamadan = { open:function(){ if(!gate('رفيق رمضان','Ramadan companion')) return;
-    const p=pt(); const suhoor = p?p.Fajr:'--:--', iftar = p?p.Maghrib:'--:--';
-    const fasted = +(localStorage.getItem('ramadan_fasted')||0);
-    const body = `
+function hm2min(s){ if(!s||(''+s).indexOf(':')<0) return null; var p=(''+s).split(':'); return (+p[0])*60+(+p[1]); }
+function pad2(n){ return (n<10?'0':'')+n; }
+const RAM_DUAS = [
+    {t:'نية الصيام', d:'وَبِصَوْمِ غَدٍ نَوَيْتُ مِنْ شَهْرِ رَمَضَان'},
+    {t:'دعاء الإفطار', d:'ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّه'},
+    {t:'دعاء ليلة القدر', d:'اللَّهُمَّ إِنَّكَ عَفُوٌّ كَرِيمٌ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي'}
+];
+const RAM_DEEDS = ['صلاة التراويح','ورد القرآن اليومي','صدقة اليوم','قيام الليل','إفطار صائم'];
+function ramDays(){ try{ return JSON.parse(localStorage.getItem('ram_days')||'[]'); }catch(e){ return []; } }
+window.AnwarRamadan = {
+    _iv:null,
+    open:function(){ if(!gate('رفيق رمضان','Ramadan companion')) return;
+        modal('ramadan-modal', tr('رفيق رمضان','Ramadan Companion'), 'fa-star-and-crescent', this._body());
+        this._startCountdown();
+    },
+    _body:function(){
+        const p=pt(); const fajr=p?p.Fajr:'--:--', maghrib=p?p.Maghrib:'--:--';
+        let imsak='--:--'; const fm=hm2min(fajr); if(fm!=null){ const im=fm-10; imsak=pad2(Math.floor(im/60))+':'+pad2(im%60); }
+        const days=ramDays(); const grid=Array.from({length:30},(_,i)=>{ const n=i+1; const on=days.indexOf(n)>=0;
+            return `<button class="ram-day ${on?'on':''}" onclick="AnwarRamadan.toggleDay(${n})">${n}</button>`; }).join('');
+        const duas=RAM_DUAS.map(x=>`<div class="ram-dua"><span class="ram-dua-t">${x.t}</span><p>${x.d}</p></div>`).join('');
+        const deeds=RAM_DEEDS.map((d,i)=>{ const done=localStorage.getItem('ram_deed_'+i)==='1';
+            return `<div class="ch-task ${done?'done':''}" onclick="AnwarRamadan.deed(${i})"><span class="ch-ico"><i class="fa-solid fa-star"></i></span><span class="ch-name">${d}</span><span class="ch-pts">${done?'<i class="fa-solid fa-check"></i>':'✓'}</span></div>`; }).join('');
+        return `
+        <div class="ram-count-card"><span class="ram-next" id="ram-next">${tr('جارٍ الحساب…','Calculating…')}</span>
+            <b class="ram-timer" id="ram-timer">--:--:--</b></div>
         <div class="ram-times">
-            <div class="ram-t"><span>${tr('الإمساك (السحور)','Suhoor ends')}</span><b>${suhoor}</b></div>
-            <div class="ram-t iftar"><span>${tr('الإفطار (المغرب)','Iftar')}</span><b>${iftar}</b></div>
+            <div class="ram-t"><span>${tr('الإمساك','Imsak')}</span><b>${imsak}</b></div>
+            <div class="ram-t"><span>${tr('السحور (الفجر)','Suhoor')}</span><b>${fajr}</b></div>
+            <div class="ram-t iftar"><span>${tr('الإفطار','Iftar')}</span><b>${maghrib}</b></div>
         </div>
-        <div class="pts-sec-title">${tr('عدّاد الصيام','Fasting counter')}</div>
-        <div class="ram-counter"><button class="off-btn" onclick="AnwarRamadan.fast(-1)">−</button>
-            <div class="ram-count"><b id="ram-count">${fasted}</b><span>${tr('يوم صيام','days fasted')}</span></div>
-            <button class="off-btn" onclick="AnwarRamadan.fast(1)">+</button></div>
-        <div class="pts-sec-title">${tr('أعمال رمضان','Ramadan deeds')}</div>
-        ${['صلاة التراويح','ورد القرآن اليومي','صدقة اليوم','قيام ليل','دعاء الإفطار'].map((d,i)=>{
-            const done=(localStorage.getItem('ram_deed_'+i)==='1');
-            return `<div class="ch-task ${done?'done':''}" onclick="AnwarRamadan.deed(${i})"><span class="ch-ico"><i class="fa-solid fa-star"></i></span><span class="ch-name">${d}</span><span class="ch-pts">${done?'<i class="fa-solid fa-check"></i>':'✓'}</span></div>`;
-        }).join('')}
-        <p style="text-align:center;color:var(--text-muted);font-size:0.72rem;margin-top:12px;">${tr('الإمساك والإفطار محسوبان من أوقات صلاتك تلقائياً.','Times computed from your prayer settings.')}</p>`;
-    modal('ramadan-modal', tr('رفيق رمضان','Ramadan Companion'), 'fa-star-and-crescent', body);
-},
-fast:function(d){ let v=+(localStorage.getItem('ramadan_fasted')||0)+d; v=Math.max(0,Math.min(30,v)); localStorage.setItem('ramadan_fasted',v); const e=$('ram-count'); if(e)e.textContent=v; if(window.HAP)HAP.light(); },
-deed:function(i){ const k='ram_deed_'+i; localStorage.setItem(k, localStorage.getItem(k)==='1'?'0':'1'); if(window.HAP)HAP.light(); AnwarRamadan.open(); } };
+        <div class="pts-sec-title">${tr('صيامك هذا الشهر','Your fasting this month')} <span id="ram-dcount" style="color:var(--accent-color)">(${days.length}/30)</span></div>
+        <div class="ram-grid">${grid}</div>
+        <div class="pts-sec-title">${tr('أعمال اليوم','Daily deeds')}</div>
+        ${deeds}
+        <div class="pts-sec-title">${tr('أدعية رمضان','Ramadan duas')}</div>
+        ${duas}
+        <p style="text-align:center;color:var(--text-muted);font-size:0.72rem;margin-top:12px;">${tr('الأوقات محسوبة من إعدادات صلاتك · العشر الأواخر: أكثِر من دعاء ليلة القدر 🤍','Times from your prayer settings · Last 10 nights: recite the Laylat al-Qadr dua 🤍')}</p>`;
+    },
+    _startCountdown:function(){
+        clearInterval(this._iv);
+        const upd=()=>{
+            const m=$('ramadan-modal'); if(!m||!m.classList.contains('active')){ clearInterval(AnwarRamadan._iv); return; }
+            const p=pt(); const nx=$('ram-next'), tm=$('ram-timer'); if(!nx||!tm) return;
+            const fm=hm2min(p?p.Fajr:null), mm=hm2min(p?p.Maghrib:null);
+            if(fm==null||mm==null){ nx.textContent=tr('فعّل أوقات الصلاة','Enable prayer times'); tm.textContent='--:--:--'; return; }
+            const now=new Date(); const cur=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
+            let label, target;
+            if(cur < fm){ label=tr('باقٍ على الإمساك','Until Imsak'); target=fm; }
+            else if(cur < mm){ label=tr('باقٍ على الإفطار','Until Iftar'); target=mm; }
+            else { label=tr('باقٍ على السحور','Until Suhoor'); target=fm+1440; }
+            let rem=Math.max(0,(target-cur)*60); // ثوانٍ
+            const h=Math.floor(rem/3600), mn=Math.floor((rem%3600)/60), s=Math.floor(rem%60);
+            nx.textContent=label; tm.textContent=pad2(h)+':'+pad2(mn)+':'+pad2(s);
+        };
+        upd(); this._iv=setInterval(upd,1000);
+    },
+    toggleDay:function(n){ let d=ramDays(); const i=d.indexOf(n); if(i>=0)d.splice(i,1); else d.push(n);
+        localStorage.setItem('ram_days',JSON.stringify(d)); if(window.HAP)HAP.light();
+        const btn=event&&event.target; if(btn)btn.classList.toggle('on');
+        const c=$('ram-dcount'); if(c)c.textContent='('+d.length+'/30)'; },
+    deed:function(i){ const k='ram_deed_'+i; localStorage.setItem(k, localStorage.getItem(k)==='1'?'0':'1'); if(window.HAP)HAP.light(); AnwarRamadan.open(); }
+};
 
 // ===== (12) صانع الثيمات الشخصي =====
 window.AnwarThemeMaker = { open:function(){ if(!gate('صانع الثيمات','Theme maker')) return;
@@ -178,33 +219,73 @@ window.AnwarFocus = {
     stopSound:function(){ try{ if(this._audio){ this._audio.osc.forEach(function(o){ try{o.stop();}catch(e){} }); this._audio.ctx.close(); this._audio=null; const b=$('focus-sound'); if(b){ b.innerHTML='<i class="fa-solid fa-volume-xmark"></i>'; b.classList.remove('on'); } } }catch(e){} }
 };
 
-// ===== (7) لوحات فنية للآيات (Wallpapers) =====
-const WP_BG=[['#0D3B2E','#04120C'],['#1B2A4A','#05080F'],['#3A2140','#0E0714'],['#4A2C1A','#100B06'],['#14294A','#04070E'],['#2E2A12','#0B0A04']];
-window.AnwarWallpaper = { open:function(){ if(!gate('لوحات فنية للآيات','Ayah wallpapers')) return;
-    const ayahs=(window.FEATURED_AYAHS)||[{text:'وَاللَّهُ خَيْرٌ حَافِظًا',ref:''}];
-    const body = `<p style="text-align:center;color:var(--text-muted);font-size:0.82rem;margin-bottom:12px;">${tr('خلفية جوّال فنية بالآية — اختر واحدة واحفظها.','Artistic phone wallpaper — pick one and save.')}</p>
-        <div class="wp-grid">${WP_BG.map((g,i)=>`<div class="wp-thumb" style="background:linear-gradient(160deg,${g[0]},${g[1]})" onclick="AnwarWallpaper.save(${i})"><span>${ayahs[i%ayahs.length].text.slice(0,22)}…</span></div>`).join('')}</div>`;
-    modal('wallpaper-modal', tr('لوحات فنية للآيات','Ayah Wallpapers'), 'fa-image', body);
-},
-save:async function(i){
-    const ayahs=(window.FEATURED_AYAHS)||[{text:'وَاللَّهُ خَيْرٌ حَافِظًا',ref:''}];
-    const a=ayahs[i%ayahs.length]; const [c1,c2]=WP_BG[i];
-    const W=1080,H=1920,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
-    try{ await document.fonts.load('70px Amiri'); }catch(e){}
-    const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,c1); g.addColorStop(1,c2); x.fillStyle=g; x.fillRect(0,0,W,H);
-    x.strokeStyle='rgba(242,210,122,0.35)'; x.lineWidth=4; x.strokeRect(60,60,W-120,H-120);
-    x.textAlign='center'; try{x.direction='rtl';}catch(e){}
-    x.fillStyle='#F7EFDC'; x.font='72px Amiri, serif';
-    const words=(a.text||'').split(/\s+/); const lines=[]; let ln='';
-    words.forEach(w=>{ const t=ln?ln+' '+w:w; if(x.measureText(t).width>W-280&&ln){lines.push(ln);ln=w;}else ln=t; }); if(ln)lines.push(ln);
-    let y=H/2-(lines.length-1)*66; lines.forEach(l=>{ x.fillText(l,W/2,y); y+=132; });
-    x.fillStyle='#D4A843'; x.font='40px Amiri, serif'; x.fillText('﴿ '+(a.ref||'')+' ﴾',W/2,y+20);
-    x.fillStyle='rgba(247,239,220,0.4)'; x.font='30px Tajawal, sans-serif'; x.fillText('anwar',W/2,H-100);
-    cv.toBlob(async b=>{ if(!b)return; const f=new File([b],'anwar-wallpaper.png',{type:'image/png'});
-        try{ if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f]}); return; } }catch(e){}
-        const u=URL.createObjectURL(b); const link=document.createElement('a'); link.href=u; link.download='anwar-wallpaper.png'; link.click(); setTimeout(()=>URL.revokeObjectURL(u),1500);
-    },'image/png');
-}};
+// ===== (7) استوديو اللوحات الفنية للآيات =====
+const WP_BG=[
+    ['#0D3B2E','#04120C'],['#1B2A4A','#05080F'],['#3A2140','#0E0714'],['#4A2C1A','#100B06'],
+    ['#14294A','#04070E'],['#2E2A12','#0B0A04'],['#0E3A44','#03110F'],['#43213A','#12060F'],
+    ['#2B3A1C','#080C04'],['#3A1E1E','#100505'],['#1A2540','#05070E'],['#2A2438','#0A0812']
+];
+const WP_AYAHS=[
+    {text:'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ',ref:'الرعد: 28'},
+    {text:'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا',ref:'الشرح: 5'},
+    {text:'وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ',ref:'الحديد: 4'},
+    {text:'وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ',ref:'الطلاق: 3'},
+    {text:'إِنَّ رَبِّي قَرِيبٌ مُّجِيبٌ',ref:'هود: 61'},
+    {text:'وَاللَّهُ خَيْرٌ حَافِظًا وَهُوَ أَرْحَمُ الرَّاحِمِينَ',ref:'يوسف: 64'},
+    {text:'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً',ref:'البقرة: 201'},
+    {text:'وَبَشِّرِ الصَّابِرِينَ',ref:'البقرة: 155'}
+];
+const WP_ORN=['بلا','إطار مزدوج','زوايا','شريطان']; // 0..3
+window.AnwarWallpaper = {
+    _bg:0, _ay:0, _orn:1,
+    open:function(){ if(!gate('لوحات فنية للآيات','Ayah wallpapers')) return; this._render(); },
+    _render:function(){
+        const bgs=WP_BG.map((g,i)=>`<button class="wp-sw ${i===this._bg?'on':''}" style="background:linear-gradient(160deg,${g[0]},${g[1]})" onclick="AnwarWallpaper.set('bg',${i})"></button>`).join('');
+        const ays=WP_AYAHS.map((a,i)=>`<button class="wp-chip ${i===this._ay?'on':''}" onclick="AnwarWallpaper.set('ay',${i})">${a.text.slice(0,14)}…</button>`).join('');
+        const orns=WP_ORN.map((o,i)=>`<button class="wp-chip ${i===this._orn?'on':''}" onclick="AnwarWallpaper.set('orn',${i})">${o}</button>`).join('');
+        const body=`<div class="wp-studio"><canvas id="wp-preview" class="wp-preview-cv" width="288" height="512"></canvas></div>
+            <div class="wp-sec">${tr('الآية','Verse')}</div><div class="wp-chips">${ays}</div>
+            <div class="wp-sec">${tr('الخلفية','Background')}</div><div class="wp-swatches">${bgs}</div>
+            <div class="wp-sec">${tr('الزخرفة','Ornament')}</div><div class="wp-chips">${orns}</div>
+            <button class="tasbeeh-pill" style="width:100%;margin-top:16px;" onclick="AnwarWallpaper.save()"><i class="fa-solid fa-download"></i> ${tr('حفظ بجودة عالية','Save in HD')}</button>`;
+        modal('wallpaper-modal', tr('استوديو اللوحات الفنية','Art Studio'), 'fa-image', body);
+        this._paint($('wp-preview'));
+    },
+    set:function(k,i){ if(k==='bg')this._bg=i; else if(k==='ay')this._ay=i; else this._orn=i; if(window.HAP)HAP.light(); this._render(); },
+    _paint:async function(cv){ if(!cv) return; const W=cv.width,H=cv.height,x=cv.getContext('2d');
+        try{ await document.fonts.load('40px Amiri'); }catch(e){}
+        this._draw(x,W,H); },
+    _draw:function(x,W,H){
+        const S=W/1080; const [c1,c2]=WP_BG[this._bg]; const a=WP_AYAHS[this._ay]; const orn=this._orn;
+        const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,c1); g.addColorStop(1,c2); x.fillStyle=g; x.fillRect(0,0,W,H);
+        // توهّج ناعم علوي
+        const rg=x.createRadialGradient(W/2,H*0.32,0,W/2,H*0.32,W*0.7); rg.addColorStop(0,'rgba(242,210,122,0.10)'); rg.addColorStop(1,'transparent'); x.fillStyle=rg; x.fillRect(0,0,W,H);
+        x.strokeStyle='rgba(242,210,122,0.5)'; x.fillStyle='rgba(242,210,122,0.5)';
+        const m=70*S;
+        if(orn===1){ x.lineWidth=4*S; x.strokeRect(m,m,W-2*m,H-2*m); x.lineWidth=1.5*S; x.strokeRect(m+14*S,m+14*S,W-2*m-28*S,H-2*m-28*S); }
+        else if(orn===2){ const c=90*S,L=70*S; x.lineWidth=4*S;
+            [[m,m,1,1],[W-m,m,-1,1],[m,H-m,1,-1],[W-m,H-m,-1,-1]].forEach(p=>{ x.beginPath(); x.moveTo(p[0],p[1]+p[3]*L); x.lineTo(p[0],p[1]); x.lineTo(p[0]+p[2]*L,p[1]); x.stroke(); x.beginPath(); x.arc(p[0]+p[2]*c,p[1]+p[3]*c,10*S,0,7); x.fill(); }); }
+        else if(orn===3){ x.lineWidth=3*S; x.beginPath(); x.moveTo(m,H*0.2); x.lineTo(W-m,H*0.2); x.moveTo(m,H*0.8); x.lineTo(W-m,H*0.8); x.stroke();
+            [[W/2,H*0.2],[W/2,H*0.8]].forEach(p=>{ x.beginPath(); x.arc(p[0],p[1],9*S,0,7); x.fill(); }); }
+        // النص
+        x.textAlign='center'; try{x.direction='rtl';}catch(e){}
+        x.fillStyle='#F7EFDC'; x.font=(70*S)+'px Amiri, serif';
+        const words=(a.text||'').split(/\s+/); const lines=[]; let ln='';
+        words.forEach(w=>{ const t=ln?ln+' '+w:w; if(x.measureText(t).width>W-300*S&&ln){lines.push(ln);ln=w;}else ln=t; }); if(ln)lines.push(ln);
+        let y=H/2-(lines.length-1)*64*S; lines.forEach(l=>{ x.fillText(l,W/2,y); y+=128*S; });
+        x.fillStyle='#E9C877'; x.font=(40*S)+'px Amiri, serif'; x.fillText('﴿ '+(a.ref||'')+' ﴾',W/2,y+10*S);
+        x.fillStyle='rgba(247,239,220,0.38)'; x.font=(28*S)+'px Tajawal, sans-serif'; x.fillText('anwar',W/2,H-90*S);
+    },
+    save:async function(){
+        const W=1080,H=1920,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
+        try{ await document.fonts.load('70px Amiri'); await document.fonts.load('30px Tajawal'); }catch(e){}
+        this._draw(x,W,H);
+        cv.toBlob(async b=>{ if(!b)return; const f=new File([b],'anwar-wallpaper.png',{type:'image/png'});
+            try{ if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f]}); if(window.HAP)HAP.success(); return; } }catch(e){}
+            const u=URL.createObjectURL(b); const link=document.createElement('a'); link.href=u; link.download='anwar-wallpaper.png'; link.click(); setTimeout(()=>URL.revokeObjectURL(u),1500); if(window.HAP)HAP.success();
+        },'image/png');
+    }
+};
 
 // طبّق الثيم المخصّص عند الإقلاع
 setTimeout(()=>{ try{ AnwarThemeMaker._apply(); }catch(e){} }, 300);
