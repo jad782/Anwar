@@ -22,7 +22,7 @@ const FEATURES = [
     { ico:'fa-clapperboard',     ar:'استوديو الآيات السينمائي',  d:'صمّم الآيات والأحاديث بتأثيرات متحرّكة واحفظها/انشرها بجودة عالية.', act:"AnwarCards&&AnwarCards.open()" },
     { ico:'fa-moon',             ar:'الوضع الليلي التأمّلي',      d:'شاشة قراءة غامرة للقيام والتهجّد بلا مشتّتات وأجواء هادئة.', act:"AnwarFocus&&AnwarFocus.open()" },
     { ico:'fa-image',            ar:'لوحات فنية للآيات',         d:'خلفيات جوّال فنية بالخط العربي تُحفظ في جهازك.', act:"AnwarWallpaper&&AnwarWallpaper.open()" },
-    { ico:'fa-cube',             ar:'القبلة بالواقع المعزّز',    d:'كاميرا توجّهك نحو القبلة بسهم فوق الواقع + توجيه بالاهتزاز.', act:"openQibla()" },
+    { ico:'fa-cube',             ar:'القبلة بالواقع المعزّز',    d:'كاميرا حيّة: الكعبة تطفو فوق الواقع وتتوسّط عند مواجهة القبلة + توجيه بالاهتزاز.', act:"AnwarQiblaAR&&AnwarQiblaAR.open()" },
     { ico:'fa-hands-praying',    ar:'أسماء الله الحسنى',        d:'الـ99 اسماً بتصميم فخم مع المعاني وبطاقات مشاركة.', act:"AnwarNames&&AnwarNames.open()" },
     { ico:'fa-star-and-crescent',ar:'رفيق رمضان الكامل',        d:'إمساكية وعدّاد صيام وأعمال رمضان — يعتمد على أوقات صلاتك.', act:"AnwarRamadan&&AnwarRamadan.open()" },
     { ico:'fa-wand-magic-sparkles',ar:'صانع الثيمات الشخصي',    d:'صمّم ثيمك الخاص باختيار لونين ويتناسق التطبيق كله معك.', act:"AnwarThemeMaker&&AnwarThemeMaker.open()" },

@@ -45,5 +45,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>تُستخدم الكاميرا لعرض القبلة بالواقع المعزّز فوق محيطك مباشرة.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>يُستخدم موقعك لحساب أوقات الصلاة واتجاه القبلة بدقّة. لا يُرسَل موقعك لأي خادم.</string>
 </dict>
 </plist>
