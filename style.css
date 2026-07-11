@@ -1058,6 +1058,15 @@ body.light-mode .ps-chip-lbl { color:#6b5d49; }
 .prem-restore { width:100%; margin-top:14px; padding:11px; border-radius:12px; border:1px solid var(--border-color); background:transparent; color:var(--accent-color); font-weight:700; cursor:pointer; font-family:'Tajawal','Cairo',sans-serif; }
 .prem-manage { width:100%; margin-top:16px; padding:13px; border-radius:12px; border:none; background:linear-gradient(135deg,var(--accent-color),var(--accent-light)); color:#14110B; font-weight:800; cursor:pointer; font-family:'Tajawal','Cairo',sans-serif; box-shadow:0 4px 14px rgba(201,162,75,0.32); }
 .prem-manage:active { transform:scale(0.98); }
+
+/* حزمة التخصيص الحصرية (AnwarLuxe) */
+.luxe-sub { text-align:center; color:var(--accent-light,#F2D27A); font-size:0.82rem; font-weight:700; margin:0 0 16px; }
+.luxe-sec { margin-bottom:18px; }
+.luxe-sec h4 { color:var(--text-soft,#cbbfa6); font-size:0.9rem; margin:0 0 10px; font-weight:700; }
+.luxe-row { display:flex; flex-wrap:wrap; gap:8px; }
+.luxe-chip { padding:9px 14px; border-radius:12px; border:1px solid var(--border-color); background:transparent; color:var(--text-main,#efe8db); font-weight:700; cursor:pointer; font-family:'Tajawal','Cairo',sans-serif; font-size:0.86rem; transition:transform .12s; }
+.luxe-chip:active { transform:scale(0.95); }
+.luxe-chip.on { background:linear-gradient(135deg,var(--accent-color),var(--accent-light)); color:#14110B; border-color:transparent; box-shadow:0 3px 10px rgba(201,162,75,0.3); }
 .prem-terms { text-align:center; font-size:0.66rem; color:var(--text-muted); margin-top:10px; line-height:1.6; }
 body.light-mode .pf-txt b { color:var(--text-main); }
 
