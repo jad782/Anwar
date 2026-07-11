@@ -246,16 +246,27 @@ function timeAdd(hhmm, mins){
     let t=((h*60+m+mins)%1440+1440)%1440; const H=Math.floor(t/60),M=t%60;
     return fmtDigits(String(H).padStart(2,'0')+':'+String(M).padStart(2,'0'));
 }
+// دقائق من نصف الليل لسلسلة وقت (يدعم الأرقام الهندية)
+function toMins(hhmm){
+    const w=String(hhmm||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+    const p=w.split(':'); const h=+p[0], m=+p[1]; return isNaN(h)?null:(h*60+m);
+}
 PRAYERS.renderMakruh = function(){
     const box=$('makruh-body'); if(!box) return;
     let pt; try{ pt=(typeof prayerTimings!=='undefined')?prayerTimings:null; }catch(e){ pt=null; }
     if(!pt||!pt.Sunrise){ box.innerHTML=''; return; }
     const rows=[
-        [L()==='en'?'After sunrise':'بعد الشروق', pt.Sunrise, timeAdd(pt.Sunrise,15), 'fa-sun'],
-        [L()==='en'?'Zenith':'الزوال', timeAdd(pt.Dhuhr,-6), pt.Dhuhr, 'fa-circle-half-stroke'],
-        [L()==='en'?'Before sunset':'قبيل الغروب', timeAdd(pt.Maghrib,-15), pt.Maghrib, 'fa-cloud-sun']
+        [L()==='en'?'After sunrise':'بعد الشروق', pt.Sunrise, timeAdd(pt.Sunrise,15), 'fa-sun', toMins(pt.Sunrise), toMins(pt.Sunrise)+15],
+        [L()==='en'?'Zenith':'الزوال', timeAdd(pt.Dhuhr,-6), pt.Dhuhr, 'fa-circle-half-stroke', toMins(pt.Dhuhr)-6, toMins(pt.Dhuhr)],
+        [L()==='en'?'Before sunset':'قبيل الغروب', timeAdd(pt.Maghrib,-15), pt.Maghrib, 'fa-cloud-sun', toMins(pt.Maghrib)-15, toMins(pt.Maghrib)]
     ];
-    box.innerHTML = `<div class="mk-grid">` + rows.map(r=>`<div class="mk-item">
+    const now=new Date(); const cur=now.getHours()*60+now.getMinutes();
+    let activeIdx=-1;
+    rows.forEach((r,i)=>{ if(r[4]!=null && cur>=r[4] && cur<r[5]) activeIdx=i; });
+    const banner = activeIdx>=0
+        ? `<div class="mk-now"><i class="fa-solid fa-triangle-exclamation"></i> ${L()==='en'?'Now is a disliked time — avoid voluntary prayer':'الوقت الحالي وقت كراهة — تُكره النافلة الآن'}</div>`
+        : '';
+    box.innerHTML = banner + `<div class="mk-grid">` + rows.map((r,i)=>`<div class="mk-item${i===activeIdx?' active':''}">
         <span class="mk-ic"><i class="fa-solid ${r[3]}"></i></span>
         <span class="mk-name">${r[0]}</span>
         <span class="mk-time">${r[1]} - ${r[2]}</span></div>`).join('') + `</div>`;
@@ -268,6 +279,7 @@ function initMakruh(){
     const _sp=window.setPrayerTimings;
     window.setPrayerTimings=function(){ const r=(typeof _sp==='function')?_sp.apply(this,arguments):undefined; try{PRAYERS.renderMakruh();}catch(e){} return r; };
     setTimeout(()=>{ try{PRAYERS.renderMakruh();}catch(e){} }, 600);
+    setInterval(()=>{ try{PRAYERS.renderMakruh();}catch(e){} }, 60000); // تحديث المؤشّر الحالي كل دقيقة
 }
 function boot(){ injectSettings(); initMakruh(); }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ()=>setTimeout(boot, 800));

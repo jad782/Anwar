@@ -943,8 +943,12 @@ body.light-mode .pv-cell b, body.light-mode .off-val { color:#9a6f12; }
 .makruh-card { background:linear-gradient(180deg, rgba(231,124,58,0.10), rgba(231,124,58,0.04)); border:1px solid rgba(231,124,58,0.28); border-radius:18px; padding:16px; margin:18px 0 24px; position:relative; }
 .makruh-card::before { content:''; position:absolute; top:-10px; left:20%; right:20%; height:1px; background:linear-gradient(90deg, transparent, var(--border-color), transparent); }
 .mk-title { display:flex; align-items:center; gap:8px; font-weight:800; color:#e77c3a; font-size:0.92rem; margin-bottom:12px; }
+.mk-now { display:flex; align-items:center; gap:8px; background:rgba(231,124,58,0.16); border:1px solid rgba(231,124,58,0.45); color:#e77c3a; font-weight:800; font-size:0.82rem; border-radius:12px; padding:10px 14px; margin-bottom:12px; animation:mkNowPulse 1.8s ease-in-out infinite; }
+@keyframes mkNowPulse { 0%,100%{ box-shadow:0 0 0 0 rgba(231,124,58,0.25);} 50%{ box-shadow:0 0 0 6px rgba(231,124,58,0);} }
 .mk-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
-.mk-item { display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; background:rgba(231,124,58,0.07); border:1px solid rgba(231,124,58,0.18); border-radius:14px; padding:12px 8px; }
+.mk-item { display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; background:rgba(231,124,58,0.07); border:1px solid rgba(231,124,58,0.18); border-radius:14px; padding:12px 8px; transition:transform .2s; }
+.mk-item.active { background:rgba(231,124,58,0.22); border-color:#e77c3a; transform:scale(1.04); box-shadow:0 4px 14px rgba(231,124,58,0.3); }
+.mk-item.active .mk-ic { background:#e77c3a; color:#fff; }
 .mk-ic { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(231,124,58,0.16); color:#e77c3a; font-size:0.95rem; }
 .mk-name { font-size:0.72rem; color:var(--text-soft,#cbbfa6); line-height:1.4; }
 .mk-time { font-size:0.78rem; font-weight:800; color:#e77c3a; direction:ltr; }
