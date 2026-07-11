@@ -103,19 +103,80 @@ _apply:function(){ if(localStorage.getItem('custom_theme')==='1'){ const a=local
 reset:function(){ localStorage.setItem('custom_theme','0'); document.documentElement.style.removeProperty('--accent-color'); document.documentElement.style.removeProperty('--accent-light'); document.documentElement.style.removeProperty('--primary-color'); if(window.applyAppTheme)applyAppTheme(); const m=$('thememaker-modal'); if(m)m.classList.remove('active'); } };
 
 // ===== (6) الوضع الليلي التأمّلي (Focus Mode) =====
-window.AnwarFocus = { open:function(){ if(!gate('الوضع التأمّلي','Focus mode')) return;
-    let f=$('focus-mode');
-    if(!f){ f=document.createElement('div'); f.id='focus-mode'; f.className='focus-overlay';
-        f.innerHTML=`<div class="focus-stars"></div>
-            <button class="focus-close" onclick="document.getElementById('focus-mode').classList.remove('active')"><i class="fa-solid fa-xmark"></i></button>
-            <div class="focus-inner"><div class="focus-ayah" id="focus-ayah"></div><div class="focus-dhikr" id="focus-dhikr"></div></div>`;
-        document.body.appendChild(f);
-    }
-    const ayahs=(window.FEATURED_AYAHS)||[{text:'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ',ref:'الرعد'}];
-    const a=ayahs[new Date().getDate()%ayahs.length];
-    $('focus-ayah').textContent=a.text; $('focus-dhikr').textContent='﴿ '+(a.ref||'')+' ﴾';
-    f.classList.add('active');
-}};
+// آيات تأمّل مهدّئة للوضع الليلي
+const FOCUS_AYAHS = [
+    {t:'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ', r:'الرعد: 28'},
+    {t:'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا', r:'الشرح: 5'},
+    {t:'وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ', r:'الحديد: 4'},
+    {t:'وَاصْبِرْ وَمَا صَبْرُكَ إِلَّا بِاللَّهِ', r:'النحل: 127'},
+    {t:'وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ', r:'الطلاق: 3'},
+    {t:'إِنَّ رَبِّي قَرِيبٌ مُّجِيبٌ', r:'هود: 61'},
+    {t:'وَنَحْنُ أَقْرَبُ إِلَيْهِ مِنْ حَبْلِ الْوَرِيدِ', r:'ق: 16'},
+    {t:'رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي', r:'طه: 25-26'}
+];
+const DHIKRS = [ {t:'سُبْحَانَ اللَّه', max:33}, {t:'الْحَمْدُ لِلَّه', max:33}, {t:'اللَّهُ أَكْبَر', max:34} ];
+window.AnwarFocus = {
+    _timers:[], _ai:0, _di:0, _dc:0, _audio:null,
+    open:function(){ if(!gate('الوضع التأمّلي','Focus mode')) return;
+        let f=$('focus-mode');
+        if(!f){ f=document.createElement('div'); f.id='focus-mode'; f.className='focus-overlay';
+            f.innerHTML=`<div class="focus-stars"></div><div class="focus-moon"></div>
+                <button class="focus-close" onclick="AnwarFocus.close()"><i class="fa-solid fa-xmark"></i></button>
+                <div class="focus-stage">
+                    <div class="focus-breath" id="focus-breath"><span id="focus-breath-txt"></span></div>
+                    <div class="focus-ayah" id="focus-ayah"></div>
+                    <div class="focus-ref" id="focus-ref"></div>
+                </div>
+                <div class="focus-dock">
+                    <button class="focus-dockbtn" id="focus-sound" onclick="AnwarFocus.toggleSound()" title="${tr('صوت هادئ','Ambient')}"><i class="fa-solid fa-volume-xmark"></i></button>
+                    <div class="focus-tasbeeh" onclick="AnwarFocus.tick()"><span id="focus-dhikr"></span><span class="focus-count" id="focus-count">0</span></div>
+                    <button class="focus-dockbtn" onclick="AnwarFocus.nextAyah()" title="${tr('آية أخرى','Next verse')}"><i class="fa-solid fa-arrows-rotate"></i></button>
+                </div>`;
+            document.body.appendChild(f);
+        }
+        this._ai=new Date().getDate()%FOCUS_AYAHS.length; this._di=0; this._dc=0;
+        this.showAyah(); this.showDhikr();
+        f.classList.add('active');
+        this.breathe();
+    },
+    close:function(){ this._timers.forEach(clearTimeout); this._timers=[]; this.stopSound(); const f=$('focus-mode'); if(f) f.classList.remove('active'); },
+    breathe:function(){ // دورة 4-7-8: استنشق/احبس/ازفر
+        const orb=$('focus-breath'), txt=$('focus-breath-txt'); if(!orb) return;
+        const self=this;
+        function phase(name, cls, secs, next){
+            if(txt) txt.textContent=name; orb.className='focus-breath '+cls;
+            self._timers.push(setTimeout(next, secs*1000));
+        }
+        function cycle(){
+            phase(tr('استنشق','Inhale'),'inhale',4,function(){
+                phase(tr('احبس','Hold'),'hold',7,function(){
+                    phase(tr('ازفر','Exhale'),'exhale',8,cycle);
+                });
+            });
+        }
+        cycle();
+    },
+    showAyah:function(){ const a=FOCUS_AYAHS[this._ai%FOCUS_AYAHS.length]; const ae=$('focus-ayah'), re=$('focus-ref');
+        if(ae){ ae.style.animation='none'; void ae.offsetWidth; ae.style.animation=''; ae.textContent=a.t; } if(re) re.textContent='﴿ '+a.r+' ﴾'; },
+    nextAyah:function(){ this._ai=(this._ai+1)%FOCUS_AYAHS.length; this.showAyah(); if(window.HAP)HAP.light(); },
+    showDhikr:function(){ const d=DHIKRS[this._di]; const de=$('focus-dhikr'), ce=$('focus-count'); if(de)de.textContent=d.t; if(ce)ce.textContent=this._dc; },
+    tick:function(){ const d=DHIKRS[this._di]; this._dc++; if(window.HAP)HAP.light();
+        if(this._dc>=d.max){ this._di=(this._di+1)%DHIKRS.length; this._dc=0; if(window.HAP)HAP.success(); }
+        this.showDhikr(); },
+    toggleSound:function(){ if(this._audio){ this.stopSound(); } else { this.startSound(); } },
+    startSound:function(){ try{
+        const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+        const ctx=new AC(); const g=ctx.createGain(); g.gain.value=0.05; g.connect(ctx.destination);
+        // نغمة رياح هادئة: مذبذبان مخفوتان + مرشّح
+        const o1=ctx.createOscillator(); o1.type='sine'; o1.frequency.value=110;
+        const o2=ctx.createOscillator(); o2.type='sine'; o2.frequency.value=110.5;
+        const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=400;
+        o1.connect(lp); o2.connect(lp); lp.connect(g); o1.start(); o2.start();
+        this._audio={ctx:ctx,osc:[o1,o2]};
+        const b=$('focus-sound'); if(b) b.innerHTML='<i class="fa-solid fa-volume-high"></i>'; b&&b.classList.add('on');
+    }catch(e){} },
+    stopSound:function(){ try{ if(this._audio){ this._audio.osc.forEach(function(o){ try{o.stop();}catch(e){} }); this._audio.ctx.close(); this._audio=null; const b=$('focus-sound'); if(b){ b.innerHTML='<i class="fa-solid fa-volume-xmark"></i>'; b.classList.remove('on'); } } }catch(e){} }
+};
 
 // ===== (7) لوحات فنية للآيات (Wallpapers) =====
 const WP_BG=[['#0D3B2E','#04120C'],['#1B2A4A','#05080F'],['#3A2140','#0E0714'],['#4A2C1A','#100B06'],['#14294A','#04070E'],['#2E2A12','#0B0A04']];
