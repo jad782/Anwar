@@ -118,6 +118,8 @@ const APP_THEMES = [
     { id:'rosewood',     ar:'خشب وردي',   en:'Rosewood',     dot:'linear-gradient(135deg,#D98E78,#1A0C0A)' },
 ];
 function applyAppTheme(){
+    // الافتراضي عند أول تنزيل: الثيم النهاري الفاتح
+    if(localStorage.getItem('app_theme')===null){ localStorage.setItem('app_theme','light'); if(localStorage.getItem('lightMode')===null) localStorage.setItem('lightMode','true'); }
     const t = localStorage.getItem('app_theme')||'';
     document.body.classList.remove('light-mode','theme-emerald-deep','theme-navy','theme-purple','theme-rosewood');
     if(t==='light') document.body.classList.add('light-mode');
