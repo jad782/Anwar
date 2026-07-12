@@ -26,6 +26,7 @@ const FEATURES = [
     { ico:'fa-hands-praying',    ar:'أسماء الله الحسنى',        d:'الـ99 اسماً بتصميم فخم مع المعاني وبطاقات مشاركة.', act:"AnwarNames&&AnwarNames.open()" },
     { ico:'fa-star-and-crescent',ar:'رفيق رمضان الكامل',        d:'إمساكية وعدّاد صيام وأعمال رمضان — يعتمد على أوقات صلاتك.', act:"AnwarRamadan&&AnwarRamadan.open()" },
     { ico:'fa-wand-magic-sparkles',ar:'صانع الثيمات الشخصي',    d:'صمّم ثيمك الخاص باختيار لونين ويتناسق التطبيق كله معك.', act:"AnwarThemeMaker&&AnwarThemeMaker.open()" },
+    { ico:'fa-brain',            ar:'وضع الحفظ (تسميع)',        d:'كرّر الآية صوتياً بعدد تحدّده وأخفِ النص للتسميع — للحُفّاظ وطلبة القرآن.', act:"AnwarHifz&&AnwarHifz.open()" },
 ];
 const PLANS = [
     { id:'com.alanwar.premium.monthly',  ar:'شهري',      en:'Monthly',  price:'$1.99',  per:'/شهر',  perEn:'/mo' },

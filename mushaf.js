@@ -104,7 +104,7 @@ function ensureBar(){
     const host=$('reading-view'); const hdr=host.querySelector('.reading-header');
     const bar=document.createElement('div'); bar.id='msf-bar'; bar.className='msf-bar';
     bar.innerHTML = `<button class="rt-btn" id="msf-taj" onclick="MUSHAF.toggleTajweed()"><i class="fa-solid fa-palette"></i><span>${L()==='en'?'Tajweed':'تجويد'}</span></button>
-        <button class="rt-btn" onclick="MUSHAF.detailed()"><i class="fa-solid fa-headphones"></i><span>${L()==='en'?'Listen':'سماع'}</span></button>
+        <button class="rt-btn" id="msf-listen-btn" onclick="window.AnwarFollow&&AnwarFollow.toggle()"><i class="fa-solid fa-headphones"></i><span>${L()==='en'?'Listen':'سماع'}</span></button>
         <button class="rt-btn" onclick="MUSHAF.font(-2)"><i class="fa-solid fa-minus"></i><span>${L()==='en'?'A-':'تصغير'}</span></button>
         <button class="rt-btn" onclick="MUSHAF.font(2)"><i class="fa-solid fa-plus"></i><span>${L()==='en'?'A+':'تكبير'}</span></button>
         <button class="rt-btn" onclick="MUSHAF.detailed()"><i class="fa-solid fa-sliders"></i><span>${L()==='en'?'Tools':'أدوات'}</span></button>`;
@@ -121,6 +121,7 @@ MUSHAF.openPage  = function(p){ tajOn=false; showChrome(); curPage = Math.max(1,
 
 async function renderPage(page){
     const cont = $('ayahs-container'); if(!cont) return;
+    try{ if(window.AnwarFollow) AnwarFollow.stop(); }catch(e){}
     const ayahs = QD().ayahs.filter(a=>a.p===page); if(!ayahs.length) return;
     let tajMap = null;
     if (tajOn){
@@ -206,6 +207,7 @@ window.openFreeReading = function(type, num, name){
 // عند الرجوع: أعد إظهار القائمة والبحث وأخفِ شريط المصحف
 const _origClose = window.closeSurah;
 window.closeSurah = function(){
+    try{ if(window.AnwarFollow) AnwarFollow.stop(); }catch(e){}
     document.body.classList.remove('reading-fullscreen');
     document.body.classList.remove('reading-immersive');
     if (typeof _origClose==='function') _origClose();
