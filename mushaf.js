@@ -145,17 +145,15 @@ async function renderPage(page){
     });
     const legend = tajOn ? `<div class="tajweed-legend"><span><b class="tj-madd">المدّ</b></span><span><b class="tj-ghunnah">الغنّة</b></span><span><b class="tj-qalqalah">القلقلة</b></span><span><b class="tj-ikhfa">الإخفاء</b></span><span><b class="tj-idgham">الإدغام</b></span><span><b class="tj-iqlab">الإقلاب</b></span></div>` : '';
     cont.innerHTML = `${legend}<div class="mushaf-page">${html}</div>
-        <div class="mushaf-foot">
-            <button class="msf-nav-btn" onclick="MUSHAF.prev()" ${page>=604?'disabled':''}><i class="fa-solid fa-chevron-right"></i></button>
-            <div class="mushaf-pageno">${toArabic(page)}</div>
-            <button class="msf-nav-btn" onclick="MUSHAF.next()" ${page<=1?'disabled':''}><i class="fa-solid fa-chevron-left"></i></button>
-        </div>`;
+        <div class="mushaf-foot"><div class="mushaf-pageno">${toArabic(page)} · ${toArabic(604)}</div></div>`;
     if (typeof applyReadingBg==='function') applyReadingBg();
     document.querySelector('.content-area').scrollTop = 0;
     const _pg = cont.querySelector('.mushaf-page');
     if (_pg && _turnDir){ _pg.classList.add(_turnDir>0?'pg-turn-next':'pg-turn-prev'); _turnDir=0; }
     window.CUR_READ = { type:'surah', num: mainS, name: mainName, page };
     bindSwipe(cont);
+    // تقدّم حلقة "إنجازات اليوم" عند القراءة
+    try{ if(typeof updateAchievementState==='function') updateAchievementState('quran'); }catch(e){}
     try{ localStorage.setItem('last_read', JSON.stringify({type:'page', num:page, name:'سورة '+mainName, ts:Date.now()})); }catch(e){}
     if (window.PRO2 && PRO2.checkBadges) setTimeout(()=>PRO2.checkBadges(), 50);
 }
@@ -176,13 +174,27 @@ function banner(n){
     return `<div class="mushaf-banner"><span class="mb-orn">۞</span><div class="mb-mid"><h2>${m.name}</h2><span class="mb-sub">${type} · ${toArabic(m.count)} آية</span></div><span class="mb-orn">۞</span></div>`;
 }
 
-// السحب الأفقي
-let _sx=0, _sy=0, _bound=null;
+// السحب الأفقي (لمس + ماوس) + لمسة لإظهار/إخفاء القوائم
+let _sx=0, _sy=0, _st=0, _moved=false, _bound=null;
+function _endSwipe(cx,cy){
+    const dx=cx-_sx, dy=cy-_sy, dt=Date.now()-_st;
+    if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.4){ _moved=true; if(dx<0) MUSHAF.next(); else MUSHAF.prev(); return; }
+    // نقرة خفيفة على فراغ الصفحة (ليست على آية) → إظهار/إخفاء القوائم للقراءة الغامرة
+    if(dt<300 && Math.abs(dx)<12 && Math.abs(dy)<12){
+        const t=document.elementFromPoint(cx,cy);
+        if(t && !t.closest('.ayah') && !t.closest('button') && !t.closest('.mushaf-banner')){
+            document.body.classList.toggle('reading-immersive'); if(window.HAP)HAP.light();
+        }
+    }
+}
 function bindSwipe(el){
     if (_bound===el) return; _bound=el;
-    el.addEventListener('touchstart', e=>{ _sx=e.changedTouches[0].clientX; _sy=e.changedTouches[0].clientY; }, {passive:true});
-    el.addEventListener('touchend', e=>{ const dx=e.changedTouches[0].clientX-_sx, dy=e.changedTouches[0].clientY-_sy;
-        if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)*1.5){ if(dx<0) MUSHAF.next(); else MUSHAF.prev(); } }, {passive:true});
+    el.addEventListener('touchstart', e=>{ _sx=e.changedTouches[0].clientX; _sy=e.changedTouches[0].clientY; _st=Date.now(); }, {passive:true});
+    el.addEventListener('touchend', e=>{ _endSwipe(e.changedTouches[0].clientX, e.changedTouches[0].clientY); }, {passive:true});
+    // دعم الماوس (للتجربة على سطح المكتب)
+    let md=false;
+    el.addEventListener('mousedown', e=>{ md=true; _sx=e.clientX; _sy=e.clientY; _st=Date.now(); });
+    window.addEventListener('mouseup', e=>{ if(!md)return; md=false; _endSwipe(e.clientX, e.clientY); });
 }
 
 // استبدال فتح القراءة: السور والأجزاء تفتح وضع الصفحة
@@ -195,6 +207,7 @@ window.openFreeReading = function(type, num, name){
 const _origClose = window.closeSurah;
 window.closeSurah = function(){
     document.body.classList.remove('reading-fullscreen');
+    document.body.classList.remove('reading-immersive');
     if (typeof _origClose==='function') _origClose();
     const qs=$('quran-search-wrap'); if(qs) qs.style.display='flex';
     const bar=$('msf-bar'); if(bar) bar.style.display='none';

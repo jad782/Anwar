@@ -901,8 +901,25 @@ body.reading-fullscreen #current-surah-name { font-family:'Amiri',serif; font-si
 body.reading-fullscreen #msf-bar { position: sticky; top: 50px; z-index: 5; background: var(--light-bg); padding: 8px 0; margin-bottom: 6px; overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
 body.reading-fullscreen #msf-bar::-webkit-scrollbar { display:none; }
 body.reading-fullscreen #msf-bar .rt-btn { flex: 0 0 auto; }
-/* بطاقة الصفحة أفخم في وضع ملء الشاشة */
-body.reading-fullscreen .mushaf-page { background: linear-gradient(180deg, rgba(255,255,255,0.015), transparent); border: 1px solid var(--border-color); border-radius: 18px; padding: 20px 16px; box-shadow: inset 0 0 40px rgba(0,0,0,0.25); }
+/* بطاقة الصفحة أفخم في وضع ملء الشاشة — هوامش مريحة للعين */
+body.reading-fullscreen .mushaf-page { background: linear-gradient(180deg, rgba(255,255,255,0.015), transparent); border: 1px solid var(--border-color); border-radius: 18px; padding: 26px 20px; box-shadow: inset 0 0 40px rgba(0,0,0,0.25); line-height: 2.5; }
+body.reading-fullscreen .mushaf-page .ayah { line-height: 2.5; }
+
+/* إخفاء الشريط السفلي والعلوي في وضع القراءة (تركيز كامل) */
+body.reading-fullscreen .bottom-nav { display: none !important; }
+/* لمسة على فراغ الصفحة تُخفي الرأس والأدوات (قراءة غامرة) */
+body.reading-immersive .reading-header,
+body.reading-immersive #msf-bar { display: none !important; }
+body.reading-immersive #reading-view { padding-top: calc(env(safe-area-inset-top,0px) + 20px); }
+
+/* انتقال ناعم سريع بين الصفحات */
+.pg-turn-next { animation: pgNext .28s cubic-bezier(0.22,1,0.36,1); }
+.pg-turn-prev { animation: pgPrev .28s cubic-bezier(0.22,1,0.36,1); }
+@keyframes pgNext { from{ opacity:0; transform:translateX(-22px);} to{ opacity:1; transform:translateX(0);} }
+@keyframes pgPrev { from{ opacity:0; transform:translateX(22px);} to{ opacity:1; transform:translateX(0);} }
+/* رقم الصفحة أسفل — مؤشّر خفيف بلا أزرار */
+.mushaf-foot { display:flex; justify-content:center; margin:18px 0 8px; }
+.mushaf-pageno { color:var(--text-soft,#cbbfa6); font-size:0.82rem; font-weight:700; direction:ltr; opacity:0.75; background:var(--pill-bg,rgba(197,160,89,0.1)); padding:5px 16px; border-radius:14px; }
 
 /* ===== زخارف بطاقة القصة ===== */
 .story-orns { display:flex; gap:7px; margin-top:12px; flex-wrap:wrap; justify-content:center; }
