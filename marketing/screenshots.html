@@ -164,7 +164,9 @@ function draw(){
 
   // منطقة الجوّال
   const zoneTop=dy+52*S, zoneBottom=H-sigH-badgesH-24*S, zoneW=W*0.82, zoneH=Math.max(120*S, zoneBottom-zoneTop);
-  let fw=zoneW, fh=zoneH; if(img){ const ar=img.width/img.height; if(zoneW/zoneH>ar){ fh=zoneH; fw=fh*ar; } else { fw=zoneW; fh=fw/ar; } }
+  const IPHONE_AR=1290/2796; // نسبة آيفون الحقيقية (طويل ونحيف)
+  const ar = showFrame ? IPHONE_AR : (img ? img.width/img.height : zoneW/zoneH);
+  let fw=zoneW, fh=zoneH; if(zoneW/zoneH>ar){ fh=zoneH; fw=fh*ar; } else { fw=zoneW; fh=fw/ar; }
   fw*=imgScale; fh*=imgScale; if(fw>zoneW){ const k=zoneW/fw; fw*=k; fh*=k; } if(fh>zoneH){ const k=zoneH/fh; fw*=k; fh*=k; }
   const fx=(W-fw)/2; let fy=zoneTop+(zoneH-fh)/2+posOff; fy=Math.max(zoneTop, Math.min(fy, zoneBottom-fh));
   const bezel=showFrame?Math.max(16*S,fw*0.028):12*S, rad=Math.min(84*S, fw*0.105);
@@ -178,7 +180,10 @@ function draw(){
   }
   // الشاشة (زوايا مطابقة للآيفون)
   x.save(); roundRect(fx,x,fy,fw,fh,rad*0.82); x.clip();
-  if(img){ x.drawImage(img,fx,fy,fw,fh); } else { x.fillStyle='rgba(255,255,255,0.05)'; x.fillRect(fx,fy,fw,fh); x.fillStyle='rgba(255,255,255,0.45)'; x.font=Math.round(38*S)+'px Arial'; x.textAlign='center'; x.textBaseline='middle'; x.fillText('ارفع صورة شاشتك',W/2,fy+fh/2); x.textBaseline='alphabetic'; }
+  if(img){ // احتواء يملأ الشاشة بلا تشويه (يقصّ الزائد)
+    const sc=Math.max(fw/img.width, fh/img.height), dw=img.width*sc, dh=img.height*sc;
+    x.drawImage(img, fx+(fw-dw)/2, fy+(fh-dh)/2, dw, dh);
+  } else { x.fillStyle='rgba(255,255,255,0.05)'; x.fillRect(fx,fy,fw,fh); x.fillStyle='rgba(255,255,255,0.45)'; x.font=Math.round(38*S)+'px Arial'; x.textAlign='center'; x.textBaseline='middle'; x.fillText('ارفع صورة شاشتك',W/2,fy+fh/2); x.textBaseline='alphabetic'; }
   // الجزيرة الديناميكية + عدسة
   if(showFrame){ const iw=fw*0.32, ih=Math.max(30*S, fh*0.034), ix=W/2-iw/2, iy=fy+fh*0.016;
     x.fillStyle='#000'; roundRect(ix,x,iy,iw,ih,ih/2); x.fill();
