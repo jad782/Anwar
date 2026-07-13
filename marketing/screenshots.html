@@ -119,51 +119,80 @@ function roundRect(x,c,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x
 
 function draw(){
   const cv=document.getElementById('cv'), x=cv.getContext('2d'); const W=cv.width, H=cv.height;
-  const S=W/1080; // معامل قياس نسبي
-  const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,BGS[bg][0]); g.addColorStop(1,BGS[bg][1]); x.fillStyle=g; x.fillRect(0,0,W,H);
-  const rg=x.createRadialGradient(W/2,H*0.14,0,W/2,H*0.14,W*0.85); rg.addColorStop(0,'rgba(242,210,122,0.15)'); rg.addColorStop(1,'transparent'); x.fillStyle=rg; x.fillRect(0,0,W,H);
-  // العنوان
+  const S=W/1080;
   const imgScale=(+document.getElementById('r-img').value)/100;
   const titleScale=(+document.getElementById('r-title').value)/100;
   const posOff=(+document.getElementById('r-pos').value)*S;
-  x.textAlign='center'; x.fillStyle='#F2D27A'; const fs=Math.round(78*S*titleScale); x.font='bold '+fs+'px -apple-system,Segoe UI,Tahoma,Arial';
+  const showBadges=document.getElementById('badges').checked;
+
+  // ---- الخلفية: تدرّج + توهّج علوي + ظلّ سفلي ----
+  const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,BGS[bg][0]); g.addColorStop(1,BGS[bg][1]); x.fillStyle=g; x.fillRect(0,0,W,H);
+  let rg=x.createRadialGradient(W/2,H*0.13,0,W/2,H*0.13,W*0.9); rg.addColorStop(0,'rgba(242,210,122,0.16)'); rg.addColorStop(1,'transparent'); x.fillStyle=rg; x.fillRect(0,0,W,H);
+  let vg=x.createLinearGradient(0,H*0.7,0,H); vg.addColorStop(0,'transparent'); vg.addColorStop(1,'rgba(0,0,0,0.25)'); x.fillStyle=vg; x.fillRect(0,0,W,H);
+
+  // ---- مناطق ثابتة (تمنع أي تداخل) ----
+  const marginTop=110*S, sideMargin=W*0.08;
+  const sigH=64*S, badgesH=showBadges?150*S:0;
+
+  // ---- العنوان (يُلفّ تلقائياً) ----
+  x.textAlign='center'; x.textBaseline='alphabetic'; x.fillStyle='#F4D98A';
+  const fs=Math.round(80*S*titleScale); x.font='800 '+fs+'px -apple-system,Segoe UI,Tahoma,Arial';
   try{ x.direction = lang==='ar'?'rtl':'ltr'; }catch(e){}
   const cap=(document.getElementById('caption').value||'').trim();
   const words=cap.split(/\s+/), lines=[]; let ln='';
-  words.forEach(w=>{ const t=ln?ln+' '+w:w; if(x.measureText(t).width>W-150*S && ln){lines.push(ln);ln=w;}else ln=t; }); if(ln)lines.push(ln);
-  let ty=Math.round(150*S); lines.forEach(l=>{ x.fillText(l,W/2,ty); ty+=Math.round(fs*1.25); });
-  // منطقة الجوّال المتاحة (احتواء الصورة كاملة بلا قص)
-  const showBadges=document.getElementById('badges').checked;
-  const footer=(showBadges?190:90)*S, top=ty+40*S, availW=W*0.86, availH=H-top-footer;
-  let fw=availW, fh=availH;
-  if(img){ const ar=img.width/img.height; if(availW/availH > ar){ fh=availH; fw=fh*ar; } else { fw=availW; fh=fw/ar; } }
+  words.forEach(w=>{ const t=ln?ln+' '+w:w; if(x.measureText(t).width>W-2*sideMargin && ln){lines.push(ln);ln=w;}else ln=t; }); if(ln)lines.push(ln);
+  const lineH=Math.round(fs*1.28);
+  let ty=marginTop+fs;
+  lines.forEach(l=>{ x.fillText(l,W/2,ty); ty+=lineH; });
+  const capBottom=marginTop+lines.length*lineH;
+
+  // ---- زخرفة فاصلة أنيقة تحت العنوان ----
+  const dy=capBottom+34*S, dw=W*0.34;
+  let lg=x.createLinearGradient(W/2-dw,0,W/2+dw,0);
+  lg.addColorStop(0,'transparent'); lg.addColorStop(0.5,'rgba(242,210,122,0.85)'); lg.addColorStop(1,'transparent');
+  x.strokeStyle=lg; x.lineWidth=2.4*S; x.beginPath(); x.moveTo(W/2-dw,dy); x.lineTo(W/2+dw,dy); x.stroke();
+  x.save(); x.translate(W/2,dy); x.rotate(Math.PI/4); x.fillStyle='#F2D27A'; const ds=9*S; x.fillRect(-ds,-ds,ds*2,ds*2); x.restore();
+
+  // ---- منطقة الجوّال (محصورة بدقّة بين الزخرفة والشارات) ----
+  const zoneTop=dy+52*S, zoneBottom=H-sigH-badgesH-24*S;
+  const zoneW=W*0.84, zoneH=Math.max(120*S, zoneBottom-zoneTop);
+  let fw=zoneW, fh=zoneH;
+  if(img){ const ar=img.width/img.height; if(zoneW/zoneH>ar){ fh=zoneH; fw=fh*ar; } else { fw=zoneW; fh=fw/ar; } }
+  // تكبير المستخدم ثم قصّه ليبقى داخل المنطقة دائماً (لا تداخل)
   fw*=imgScale; fh*=imgScale;
-  const fx=(W-fw)/2, fy=top+(availH-fh)/2+posOff, pad=14*S, rad=Math.min(60*S, fw*0.06);
-  x.save(); x.shadowColor='rgba(0,0,0,0.5)'; x.shadowBlur=45*S; x.shadowOffsetY=20*S;
-  roundRect(fx-pad,x,fy-pad,fw+2*pad,fh+2*pad,rad+pad); x.fillStyle='#000'; x.fill(); x.restore();
+  if(fw>zoneW){ const k=zoneW/fw; fw*=k; fh*=k; }
+  if(fh>zoneH){ const k=zoneH/fh; fw*=k; fh*=k; }
+  const fx=(W-fw)/2;
+  let fy=zoneTop+(zoneH-fh)/2+posOff;
+  fy=Math.max(zoneTop, Math.min(fy, zoneBottom-fh)); // قصّ الموضع داخل المنطقة
+  const pad=13*S, rad=Math.min(58*S, fw*0.07);
+  // ظلّ + إطار الجوّال
+  x.save(); x.shadowColor='rgba(0,0,0,0.55)'; x.shadowBlur=48*S; x.shadowOffsetY=22*S;
+  roundRect(fx-pad,x,fy-pad,fw+2*pad,fh+2*pad,rad+pad); x.fillStyle='#0a0a0a'; x.fill(); x.restore();
   x.save(); roundRect(fx,x,fy,fw,fh,rad); x.clip();
-  if(img){ x.drawImage(img, fx, fy, fw, fh); }
-  else { x.fillStyle='rgba(255,255,255,0.06)'; x.fillRect(fx,fy,fw,fh);
-    x.fillStyle='rgba(255,255,255,0.5)'; x.font=Math.round(38*S)+'px Arial'; x.textAlign='center'; x.fillText('ارفع صورة شاشتك', W/2, fy+fh/2); }
+  if(img){ x.drawImage(img,fx,fy,fw,fh); }
+  else { x.fillStyle='rgba(255,255,255,0.05)'; x.fillRect(fx,fy,fw,fh);
+    x.fillStyle='rgba(255,255,255,0.45)'; x.font=Math.round(38*S)+'px Arial'; x.textAlign='center'; x.textBaseline='middle'; x.fillText('ارفع صورة شاشتك',W/2,fy+fh/2); x.textBaseline='alphabetic'; }
   x.restore();
-  // شارات المتجر
+  // خيط ذهبي رفيع على حافة الإطار (لمعان فاخر)
+  x.save(); roundRect(fx-pad,x,fy-pad,fw+2*pad,fh+2*pad,rad+pad); x.lineWidth=2*S; x.strokeStyle='rgba(242,210,122,0.28)'; x.stroke(); x.restore();
+
+  // ---- شارات المتجر (منطقة مستقلة أسفل، بلا تداخل) ----
   if(showBadges){
-    const by=H-140*S; const bh=76*S, bf=Math.round(30*S); const gap=18*S;
-    x.font='bold '+bf+'px -apple-system,Segoe UI,Tahoma,Arial';
-    const t1=' متوفر على App Store', t2='قريباً على Google Play';
-    const w1=x.measureText(t1).width+56*S, w2=x.measureText(t2).width+56*S;
-    const totalW=w1+w2+gap; let bx=(W-totalW)/2;
-    // شارة App Store (ذهبية مملوءة)
-    roundRect(bx,x,by,w1,bh,bh/2); const bg1=x.createLinearGradient(bx,by,bx,by+bh); bg1.addColorStop(0,'#F2D27A'); bg1.addColorStop(1,'#C5A059'); x.fillStyle=bg1; x.fill();
-    x.fillStyle='#14110B'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(t1, bx+w1/2, by+bh/2);
-    // شارة Google Play (مفرّغة)
-    bx+=w1+gap; roundRect(bx,x,by,w2,bh,bh/2); x.lineWidth=2.5*S; x.strokeStyle='rgba(242,210,122,0.7)'; x.stroke();
-    x.fillStyle='rgba(242,210,122,0.9)'; x.fillText(t2, bx+w2/2, by+bh/2);
+    const bh=74*S, bf=Math.round(29*S), gap=18*S, by=H-sigH-badgesH+(badgesH-bh)/2;
+    x.font='700 '+bf+'px -apple-system,Segoe UI,Tahoma,Arial'; x.textBaseline='middle';
+    const t1='متوفر على App Store', t2='قريباً على Google Play';
+    const w1=x.measureText(t1).width+58*S, w2=x.measureText(t2).width+58*S;
+    let bx=(W-(w1+w2+gap))/2;
+    roundRect(bx,x,by,w1,bh,bh/2); const bg1=x.createLinearGradient(bx,by,bx,by+bh); bg1.addColorStop(0,'#F5D98A'); bg1.addColorStop(1,'#C5A059'); x.fillStyle=bg1; x.fill();
+    x.fillStyle='#14110B'; x.textAlign='center'; x.fillText(t1,bx+w1/2,by+bh/2);
+    bx+=w1+gap; roundRect(bx,x,by,w2,bh,bh/2); x.fillStyle='rgba(255,255,255,0.04)'; x.fill(); x.lineWidth=2.4*S; x.strokeStyle='rgba(242,210,122,0.65)'; x.stroke();
+    x.fillStyle='rgba(244,217,138,0.92)'; x.fillText(t2,bx+w2/2,by+bh/2);
     x.textBaseline='alphabetic';
   }
-  // توقيع
-  x.fillStyle='rgba(242,210,122,0.6)'; x.font='bold '+Math.round(34*S)+'px -apple-system,Segoe UI,Tahoma,Arial'; x.textAlign='center';
-  x.fillText('تطبيق الأنوار', W/2, H-Math.round(40*S));
+  // ---- التوقيع ----
+  x.fillStyle='rgba(242,210,122,0.55)'; x.font='700 '+Math.round(32*S)+'px -apple-system,Segoe UI,Tahoma,Arial'; x.textAlign='center';
+  x.fillText('تطبيق الأنوار', W/2, H-24*S);
 }
 function download(){ const cv=document.getElementById('cv'); const a=document.createElement('a'); a.download='anwar-screenshot.png'; a.href=cv.toDataURL('image/png'); a.click(); }
 
