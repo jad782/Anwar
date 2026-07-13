@@ -66,6 +66,9 @@
       <label>أو اكتب عنوانك</label>
       <textarea id="caption" oninput="draw()">كل ما يحتاجه يومك الإيماني</textarea>
 
+      <label>سطر فرعي داخل الصورة (اختياري)</label>
+      <textarea id="subtitle" placeholder="مثال: تجويد ملوّن • تلاوة بالتظليل • تفسير فوري" oninput="draw()"></textarea>
+
       <label>٤. لون الخلفية</label>
       <div class="swatches" id="swatches"></div>
 
@@ -144,7 +147,17 @@ function draw(){
   const lineH=Math.round(fs*1.28);
   let ty=marginTop+fs;
   lines.forEach(l=>{ x.fillText(l,W/2,ty); ty+=lineH; });
-  const capBottom=marginTop+lines.length*lineH;
+  let capBottom=marginTop+lines.length*lineH;
+
+  // ---- سطر فرعي (اختياري) يشرح الميزات ----
+  const sub=(document.getElementById('subtitle').value||'').trim();
+  if(sub){
+    const sfs=Math.round(38*S*titleScale); x.font='600 '+sfs+'px -apple-system,Segoe UI,Tahoma,Arial'; x.fillStyle='rgba(244,224,178,0.82)';
+    const sw=sub.split(/\s+/), sl=[]; let sln='';
+    sw.forEach(w=>{ const t=sln?sln+' '+w:w; if(x.measureText(t).width>W-2*sideMargin && sln){sl.push(sln);sln=w;}else sln=t; }); if(sln)sl.push(sln);
+    let sy=capBottom+sfs+6*S; sl.forEach(l=>{ x.fillText(l,W/2,sy); sy+=Math.round(sfs*1.35); });
+    capBottom=sy-Math.round(sfs*0.35);
+  }
 
   // ---- زخرفة فاصلة أنيقة تحت العنوان ----
   const dy=capBottom+34*S, dw=W*0.34;
