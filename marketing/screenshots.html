@@ -35,6 +35,8 @@
   .lang-toggle{ display:flex; gap:6px; margin-top:6px; }
   .lang-toggle button{ flex:1; padding:8px; border-radius:9px; border:1px solid rgba(201,162,75,.3); background:transparent; color:var(--text); cursor:pointer; font-weight:700; }
   .lang-toggle button.on{ background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#14110B; border-color:transparent; }
+  input[type=range]{ width:100%; accent-color:var(--gold); margin-top:2px; }
+  label span{ color:var(--gold2); }
 </style>
 </head>
 <body>
@@ -64,6 +66,15 @@
 
       <label>٤. لون الخلفية</label>
       <div class="swatches" id="swatches"></div>
+
+      <label>حجم صورة الجوّال: <span id="v-img">100%</span></label>
+      <input type="range" id="r-img" min="55" max="130" value="100" oninput="document.getElementById('v-img').textContent=this.value+'%';draw()">
+
+      <label>حجم العنوان: <span id="v-title">100%</span></label>
+      <input type="range" id="r-title" min="60" max="150" value="100" oninput="document.getElementById('v-title').textContent=this.value+'%';draw()">
+
+      <label>موضع الصورة عمودياً: <span id="v-pos">0</span></label>
+      <input type="range" id="r-pos" min="-150" max="150" value="0" oninput="document.getElementById('v-pos').textContent=this.value;draw()">
 
       <button class="dl" onclick="download()">⬇️ حمّل الصورة الجاهزة</button>
     </div>
@@ -108,7 +119,10 @@ function draw(){
   const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,BGS[bg][0]); g.addColorStop(1,BGS[bg][1]); x.fillStyle=g; x.fillRect(0,0,W,H);
   const rg=x.createRadialGradient(W/2,H*0.14,0,W/2,H*0.14,W*0.85); rg.addColorStop(0,'rgba(242,210,122,0.15)'); rg.addColorStop(1,'transparent'); x.fillStyle=rg; x.fillRect(0,0,W,H);
   // العنوان
-  x.textAlign='center'; x.fillStyle='#F2D27A'; const fs=Math.round(78*S); x.font='bold '+fs+'px -apple-system,Segoe UI,Tahoma,Arial';
+  const imgScale=(+document.getElementById('r-img').value)/100;
+  const titleScale=(+document.getElementById('r-title').value)/100;
+  const posOff=(+document.getElementById('r-pos').value)*S;
+  x.textAlign='center'; x.fillStyle='#F2D27A'; const fs=Math.round(78*S*titleScale); x.font='bold '+fs+'px -apple-system,Segoe UI,Tahoma,Arial';
   try{ x.direction = lang==='ar'?'rtl':'ltr'; }catch(e){}
   const cap=(document.getElementById('caption').value||'').trim();
   const words=cap.split(/\s+/), lines=[]; let ln='';
@@ -118,7 +132,8 @@ function draw(){
   const footer=90*S, top=ty+40*S, availW=W*0.86, availH=H-top-footer;
   let fw=availW, fh=availH;
   if(img){ const ar=img.width/img.height; if(availW/availH > ar){ fh=availH; fw=fh*ar; } else { fw=availW; fh=fw/ar; } }
-  const fx=(W-fw)/2, fy=top+(availH-fh)/2, pad=14*S, rad=Math.min(60*S, fw*0.06);
+  fw*=imgScale; fh*=imgScale;
+  const fx=(W-fw)/2, fy=top+(availH-fh)/2+posOff, pad=14*S, rad=Math.min(60*S, fw*0.06);
   x.save(); x.shadowColor='rgba(0,0,0,0.5)'; x.shadowBlur=45*S; x.shadowOffsetY=20*S;
   roundRect(fx-pad,x,fy-pad,fw+2*pad,fh+2*pad,rad+pad); x.fillStyle='#000'; x.fill(); x.restore();
   x.save(); roundRect(fx,x,fy,fw,fh,rad); x.clip();
