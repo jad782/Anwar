@@ -45,6 +45,14 @@
       <label>١. صورة الشاشة من جهازك</label>
       <label class="file-btn">اختر صورة 📷<input type="file" id="file" accept="image/*"></label>
 
+      <label>المقاس (حسب الاستخدام)</label>
+      <select id="fmt" onchange="setFmt(this.value)">
+        <option value="appstore">App Store — 1290×2796 (طولي)</option>
+        <option value="igpost">بوست انستغرام — 1080×1350</option>
+        <option value="igsquare">مربّع انستغرام — 1080×1080</option>
+        <option value="story">ستوري/ريلز — 1080×1920</option>
+      </select>
+
       <label>٢. لغة العنوان</label>
       <div class="lang-toggle"><button id="lang-ar" class="on" onclick="setLang('ar')">عربي</button><button id="lang-en" onclick="setLang('en')">English</button></div>
 
@@ -75,7 +83,11 @@ const PRESETS = {
        'Luxurious features for your journey','Real athan & precise alerts' ]
 };
 const BGS = [ ['#1a1206','#0a0703'], ['#0e2a22','#04120c'], ['#14243f','#060a14'], ['#2a1830','#0e0714'], ['#3a2410','#0f0904'] ];
-let lang='ar', bg=0, img=null;
+const FMTS = { appstore:[1290,2796], igpost:[1080,1350], igsquare:[1080,1080], story:[1080,1920] };
+let lang='ar', bg=0, img=null, fmt='appstore';
+function setFmt(f){ fmt=f; const [W,H]=FMTS[f]; const cv=document.getElementById('cv'); cv.width=W; cv.height=H;
+  // اضبط حجم العرض مع الحفاظ على النسبة (ارتفاع ثابت ~585)
+  const dispH=560, dispW=Math.round(dispH*W/H); cv.style.height=dispH+'px'; cv.style.width=dispW+'px'; draw(); }
 
 function setLang(l){ lang=l; document.getElementById('lang-ar').classList.toggle('on',l==='ar'); document.getElementById('lang-en').classList.toggle('on',l==='en'); document.getElementById('cv').setAttribute('dir', l==='ar'?'rtl':'ltr'); renderPresets(); }
 function renderPresets(){ document.getElementById('presets').innerHTML = PRESETS[lang].map(t=>`<div class="preset" onclick="pick(this)">${t}</div>`).join(''); }
@@ -91,30 +103,32 @@ document.getElementById('file').addEventListener('change', e=>{
 function roundRect(x,c,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
 
 function draw(){
-  const cv=document.getElementById('cv'), x=cv.getContext('2d'); const W=1290,H=2796;
+  const cv=document.getElementById('cv'), x=cv.getContext('2d'); const W=cv.width, H=cv.height;
+  const S=W/1080; // معامل قياس نسبي
   const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,BGS[bg][0]); g.addColorStop(1,BGS[bg][1]); x.fillStyle=g; x.fillRect(0,0,W,H);
-  // توهج ذهبي علوي
-  const rg=x.createRadialGradient(W/2,H*0.16,0,W/2,H*0.16,W*0.8); rg.addColorStop(0,'rgba(242,210,122,0.15)'); rg.addColorStop(1,'transparent'); x.fillStyle=rg; x.fillRect(0,0,W,H);
+  const rg=x.createRadialGradient(W/2,H*0.14,0,W/2,H*0.14,W*0.85); rg.addColorStop(0,'rgba(242,210,122,0.15)'); rg.addColorStop(1,'transparent'); x.fillStyle=rg; x.fillRect(0,0,W,H);
   // العنوان
-  x.textAlign='center'; x.fillStyle='#F2D27A'; x.font='bold 92px -apple-system,Segoe UI,Tahoma,Arial';
+  x.textAlign='center'; x.fillStyle='#F2D27A'; const fs=Math.round(78*S); x.font='bold '+fs+'px -apple-system,Segoe UI,Tahoma,Arial';
   try{ x.direction = lang==='ar'?'rtl':'ltr'; }catch(e){}
   const cap=(document.getElementById('caption').value||'').trim();
   const words=cap.split(/\s+/), lines=[]; let ln='';
-  words.forEach(w=>{ const t=ln?ln+' '+w:w; if(x.measureText(t).width>W-170 && ln){lines.push(ln);ln=w;}else ln=t; }); if(ln)lines.push(ln);
-  let ty=250; lines.forEach(l=>{ x.fillText(l,W/2,ty); ty+=118; });
-  // إطار الجوّال + الصورة
-  const fw=980, fh=2010, fx=(W-fw)/2, fy=ty+40; const rad=70;
-  x.save(); x.shadowColor='rgba(0,0,0,0.55)'; x.shadowBlur=50; x.shadowOffsetY=24;
-  roundRect(fx,x,fy,fw,fh,rad); x.fillStyle='#000'; x.fill(); x.restore();
-  x.save(); roundRect(fx+14,x,fy+14,fw-28,fh-28,rad-14); x.clip();
-  if(img){ const iw=img.width, ih=img.height, cw=fw-28, ch=fh-28; const s=Math.max(cw/iw,ch/ih);
-    const dw=iw*s, dh=ih*s; x.drawImage(img, fx+14+(cw-dw)/2, fy+14+(ch-dh)/2, dw, dh);
-  } else { x.fillStyle='rgba(255,255,255,0.06)'; x.fillRect(fx+14,fy+14,fw-28,fh-28);
-    x.fillStyle='rgba(255,255,255,0.5)'; x.font='40px Arial'; x.textAlign='center'; x.fillText('ارفع صورة شاشتك', W/2, fy+fh/2); }
+  words.forEach(w=>{ const t=ln?ln+' '+w:w; if(x.measureText(t).width>W-150*S && ln){lines.push(ln);ln=w;}else ln=t; }); if(ln)lines.push(ln);
+  let ty=Math.round(150*S); lines.forEach(l=>{ x.fillText(l,W/2,ty); ty+=Math.round(fs*1.25); });
+  // منطقة الجوّال المتاحة (احتواء الصورة كاملة بلا قص)
+  const footer=90*S, top=ty+40*S, availW=W*0.86, availH=H-top-footer;
+  let fw=availW, fh=availH;
+  if(img){ const ar=img.width/img.height; if(availW/availH > ar){ fh=availH; fw=fh*ar; } else { fw=availW; fh=fw/ar; } }
+  const fx=(W-fw)/2, fy=top+(availH-fh)/2, pad=14*S, rad=Math.min(60*S, fw*0.06);
+  x.save(); x.shadowColor='rgba(0,0,0,0.5)'; x.shadowBlur=45*S; x.shadowOffsetY=20*S;
+  roundRect(fx-pad,x,fy-pad,fw+2*pad,fh+2*pad,rad+pad); x.fillStyle='#000'; x.fill(); x.restore();
+  x.save(); roundRect(fx,x,fy,fw,fh,rad); x.clip();
+  if(img){ x.drawImage(img, fx, fy, fw, fh); }
+  else { x.fillStyle='rgba(255,255,255,0.06)'; x.fillRect(fx,fy,fw,fh);
+    x.fillStyle='rgba(255,255,255,0.5)'; x.font=Math.round(38*S)+'px Arial'; x.textAlign='center'; x.fillText('ارفع صورة شاشتك', W/2, fy+fh/2); }
   x.restore();
   // توقيع
-  x.fillStyle='rgba(242,210,122,0.6)'; x.font='bold 40px -apple-system,Segoe UI,Tahoma,Arial'; x.textAlign='center';
-  x.fillText('تطبيق الأنوار', W/2, H-70);
+  x.fillStyle='rgba(242,210,122,0.6)'; x.font='bold '+Math.round(36*S)+'px -apple-system,Segoe UI,Tahoma,Arial'; x.textAlign='center';
+  x.fillText('تطبيق الأنوار', W/2, H-Math.round(40*S));
 }
 function download(){ const cv=document.getElementById('cv'); const a=document.createElement('a'); a.download='anwar-screenshot.png'; a.href=cv.toDataURL('image/png'); a.click(); }
 
