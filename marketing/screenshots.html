@@ -37,6 +37,8 @@
   .lang-toggle button.on{ background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#14110B; border-color:transparent; }
   input[type=range]{ width:100%; accent-color:var(--gold); margin-top:2px; }
   label span{ color:var(--gold2); }
+  .chk{ display:flex; align-items:center; gap:8px; color:var(--text); font-size:.85rem; font-weight:400; margin-top:16px; cursor:pointer; }
+  .chk input{ accent-color:var(--gold); width:18px; height:18px; }
 </style>
 </head>
 <body>
@@ -75,6 +77,8 @@
 
       <label>موضع الصورة عمودياً: <span id="v-pos">0</span></label>
       <input type="range" id="r-pos" min="-150" max="150" value="0" oninput="document.getElementById('v-pos').textContent=this.value;draw()">
+
+      <label class="chk"><input type="checkbox" id="badges" checked onchange="draw()"> أظهر شارات المتجر (App Store + قريباً Google Play)</label>
 
       <button class="dl" onclick="download()">⬇️ حمّل الصورة الجاهزة</button>
     </div>
@@ -129,7 +133,8 @@ function draw(){
   words.forEach(w=>{ const t=ln?ln+' '+w:w; if(x.measureText(t).width>W-150*S && ln){lines.push(ln);ln=w;}else ln=t; }); if(ln)lines.push(ln);
   let ty=Math.round(150*S); lines.forEach(l=>{ x.fillText(l,W/2,ty); ty+=Math.round(fs*1.25); });
   // منطقة الجوّال المتاحة (احتواء الصورة كاملة بلا قص)
-  const footer=90*S, top=ty+40*S, availW=W*0.86, availH=H-top-footer;
+  const showBadges=document.getElementById('badges').checked;
+  const footer=(showBadges?190:90)*S, top=ty+40*S, availW=W*0.86, availH=H-top-footer;
   let fw=availW, fh=availH;
   if(img){ const ar=img.width/img.height; if(availW/availH > ar){ fh=availH; fw=fh*ar; } else { fw=availW; fh=fw/ar; } }
   fw*=imgScale; fh*=imgScale;
@@ -141,8 +146,23 @@ function draw(){
   else { x.fillStyle='rgba(255,255,255,0.06)'; x.fillRect(fx,fy,fw,fh);
     x.fillStyle='rgba(255,255,255,0.5)'; x.font=Math.round(38*S)+'px Arial'; x.textAlign='center'; x.fillText('ارفع صورة شاشتك', W/2, fy+fh/2); }
   x.restore();
+  // شارات المتجر
+  if(showBadges){
+    const by=H-140*S; const bh=76*S, bf=Math.round(30*S); const gap=18*S;
+    x.font='bold '+bf+'px -apple-system,Segoe UI,Tahoma,Arial';
+    const t1=' متوفر على App Store', t2='قريباً على Google Play';
+    const w1=x.measureText(t1).width+56*S, w2=x.measureText(t2).width+56*S;
+    const totalW=w1+w2+gap; let bx=(W-totalW)/2;
+    // شارة App Store (ذهبية مملوءة)
+    roundRect(bx,x,by,w1,bh,bh/2); const bg1=x.createLinearGradient(bx,by,bx,by+bh); bg1.addColorStop(0,'#F2D27A'); bg1.addColorStop(1,'#C5A059'); x.fillStyle=bg1; x.fill();
+    x.fillStyle='#14110B'; x.textAlign='center'; x.textBaseline='middle'; x.fillText(t1, bx+w1/2, by+bh/2);
+    // شارة Google Play (مفرّغة)
+    bx+=w1+gap; roundRect(bx,x,by,w2,bh,bh/2); x.lineWidth=2.5*S; x.strokeStyle='rgba(242,210,122,0.7)'; x.stroke();
+    x.fillStyle='rgba(242,210,122,0.9)'; x.fillText(t2, bx+w2/2, by+bh/2);
+    x.textBaseline='alphabetic';
+  }
   // توقيع
-  x.fillStyle='rgba(242,210,122,0.6)'; x.font='bold '+Math.round(36*S)+'px -apple-system,Segoe UI,Tahoma,Arial'; x.textAlign='center';
+  x.fillStyle='rgba(242,210,122,0.6)'; x.font='bold '+Math.round(34*S)+'px -apple-system,Segoe UI,Tahoma,Arial'; x.textAlign='center';
   x.fillText('تطبيق الأنوار', W/2, H-Math.round(40*S));
 }
 function download(){ const cv=document.getElementById('cv'); const a=document.createElement('a'); a.download='anwar-screenshot.png'; a.href=cv.toDataURL('image/png'); a.click(); }
