@@ -136,7 +136,7 @@ function draw(){
   let rg=x.createRadialGradient(W/2,H*0.12,0,W/2,H*0.12,W*0.9); rg.addColorStop(0,'rgba(242,210,122,0.16)'); rg.addColorStop(1,'transparent'); x.fillStyle=rg; x.fillRect(0,0,W,H);
   let vg=x.createLinearGradient(0,H*0.72,0,H); vg.addColorStop(0,'transparent'); vg.addColorStop(1,'rgba(0,0,0,0.25)'); x.fillStyle=vg; x.fillRect(0,0,W,H);
 
-  const sideMargin=W*0.08, sigH=64*S, badgesH=showBadges?150*S:0;
+  const sideMargin=W*0.08, sigH=58*S, badgesH=showBadges?118*S:0;
   let topY=70*S;
   // لوقو علوي
   if(logo){ const ls=120*S; x.drawImage(logo, W/2-ls/2, topY, ls, ls); topY+=ls+22*S; } else topY=104*S;
@@ -163,7 +163,7 @@ function draw(){
   x.save(); x.translate(W/2,dy); x.rotate(Math.PI/4); x.fillStyle='#F2D27A'; const ds=9*S; x.fillRect(-ds,-ds,ds*2,ds*2); x.restore();
 
   // منطقة الجوّال
-  const zoneTop=dy+34*S, zoneBottom=H-sigH-badgesH-12*S, zoneW=W*0.66, zoneH=Math.max(120*S, zoneBottom-zoneTop);
+  const zoneTop=dy+24*S, zoneBottom=H-sigH-badgesH-8*S, zoneW=W*0.72, zoneH=Math.max(120*S, zoneBottom-zoneTop);
   const IPHONE_AR=1290/2796; // نسبة آيفون الحقيقية (طويل ونحيف)
   const ar = showFrame ? IPHONE_AR : (img ? img.width/img.height : zoneW/zoneH);
   let fw=zoneW, fh=zoneH; if(zoneW/zoneH>ar){ fh=zoneH; fw=fh*ar; } else { fw=zoneW; fh=fw/ar; }
@@ -193,13 +193,13 @@ function draw(){
 
   // أسهم توضيحية
   anns.forEach(a=>{
-    x.strokeStyle='rgba(242,210,122,0.95)'; x.fillStyle='rgba(242,210,122,0.95)'; x.lineWidth=3*S;
+    x.strokeStyle='rgba(242,210,122,0.95)'; x.fillStyle='rgba(242,210,122,0.95)'; x.lineWidth=2.4*S;
     x.beginPath(); x.moveTo(a.tx,a.ty); x.lineTo(a.ax,a.ay); x.stroke();
-    x.beginPath(); x.arc(a.ax,a.ay,10*S,0,7); x.fill(); // رأس السهم
+    x.beginPath(); x.arc(a.ax,a.ay,8*S,0,7); x.fill(); // رأس السهم
     // صندوق النص
-    x.font='700 '+Math.round(30*S)+'px -apple-system,Segoe UI,Tahoma,Arial'; x.textAlign='center'; x.textBaseline='middle';
-    const tw=x.measureText(a.text).width, bw=tw+40*S, bh=64*S;
-    roundRect(a.tx-bw/2,x,a.ty-bh/2,bw,bh,16*S); x.fillStyle='rgba(20,17,11,0.92)'; x.fill(); x.lineWidth=2*S; x.strokeStyle='rgba(242,210,122,0.6)'; x.stroke();
+    x.font='700 '+Math.round(24*S)+'px -apple-system,Segoe UI,Tahoma,Arial'; x.textAlign='center'; x.textBaseline='middle';
+    const tw=x.measureText(a.text).width, bw=tw+30*S, bh=48*S;
+    roundRect(a.tx-bw/2,x,a.ty-bh/2,bw,bh,13*S); x.fillStyle='rgba(20,17,11,0.92)'; x.fill(); x.lineWidth=1.8*S; x.strokeStyle='rgba(242,210,122,0.6)'; x.stroke();
     x.fillStyle='#F4D98A'; x.fillText(a.text,a.tx,a.ty); x.textBaseline='alphabetic';
   });
 
@@ -224,7 +224,7 @@ function cpt(e){ const cv=document.getElementById('cv'), r=cv.getBoundingClientR
 function hit(p){ const S=document.getElementById('cv').width/1080;
   for(let i=anns.length-1;i>=0;i--){ const a=anns[i];
     if(Math.hypot(p.x-a.ax,p.y-a.ay)<26*S) return {i,part:'target'};
-    if(Math.abs(p.x-a.tx)<130*S && Math.abs(p.y-a.ty)<40*S) return {i,part:'label'}; }
+    if(Math.abs(p.x-a.tx)<130*S && Math.abs(p.y-a.ty)<30*S) return {i,part:'label'}; }
   return null;
 }
 function down(e){ const p=cpt(e); const h=hit(p); if(h){ drag={...h, px:p.x, py:p.y}; e.preventDefault(); } }
