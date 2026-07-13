@@ -163,7 +163,7 @@ function draw(){
   x.save(); x.translate(W/2,dy); x.rotate(Math.PI/4); x.fillStyle='#F2D27A'; const ds=9*S; x.fillRect(-ds,-ds,ds*2,ds*2); x.restore();
 
   // منطقة الجوّال
-  const zoneTop=dy+30*S, zoneBottom=H-sigH-badgesH-8*S, zoneW=W*0.9, zoneH=Math.max(120*S, zoneBottom-zoneTop);
+  const zoneTop=dy+34*S, zoneBottom=H-sigH-badgesH-12*S, zoneW=W*0.66, zoneH=Math.max(120*S, zoneBottom-zoneTop);
   const IPHONE_AR=1290/2796; // نسبة آيفون الحقيقية (طويل ونحيف)
   const ar = showFrame ? IPHONE_AR : (img ? img.width/img.height : zoneW/zoneH);
   let fw=zoneW, fh=zoneH; if(zoneW/zoneH>ar){ fh=zoneH; fw=fh*ar; } else { fw=zoneW; fh=fw/ar; }
