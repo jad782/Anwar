@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استوديو لقطات المتجر — الأنوار</title>
+<style>
+  :root{ --gold:#C9A24B; --gold2:#F2D27A; --bg:#0f0d0a; --card:#1a1712; --text:#efe8db; --muted:#b8ad98; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;
+        background:var(--bg); color:var(--text); padding:20px; }
+  h1{ color:var(--gold2); text-align:center; font-size:1.5rem; margin:6px 0 4px; }
+  .hint{ text-align:center; color:var(--muted); font-size:.9rem; margin-bottom:20px; }
+  .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; align-items:flex-start; max-width:1100px; margin:0 auto; }
+  .panel{ background:var(--card); border:1px solid rgba(201,162,75,.25); border-radius:18px; padding:18px; width:340px; }
+  label{ display:block; color:var(--muted); font-size:.85rem; margin:14px 0 6px; font-weight:700; }
+  input[type=text], select, textarea{ width:100%; background:#0d0b08; color:var(--text); border:1px solid rgba(201,162,75,.3);
+        border-radius:10px; padding:11px; font-family:inherit; font-size:.95rem; }
+  textarea{ min-height:60px; resize:vertical; }
+  .file-btn{ display:block; text-align:center; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#14110B;
+        font-weight:800; padding:14px; border-radius:12px; cursor:pointer; margin-top:4px; }
+  input[type=file]{ display:none; }
+  .row{ display:flex; gap:8px; }
+  .row > *{ flex:1; }
+  .swatches{ display:flex; gap:8px; margin-top:6px; }
+  .sw{ width:38px; height:38px; border-radius:10px; cursor:pointer; border:2px solid transparent; }
+  .sw.on{ border-color:var(--gold2); }
+  .dl{ width:100%; margin-top:18px; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#14110B;
+        font-weight:800; padding:15px; border:none; border-radius:12px; font-size:1rem; cursor:pointer; }
+  .preview{ text-align:center; }
+  canvas{ width:270px; height:585px; border-radius:22px; box-shadow:0 20px 60px rgba(0,0,0,.5); background:#000; }
+  .presetgrid{ display:flex; flex-direction:column; gap:6px; max-height:190px; overflow-y:auto; margin-top:4px; }
+  .preset{ background:#0d0b08; border:1px solid rgba(201,162,75,.2); border-radius:9px; padding:9px 11px; cursor:pointer; font-size:.85rem; color:var(--text); text-align:right; }
+  .preset:hover{ border-color:var(--gold); }
+  .lang-toggle{ display:flex; gap:6px; margin-top:6px; }
+  .lang-toggle button{ flex:1; padding:8px; border-radius:9px; border:1px solid rgba(201,162,75,.3); background:transparent; color:var(--text); cursor:pointer; font-weight:700; }
+  .lang-toggle button.on{ background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#14110B; border-color:transparent; }
+</style>
+</head>
+<body>
+  <h1>استوديو لقطات المتجر</h1>
+  <p class="hint">ارفع صورة شاشتك ← اختر العنوان ← حمّل الصورة الجاهزة (مقاس آبل ١٢٩٠×٢٧٩٦) 🤍</p>
+  <div class="wrap">
+    <div class="panel">
+      <label>١. صورة الشاشة من جهازك</label>
+      <label class="file-btn">اختر صورة 📷<input type="file" id="file" accept="image/*"></label>
+
+      <label>٢. لغة العنوان</label>
+      <div class="lang-toggle"><button id="lang-ar" class="on" onclick="setLang('ar')">عربي</button><button id="lang-en" onclick="setLang('en')">English</button></div>
+
+      <label>٣. اختر عنواناً جاهزاً</label>
+      <div class="presetgrid" id="presets"></div>
+
+      <label>أو اكتب عنوانك</label>
+      <textarea id="caption" oninput="draw()">كل ما يحتاجه يومك الإيماني</textarea>
+
+      <label>٤. لون الخلفية</label>
+      <div class="swatches" id="swatches"></div>
+
+      <button class="dl" onclick="download()">⬇️ حمّل الصورة الجاهزة</button>
+    </div>
+
+    <div class="preview">
+      <canvas id="cv" width="1290" height="2796"></canvas>
+    </div>
+  </div>
+
+<script>
+const PRESETS = {
+  ar:[ 'كل ما يحتاجه يومك الإيماني','قرآن كامل يعمل بلا إنترنت','قبلتك أمام عينيك بالكاميرا',
+       'احفظ القرآن بتكرار الآيات والتسميع','التزم بصلواتك الخمس كل يوم','أذكار وأدعية بمصادرها الموثّقة',
+       'ميزات فاخرة تُثري رحلتك مع القرآن','أذان حقيقي وتنبيهات دقيقة' ],
+  en:[ 'Everything for your faithful day','The full Quran — works offline','Find the Qibla through your camera',
+       'Memorize with verse repeat & hide','Track your five daily prayers','Adhkar & duas with authentic sources',
+       'Luxurious features for your journey','Real athan & precise alerts' ]
+};
+const BGS = [ ['#1a1206','#0a0703'], ['#0e2a22','#04120c'], ['#14243f','#060a14'], ['#2a1830','#0e0714'], ['#3a2410','#0f0904'] ];
+let lang='ar', bg=0, img=null;
+
+function setLang(l){ lang=l; document.getElementById('lang-ar').classList.toggle('on',l==='ar'); document.getElementById('lang-en').classList.toggle('on',l==='en'); document.getElementById('cv').setAttribute('dir', l==='ar'?'rtl':'ltr'); renderPresets(); }
+function renderPresets(){ document.getElementById('presets').innerHTML = PRESETS[lang].map(t=>`<div class="preset" onclick="pick(this)">${t}</div>`).join(''); }
+function pick(el){ document.getElementById('caption').value = el.textContent; draw(); }
+function renderSwatches(){ document.getElementById('swatches').innerHTML = BGS.map((g,i)=>`<div class="sw ${i===bg?'on':''}" style="background:linear-gradient(160deg,${g[0]},${g[1]})" onclick="setBg(${i})"></div>`).join(''); }
+function setBg(i){ bg=i; renderSwatches(); draw(); }
+
+document.getElementById('file').addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f) return; const r=new FileReader();
+  r.onload=()=>{ img=new Image(); img.onload=draw; img.src=r.result; }; r.readAsDataURL(f);
+});
+
+function roundRect(x,c,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
+
+function draw(){
+  const cv=document.getElementById('cv'), x=cv.getContext('2d'); const W=1290,H=2796;
+  const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,BGS[bg][0]); g.addColorStop(1,BGS[bg][1]); x.fillStyle=g; x.fillRect(0,0,W,H);
+  // توهج ذهبي علوي
+  const rg=x.createRadialGradient(W/2,H*0.16,0,W/2,H*0.16,W*0.8); rg.addColorStop(0,'rgba(242,210,122,0.15)'); rg.addColorStop(1,'transparent'); x.fillStyle=rg; x.fillRect(0,0,W,H);
+  // العنوان
+  x.textAlign='center'; x.fillStyle='#F2D27A'; x.font='bold 92px -apple-system,Segoe UI,Tahoma,Arial';
+  try{ x.direction = lang==='ar'?'rtl':'ltr'; }catch(e){}
+  const cap=(document.getElementById('caption').value||'').trim();
+  const words=cap.split(/\s+/), lines=[]; let ln='';
+  words.forEach(w=>{ const t=ln?ln+' '+w:w; if(x.measureText(t).width>W-170 && ln){lines.push(ln);ln=w;}else ln=t; }); if(ln)lines.push(ln);
+  let ty=250; lines.forEach(l=>{ x.fillText(l,W/2,ty); ty+=118; });
+  // إطار الجوّال + الصورة
+  const fw=980, fh=2010, fx=(W-fw)/2, fy=ty+40; const rad=70;
+  x.save(); x.shadowColor='rgba(0,0,0,0.55)'; x.shadowBlur=50; x.shadowOffsetY=24;
+  roundRect(fx,x,fy,fw,fh,rad); x.fillStyle='#000'; x.fill(); x.restore();
+  x.save(); roundRect(fx+14,x,fy+14,fw-28,fh-28,rad-14); x.clip();
+  if(img){ const iw=img.width, ih=img.height, cw=fw-28, ch=fh-28; const s=Math.max(cw/iw,ch/ih);
+    const dw=iw*s, dh=ih*s; x.drawImage(img, fx+14+(cw-dw)/2, fy+14+(ch-dh)/2, dw, dh);
+  } else { x.fillStyle='rgba(255,255,255,0.06)'; x.fillRect(fx+14,fy+14,fw-28,fh-28);
+    x.fillStyle='rgba(255,255,255,0.5)'; x.font='40px Arial'; x.textAlign='center'; x.fillText('ارفع صورة شاشتك', W/2, fy+fh/2); }
+  x.restore();
+  // توقيع
+  x.fillStyle='rgba(242,210,122,0.6)'; x.font='bold 40px -apple-system,Segoe UI,Tahoma,Arial'; x.textAlign='center';
+  x.fillText('تطبيق الأنوار', W/2, H-70);
+}
+function download(){ const cv=document.getElementById('cv'); const a=document.createElement('a'); a.download='anwar-screenshot.png'; a.href=cv.toDataURL('image/png'); a.click(); }
+
+renderPresets(); renderSwatches(); draw();
+</script>
+</body>
+</html>
