@@ -7,29 +7,24 @@
 <style>
   :root{ --gold:#C9A24B; --gold2:#F2D27A; --bg:#0f0d0a; --card:#1a1712; --text:#efe8db; --muted:#b8ad98; }
   *{ box-sizing:border-box; }
-  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;
-        background:var(--bg); color:var(--text); padding:20px; }
+  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif; background:var(--bg); color:var(--text); padding:20px; }
   h1{ color:var(--gold2); text-align:center; font-size:1.5rem; margin:6px 0 4px; }
-  .hint{ text-align:center; color:var(--muted); font-size:.9rem; margin-bottom:20px; }
-  .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; align-items:flex-start; max-width:1100px; margin:0 auto; }
-  .panel{ background:var(--card); border:1px solid rgba(201,162,75,.25); border-radius:18px; padding:18px; width:340px; }
-  label{ display:block; color:var(--muted); font-size:.85rem; margin:14px 0 6px; font-weight:700; }
-  input[type=text], select, textarea{ width:100%; background:#0d0b08; color:var(--text); border:1px solid rgba(201,162,75,.3);
-        border-radius:10px; padding:11px; font-family:inherit; font-size:.95rem; }
-  textarea{ min-height:60px; resize:vertical; }
-  .file-btn{ display:block; text-align:center; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#14110B;
-        font-weight:800; padding:14px; border-radius:12px; cursor:pointer; margin-top:4px; }
+  .hint{ text-align:center; color:var(--muted); font-size:.9rem; margin-bottom:18px; }
+  .wrap{ display:flex; gap:24px; flex-wrap:wrap; justify-content:center; align-items:flex-start; max-width:1150px; margin:0 auto; }
+  .panel{ background:var(--card); border:1px solid rgba(201,162,75,.25); border-radius:18px; padding:18px; width:360px; }
+  label{ display:block; color:var(--muted); font-size:.85rem; margin:13px 0 6px; font-weight:700; }
+  input[type=text], select, textarea{ width:100%; background:#0d0b08; color:var(--text); border:1px solid rgba(201,162,75,.3); border-radius:10px; padding:11px; font-family:inherit; font-size:.95rem; }
+  textarea{ min-height:52px; resize:vertical; }
+  .file-btn{ display:block; text-align:center; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#14110B; font-weight:800; padding:13px; border-radius:12px; cursor:pointer; margin-top:4px; }
+  .file-btn.sec{ background:transparent; border:1px solid rgba(201,162,75,.4); color:var(--gold2); }
   input[type=file]{ display:none; }
-  .row{ display:flex; gap:8px; }
-  .row > *{ flex:1; }
   .swatches{ display:flex; gap:8px; margin-top:6px; }
   .sw{ width:38px; height:38px; border-radius:10px; cursor:pointer; border:2px solid transparent; }
   .sw.on{ border-color:var(--gold2); }
-  .dl{ width:100%; margin-top:18px; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#14110B;
-        font-weight:800; padding:15px; border:none; border-radius:12px; font-size:1rem; cursor:pointer; }
-  .preview{ text-align:center; }
-  canvas{ width:270px; height:585px; border-radius:22px; box-shadow:0 20px 60px rgba(0,0,0,.5); background:#000; }
-  .presetgrid{ display:flex; flex-direction:column; gap:6px; max-height:190px; overflow-y:auto; margin-top:4px; }
+  .dl{ width:100%; margin-top:16px; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#14110B; font-weight:800; padding:15px; border:none; border-radius:12px; font-size:1rem; cursor:pointer; }
+  .add{ width:100%; margin-top:8px; background:transparent; border:1px dashed rgba(201,162,75,.5); color:var(--gold2); padding:11px; border-radius:11px; cursor:pointer; font-weight:700; font-family:inherit; }
+  canvas{ border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,.5); background:#000; touch-action:none; cursor:grab; }
+  .presetgrid{ display:flex; flex-direction:column; gap:6px; max-height:150px; overflow-y:auto; margin-top:4px; }
   .preset{ background:#0d0b08; border:1px solid rgba(201,162,75,.2); border-radius:9px; padding:9px 11px; cursor:pointer; font-size:.85rem; color:var(--text); text-align:right; }
   .preset:hover{ border-color:var(--gold); }
   .lang-toggle{ display:flex; gap:6px; margin-top:6px; }
@@ -37,17 +32,24 @@
   .lang-toggle button.on{ background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#14110B; border-color:transparent; }
   input[type=range]{ width:100%; accent-color:var(--gold); margin-top:2px; }
   label span{ color:var(--gold2); }
-  .chk{ display:flex; align-items:center; gap:8px; color:var(--text); font-size:.85rem; font-weight:400; margin-top:16px; cursor:pointer; }
+  .chk{ display:flex; align-items:center; gap:8px; color:var(--text); font-size:.85rem; font-weight:400; margin-top:14px; cursor:pointer; }
   .chk input{ accent-color:var(--gold); width:18px; height:18px; }
+  .ann{ display:flex; gap:6px; margin-top:7px; align-items:center; }
+  .ann input{ flex:1; }
+  .ann button{ background:rgba(200,60,60,.2); border:1px solid rgba(200,60,60,.4); color:#f2a; border-radius:9px; padding:0 12px; cursor:pointer; }
+  .tip{ color:var(--muted); font-size:.78rem; margin-top:4px; }
 </style>
 </head>
 <body>
   <h1>استوديو لقطات المتجر</h1>
-  <p class="hint">ارفع صورة شاشتك ← اختر العنوان ← حمّل الصورة الجاهزة (مقاس آبل ١٢٩٠×٢٧٩٦) 🤍</p>
+  <p class="hint">ارفع لقطتك ← اختر العنوان والمقاس ← أضف أسهماً توضيحية ← حمّل الصورة الجاهزة 🤍</p>
   <div class="wrap">
     <div class="panel">
       <label>١. صورة الشاشة من جهازك</label>
       <label class="file-btn">اختر صورة 📷<input type="file" id="file" accept="image/*"></label>
+
+      <label>لوقو التطبيق (اختياري — يظهر فوق وتحت)</label>
+      <label class="file-btn sec">اختر اللوقو 🖼️<input type="file" id="logo" accept="image/*"></label>
 
       <label>المقاس (حسب الاستخدام)</label>
       <select id="fmt" onchange="setFmt(this.value)">
@@ -57,43 +59,45 @@
         <option value="story">ستوري/ريلز — 1080×1920</option>
       </select>
 
-      <label>٢. لغة العنوان</label>
+      <label>لغة العنوان</label>
       <div class="lang-toggle"><button id="lang-ar" class="on" onclick="setLang('ar')">عربي</button><button id="lang-en" onclick="setLang('en')">English</button></div>
 
-      <label>٣. اختر عنواناً جاهزاً</label>
+      <label>اختر عنواناً جاهزاً</label>
       <div class="presetgrid" id="presets"></div>
 
       <label>أو اكتب عنوانك</label>
-      <textarea id="caption" oninput="draw()">كل ما يحتاجه يومك الإيماني</textarea>
+      <textarea id="caption" oninput="draw()">المصحف — قرآن كامل بلا إنترنت</textarea>
 
       <label>سطر فرعي داخل الصورة (اختياري)</label>
-      <textarea id="subtitle" placeholder="مثال: تجويد ملوّن • تلاوة بالتظليل • تفسير فوري" oninput="draw()"></textarea>
+      <textarea id="subtitle" oninput="draw()">تجويد ملوّن • تلاوة بتظليل الآيات • تفسير بضغطة</textarea>
 
-      <label>٤. لون الخلفية</label>
+      <label>لون الخلفية</label>
       <div class="swatches" id="swatches"></div>
 
       <label>حجم صورة الجوّال: <span id="v-img">100%</span></label>
       <input type="range" id="r-img" min="55" max="130" value="100" oninput="document.getElementById('v-img').textContent=this.value+'%';draw()">
-
       <label>حجم العنوان: <span id="v-title">100%</span></label>
       <input type="range" id="r-title" min="60" max="150" value="100" oninput="document.getElementById('v-title').textContent=this.value+'%';draw()">
-
       <label>موضع الصورة عمودياً: <span id="v-pos">0</span></label>
       <input type="range" id="r-pos" min="-150" max="150" value="0" oninput="document.getElementById('v-pos').textContent=this.value;draw()">
 
-      <label class="chk"><input type="checkbox" id="badges" checked onchange="draw()"> أظهر شارات المتجر (App Store + قريباً Google Play)</label>
+      <label class="chk"><input type="checkbox" id="frame" checked onchange="draw()"> إطار آيفون مع الجزيرة الديناميكية</label>
+      <label class="chk"><input type="checkbox" id="badges" checked onchange="draw()"> شارات المتجر (App Store + قريباً Google Play)</label>
+
+      <label>أسهم توضيحية</label>
+      <div id="annlist"></div>
+      <button class="add" onclick="addAnn()">＋ إضافة سهم توضيحي</button>
+      <div class="tip">اسحب النص أو رأس السهم بالماوس/الإصبع على الصورة لتحريكه.</div>
 
       <button class="dl" onclick="download()">⬇️ حمّل الصورة الجاهزة</button>
     </div>
 
-    <div class="preview">
-      <canvas id="cv" width="1290" height="2796"></canvas>
-    </div>
+    <div style="text-align:center"><canvas id="cv" width="1290" height="2796"></canvas></div>
   </div>
 
 <script>
 const PRESETS = {
-  ar:[ 'كل ما يحتاجه يومك الإيماني','قرآن كامل يعمل بلا إنترنت','قبلتك أمام عينيك بالكاميرا',
+  ar:[ 'كل ما يحتاجه يومك الإيماني','المصحف — قرآن كامل بلا إنترنت','قبلتك أمام عينيك بالكاميرا',
        'احفظ القرآن بتكرار الآيات والتسميع','التزم بصلواتك الخمس كل يوم','أذكار وأدعية بمصادرها الموثّقة',
        'ميزات فاخرة تُثري رحلتك مع القرآن','أذان حقيقي وتنبيهات دقيقة' ],
   en:[ 'Everything for your faithful day','The full Quran — works offline','Find the Qibla through your camera',
@@ -102,114 +106,128 @@ const PRESETS = {
 };
 const BGS = [ ['#1a1206','#0a0703'], ['#0e2a22','#04120c'], ['#14243f','#060a14'], ['#2a1830','#0e0714'], ['#3a2410','#0f0904'] ];
 const FMTS = { appstore:[1290,2796], igpost:[1080,1350], igsquare:[1080,1080], story:[1080,1920] };
-let lang='ar', bg=0, img=null, fmt='appstore';
-function setFmt(f){ fmt=f; const [W,H]=FMTS[f]; const cv=document.getElementById('cv'); cv.width=W; cv.height=H;
-  // اضبط حجم العرض مع الحفاظ على النسبة (ارتفاع ثابت ~585)
-  const dispH=560, dispW=Math.round(dispH*W/H); cv.style.height=dispH+'px'; cv.style.width=dispW+'px'; draw(); }
+let lang='ar', bg=0, img=null, logo=null, fmt='appstore';
+let anns=[]; // {tx,ty,ax,ay,text}
+let drag=null; // {i, part:'label'|'target', dx,dy}
 
-function setLang(l){ lang=l; document.getElementById('lang-ar').classList.toggle('on',l==='ar'); document.getElementById('lang-en').classList.toggle('on',l==='en'); document.getElementById('cv').setAttribute('dir', l==='ar'?'rtl':'ltr'); renderPresets(); }
+function setFmt(f){ fmt=f; const [W,H]=FMTS[f]; const cv=document.getElementById('cv'); cv.width=W; cv.height=H;
+  const dispH=560, dispW=Math.round(dispH*W/H); cv.style.height=dispH+'px'; cv.style.width=dispW+'px'; draw(); }
+function setLang(l){ lang=l; document.getElementById('lang-ar').classList.toggle('on',l==='ar'); document.getElementById('lang-en').classList.toggle('on',l==='en'); renderPresets(); }
 function renderPresets(){ document.getElementById('presets').innerHTML = PRESETS[lang].map(t=>`<div class="preset" onclick="pick(this)">${t}</div>`).join(''); }
 function pick(el){ document.getElementById('caption').value = el.textContent; draw(); }
 function renderSwatches(){ document.getElementById('swatches').innerHTML = BGS.map((g,i)=>`<div class="sw ${i===bg?'on':''}" style="background:linear-gradient(160deg,${g[0]},${g[1]})" onclick="setBg(${i})"></div>`).join(''); }
 function setBg(i){ bg=i; renderSwatches(); draw(); }
 
-document.getElementById('file').addEventListener('change', e=>{
-  const f=e.target.files[0]; if(!f) return; const r=new FileReader();
-  r.onload=()=>{ img=new Image(); img.onload=draw; img.src=r.result; }; r.readAsDataURL(f);
-});
+document.getElementById('file').addEventListener('change', e=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{ img=new Image(); img.onload=draw; img.src=r.result; }; r.readAsDataURL(f); });
+document.getElementById('logo').addEventListener('change', e=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{ logo=new Image(); logo.onload=draw; logo.src=r.result; }; r.readAsDataURL(f); });
+
+function addAnn(){ const cv=document.getElementById('cv'); anns.push({ tx:cv.width*0.22, ty:cv.height*0.5, ax:cv.width*0.5, ay:cv.height*0.5, text:'اكتب الشرح هنا' }); renderAnns(); draw(); }
+function renderAnns(){ document.getElementById('annlist').innerHTML = anns.map((a,i)=>`<div class="ann"><input type="text" value="${a.text.replace(/"/g,'&quot;')}" oninput="anns[${i}].text=this.value;draw()"><button onclick="anns.splice(${i},1);renderAnns();draw()">✕</button></div>`).join(''); }
 
 function roundRect(x,c,y,w,h,r){ c.beginPath(); c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r); c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath(); }
 
 function draw(){
-  const cv=document.getElementById('cv'), x=cv.getContext('2d'); const W=cv.width, H=cv.height;
-  const S=W/1080;
-  const imgScale=(+document.getElementById('r-img').value)/100;
-  const titleScale=(+document.getElementById('r-title').value)/100;
-  const posOff=(+document.getElementById('r-pos').value)*S;
-  const showBadges=document.getElementById('badges').checked;
+  const cv=document.getElementById('cv'), x=cv.getContext('2d'); const W=cv.width, H=cv.height, S=W/1080;
+  const imgScale=(+document.getElementById('r-img').value)/100, titleScale=(+document.getElementById('r-title').value)/100, posOff=(+document.getElementById('r-pos').value)*S;
+  const showBadges=document.getElementById('badges').checked, showFrame=document.getElementById('frame').checked;
 
-  // ---- الخلفية: تدرّج + توهّج علوي + ظلّ سفلي ----
+  // خلفية
   const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,BGS[bg][0]); g.addColorStop(1,BGS[bg][1]); x.fillStyle=g; x.fillRect(0,0,W,H);
-  let rg=x.createRadialGradient(W/2,H*0.13,0,W/2,H*0.13,W*0.9); rg.addColorStop(0,'rgba(242,210,122,0.16)'); rg.addColorStop(1,'transparent'); x.fillStyle=rg; x.fillRect(0,0,W,H);
-  let vg=x.createLinearGradient(0,H*0.7,0,H); vg.addColorStop(0,'transparent'); vg.addColorStop(1,'rgba(0,0,0,0.25)'); x.fillStyle=vg; x.fillRect(0,0,W,H);
+  let rg=x.createRadialGradient(W/2,H*0.12,0,W/2,H*0.12,W*0.9); rg.addColorStop(0,'rgba(242,210,122,0.16)'); rg.addColorStop(1,'transparent'); x.fillStyle=rg; x.fillRect(0,0,W,H);
+  let vg=x.createLinearGradient(0,H*0.72,0,H); vg.addColorStop(0,'transparent'); vg.addColorStop(1,'rgba(0,0,0,0.25)'); x.fillStyle=vg; x.fillRect(0,0,W,H);
 
-  // ---- مناطق ثابتة (تمنع أي تداخل) ----
-  const marginTop=110*S, sideMargin=W*0.08;
-  const sigH=64*S, badgesH=showBadges?150*S:0;
+  const sideMargin=W*0.08, sigH=64*S, badgesH=showBadges?150*S:0;
+  let topY=70*S;
+  // لوقو علوي
+  if(logo){ const ls=120*S; x.drawImage(logo, W/2-ls/2, topY, ls, ls); topY+=ls+22*S; } else topY=104*S;
 
-  // ---- العنوان (يُلفّ تلقائياً) ----
+  // العنوان
   x.textAlign='center'; x.textBaseline='alphabetic'; x.fillStyle='#F4D98A';
   const fs=Math.round(80*S*titleScale); x.font='800 '+fs+'px -apple-system,Segoe UI,Tahoma,Arial';
-  try{ x.direction = lang==='ar'?'rtl':'ltr'; }catch(e){}
+  try{ x.direction=lang==='ar'?'rtl':'ltr'; }catch(e){}
   const cap=(document.getElementById('caption').value||'').trim();
-  const words=cap.split(/\s+/), lines=[]; let ln='';
-  words.forEach(w=>{ const t=ln?ln+' '+w:w; if(x.measureText(t).width>W-2*sideMargin && ln){lines.push(ln);ln=w;}else ln=t; }); if(ln)lines.push(ln);
-  const lineH=Math.round(fs*1.28);
-  let ty=marginTop+fs;
-  lines.forEach(l=>{ x.fillText(l,W/2,ty); ty+=lineH; });
-  let capBottom=marginTop+lines.length*lineH;
+  let words=cap.split(/\s+/), lines=[], ln=''; words.forEach(w=>{ const t=ln?ln+' '+w:w; if(x.measureText(t).width>W-2*sideMargin && ln){lines.push(ln);ln=w;}else ln=t; }); if(ln)lines.push(ln);
+  const lineH=Math.round(fs*1.28); let ty=topY+fs; lines.forEach(l=>{ x.fillText(l,W/2,ty); ty+=lineH; });
+  let capBottom=topY+lines.length*lineH;
 
-  // ---- سطر فرعي (اختياري) يشرح الميزات ----
+  // سطر فرعي
   const sub=(document.getElementById('subtitle').value||'').trim();
-  if(sub){
-    const sfs=Math.round(38*S*titleScale); x.font='600 '+sfs+'px -apple-system,Segoe UI,Tahoma,Arial'; x.fillStyle='rgba(244,224,178,0.82)';
-    const sw=sub.split(/\s+/), sl=[]; let sln='';
-    sw.forEach(w=>{ const t=sln?sln+' '+w:w; if(x.measureText(t).width>W-2*sideMargin && sln){sl.push(sln);sln=w;}else sln=t; }); if(sln)sl.push(sln);
-    let sy=capBottom+sfs+6*S; sl.forEach(l=>{ x.fillText(l,W/2,sy); sy+=Math.round(sfs*1.35); });
-    capBottom=sy-Math.round(sfs*0.35);
-  }
+  if(sub){ const sfs=Math.round(38*S*titleScale); x.font='600 '+sfs+'px -apple-system,Segoe UI,Tahoma,Arial'; x.fillStyle='rgba(244,224,178,0.82)';
+    let sw=sub.split(/\s+/), sl=[], sln=''; sw.forEach(w=>{ const t=sln?sln+' '+w:w; if(x.measureText(t).width>W-2*sideMargin && sln){sl.push(sln);sln=w;}else sln=t; }); if(sln)sl.push(sln);
+    let sy=capBottom+sfs+6*S; sl.forEach(l=>{ x.fillText(l,W/2,sy); sy+=Math.round(sfs*1.35); }); capBottom=sy-Math.round(sfs*0.35); }
 
-  // ---- زخرفة فاصلة أنيقة تحت العنوان ----
-  const dy=capBottom+34*S, dw=W*0.34;
-  let lg=x.createLinearGradient(W/2-dw,0,W/2+dw,0);
+  // زخرفة فاصلة
+  const dy=capBottom+34*S, dw=W*0.32; let lg=x.createLinearGradient(W/2-dw,0,W/2+dw,0);
   lg.addColorStop(0,'transparent'); lg.addColorStop(0.5,'rgba(242,210,122,0.85)'); lg.addColorStop(1,'transparent');
   x.strokeStyle=lg; x.lineWidth=2.4*S; x.beginPath(); x.moveTo(W/2-dw,dy); x.lineTo(W/2+dw,dy); x.stroke();
   x.save(); x.translate(W/2,dy); x.rotate(Math.PI/4); x.fillStyle='#F2D27A'; const ds=9*S; x.fillRect(-ds,-ds,ds*2,ds*2); x.restore();
 
-  // ---- منطقة الجوّال (محصورة بدقّة بين الزخرفة والشارات) ----
-  const zoneTop=dy+52*S, zoneBottom=H-sigH-badgesH-24*S;
-  const zoneW=W*0.84, zoneH=Math.max(120*S, zoneBottom-zoneTop);
-  let fw=zoneW, fh=zoneH;
-  if(img){ const ar=img.width/img.height; if(zoneW/zoneH>ar){ fh=zoneH; fw=fh*ar; } else { fw=zoneW; fh=fw/ar; } }
-  // تكبير المستخدم ثم قصّه ليبقى داخل المنطقة دائماً (لا تداخل)
-  fw*=imgScale; fh*=imgScale;
-  if(fw>zoneW){ const k=zoneW/fw; fw*=k; fh*=k; }
-  if(fh>zoneH){ const k=zoneH/fh; fw*=k; fh*=k; }
-  const fx=(W-fw)/2;
-  let fy=zoneTop+(zoneH-fh)/2+posOff;
-  fy=Math.max(zoneTop, Math.min(fy, zoneBottom-fh)); // قصّ الموضع داخل المنطقة
-  const pad=13*S, rad=Math.min(58*S, fw*0.07);
-  // ظلّ + إطار الجوّال
-  x.save(); x.shadowColor='rgba(0,0,0,0.55)'; x.shadowBlur=48*S; x.shadowOffsetY=22*S;
-  roundRect(fx-pad,x,fy-pad,fw+2*pad,fh+2*pad,rad+pad); x.fillStyle='#0a0a0a'; x.fill(); x.restore();
-  x.save(); roundRect(fx,x,fy,fw,fh,rad); x.clip();
-  if(img){ x.drawImage(img,fx,fy,fw,fh); }
-  else { x.fillStyle='rgba(255,255,255,0.05)'; x.fillRect(fx,fy,fw,fh);
-    x.fillStyle='rgba(255,255,255,0.45)'; x.font=Math.round(38*S)+'px Arial'; x.textAlign='center'; x.textBaseline='middle'; x.fillText('ارفع صورة شاشتك',W/2,fy+fh/2); x.textBaseline='alphabetic'; }
+  // منطقة الجوّال
+  const zoneTop=dy+52*S, zoneBottom=H-sigH-badgesH-24*S, zoneW=W*0.82, zoneH=Math.max(120*S, zoneBottom-zoneTop);
+  let fw=zoneW, fh=zoneH; if(img){ const ar=img.width/img.height; if(zoneW/zoneH>ar){ fh=zoneH; fw=fh*ar; } else { fw=zoneW; fh=fw/ar; } }
+  fw*=imgScale; fh*=imgScale; if(fw>zoneW){ const k=zoneW/fw; fw*=k; fh*=k; } if(fh>zoneH){ const k=zoneH/fh; fw*=k; fh*=k; }
+  const fx=(W-fw)/2; let fy=zoneTop+(zoneH-fh)/2+posOff; fy=Math.max(zoneTop, Math.min(fy, zoneBottom-fh));
+  const bezel=showFrame?Math.max(14*S,fw*0.03):13*S, rad=Math.min(70*S, fw*0.09);
+  // جسم الآيفون
+  x.save(); x.shadowColor='rgba(0,0,0,0.55)'; x.shadowBlur=52*S; x.shadowOffsetY=24*S;
+  roundRect(fx-bezel,x,fy-bezel,fw+2*bezel,fh+2*bezel,rad+bezel);
+  if(showFrame){ const dg=x.createLinearGradient(fx-bezel,0,fx+fw+bezel,0); dg.addColorStop(0,'#3a3a3e'); dg.addColorStop(0.5,'#141416'); dg.addColorStop(1,'#3a3a3e'); x.fillStyle=dg; } else x.fillStyle='#0a0a0a';
+  x.fill(); x.restore();
+  // الشاشة
+  x.save(); roundRect(fx,x,fy,fw,fh,rad*0.86); x.clip();
+  if(img){ x.drawImage(img,fx,fy,fw,fh); } else { x.fillStyle='rgba(255,255,255,0.05)'; x.fillRect(fx,fy,fw,fh); x.fillStyle='rgba(255,255,255,0.45)'; x.font=Math.round(38*S)+'px Arial'; x.textAlign='center'; x.textBaseline='middle'; x.fillText('ارفع صورة شاشتك',W/2,fy+fh/2); x.textBaseline='alphabetic'; }
+  // الجزيرة الديناميكية
+  if(showFrame){ const iw=fw*0.30, ih=Math.max(26*S, fh*0.032), ix=W/2-iw/2, iy=fy+fh*0.018; x.fillStyle='#000'; roundRect(ix,x,iy,iw,ih,ih/2); x.fill(); }
   x.restore();
-  // خيط ذهبي رفيع على حافة الإطار (لمعان فاخر)
-  x.save(); roundRect(fx-pad,x,fy-pad,fw+2*pad,fh+2*pad,rad+pad); x.lineWidth=2*S; x.strokeStyle='rgba(242,210,122,0.28)'; x.stroke(); x.restore();
+  if(showFrame){ x.save(); roundRect(fx-bezel,x,fy-bezel,fw+2*bezel,fh+2*bezel,rad+bezel); x.lineWidth=2*S; x.strokeStyle='rgba(255,255,255,0.12)'; x.stroke(); x.restore(); }
 
-  // ---- شارات المتجر (منطقة مستقلة أسفل، بلا تداخل) ----
-  if(showBadges){
-    const bh=74*S, bf=Math.round(29*S), gap=18*S, by=H-sigH-badgesH+(badgesH-bh)/2;
+  // أسهم توضيحية
+  anns.forEach(a=>{
+    x.strokeStyle='rgba(242,210,122,0.95)'; x.fillStyle='rgba(242,210,122,0.95)'; x.lineWidth=3*S;
+    x.beginPath(); x.moveTo(a.tx,a.ty); x.lineTo(a.ax,a.ay); x.stroke();
+    x.beginPath(); x.arc(a.ax,a.ay,10*S,0,7); x.fill(); // رأس السهم
+    // صندوق النص
+    x.font='700 '+Math.round(30*S)+'px -apple-system,Segoe UI,Tahoma,Arial'; x.textAlign='center'; x.textBaseline='middle';
+    const tw=x.measureText(a.text).width, bw=tw+40*S, bh=64*S;
+    roundRect(a.tx-bw/2,x,a.ty-bh/2,bw,bh,16*S); x.fillStyle='rgba(20,17,11,0.92)'; x.fill(); x.lineWidth=2*S; x.strokeStyle='rgba(242,210,122,0.6)'; x.stroke();
+    x.fillStyle='#F4D98A'; x.fillText(a.text,a.tx,a.ty); x.textBaseline='alphabetic';
+  });
+
+  // شارات المتجر
+  if(showBadges){ const bh=74*S, bf=Math.round(29*S), gap=18*S, by=H-sigH-badgesH+(badgesH-bh)/2;
     x.font='700 '+bf+'px -apple-system,Segoe UI,Tahoma,Arial'; x.textBaseline='middle';
     const t1='متوفر على App Store', t2='قريباً على Google Play';
-    const w1=x.measureText(t1).width+58*S, w2=x.measureText(t2).width+58*S;
-    let bx=(W-(w1+w2+gap))/2;
-    roundRect(bx,x,by,w1,bh,bh/2); const bg1=x.createLinearGradient(bx,by,bx,by+bh); bg1.addColorStop(0,'#F5D98A'); bg1.addColorStop(1,'#C5A059'); x.fillStyle=bg1; x.fill();
-    x.fillStyle='#14110B'; x.textAlign='center'; x.fillText(t1,bx+w1/2,by+bh/2);
-    bx+=w1+gap; roundRect(bx,x,by,w2,bh,bh/2); x.fillStyle='rgba(255,255,255,0.04)'; x.fill(); x.lineWidth=2.4*S; x.strokeStyle='rgba(242,210,122,0.65)'; x.stroke();
-    x.fillStyle='rgba(244,217,138,0.92)'; x.fillText(t2,bx+w2/2,by+bh/2);
-    x.textBaseline='alphabetic';
-  }
-  // ---- التوقيع ----
-  x.fillStyle='rgba(242,210,122,0.55)'; x.font='700 '+Math.round(32*S)+'px -apple-system,Segoe UI,Tahoma,Arial'; x.textAlign='center';
-  x.fillText('تطبيق الأنوار', W/2, H-24*S);
+    const w1=x.measureText(t1).width+58*S, w2=x.measureText(t2).width+58*S; let bx=(W-(w1+w2+gap))/2;
+    roundRect(bx,x,by,w1,bh,bh/2); const bg1=x.createLinearGradient(bx,by,bx,by+bh); bg1.addColorStop(0,'#F5D98A'); bg1.addColorStop(1,'#C5A059'); x.fillStyle=bg1; x.fill(); x.fillStyle='#14110B'; x.textAlign='center'; x.fillText(t1,bx+w1/2,by+bh/2);
+    bx+=w1+gap; roundRect(bx,x,by,w2,bh,bh/2); x.fillStyle='rgba(255,255,255,0.04)'; x.fill(); x.lineWidth=2.4*S; x.strokeStyle='rgba(242,210,122,0.65)'; x.stroke(); x.fillStyle='rgba(244,217,138,0.92)'; x.fillText(t2,bx+w2/2,by+bh/2); x.textBaseline='alphabetic'; }
+
+  // التوقيع + لوقو سفلي
+  x.textAlign='center'; x.textBaseline='middle'; x.fillStyle='rgba(242,210,122,0.6)'; x.font='700 '+Math.round(34*S)+'px -apple-system,Segoe UI,Tahoma,Arial';
+  const name='تطبيق الأنوار'; const nameW=x.measureText(name).width; const ly=H-30*S;
+  if(logo){ const ls=54*S; x.drawImage(logo, W/2+nameW/2+14*S, ly-ls/2, ls, ls); x.fillText(name, W/2-ls*0.4, ly); }
+  else x.fillText(name, W/2, ly);
+  x.textBaseline='alphabetic';
 }
+
+// ---- سحب الأسهم ----
+function cpt(e){ const cv=document.getElementById('cv'), r=cv.getBoundingClientRect(); const px=(e.touches?e.touches[0].clientX:e.clientX)-r.left, py=(e.touches?e.touches[0].clientY:e.clientY)-r.top; return { x:px*cv.width/r.width, y:py*cv.height/r.height }; }
+function hit(p){ const S=document.getElementById('cv').width/1080;
+  for(let i=anns.length-1;i>=0;i--){ const a=anns[i];
+    if(Math.hypot(p.x-a.ax,p.y-a.ay)<26*S) return {i,part:'target'};
+    if(Math.abs(p.x-a.tx)<130*S && Math.abs(p.y-a.ty)<40*S) return {i,part:'label'}; }
+  return null;
+}
+function down(e){ const p=cpt(e); const h=hit(p); if(h){ drag={...h, px:p.x, py:p.y}; e.preventDefault(); } }
+function move(e){ if(!drag)return; const p=cpt(e); const a=anns[drag.i]; const dx=p.x-drag.px, dy=p.y-drag.py; drag.px=p.x; drag.py=p.y;
+  if(drag.part==='label'){ a.tx+=dx; a.ty+=dy; } else { a.ax+=dx; a.ay+=dy; } draw(); e.preventDefault(); }
+function up(){ drag=null; }
+const cvEl=document.getElementById('cv');
+cvEl.addEventListener('mousedown',down); window.addEventListener('mousemove',move); window.addEventListener('mouseup',up);
+cvEl.addEventListener('touchstart',down,{passive:false}); cvEl.addEventListener('touchmove',move,{passive:false}); window.addEventListener('touchend',up);
+
 function download(){ const cv=document.getElementById('cv'); const a=document.createElement('a'); a.download='anwar-screenshot.png'; a.href=cv.toDataURL('image/png'); a.click(); }
 
-renderPresets(); renderSwatches(); draw();
+renderPresets(); renderSwatches(); renderAnns(); draw();
 </script>
 </body>
 </html>
