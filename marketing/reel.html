@@ -40,6 +40,8 @@
       <div id="shotlist"></div>
       <label>لوقو التطبيق (اختياري)</label>
       <label class="file-btn sec">اختر اللوقو 🖼️<input type="file" id="logo" accept="image/*"></label>
+      <label>صوت/تلاوة للفيديو (اختياري — يُسمع فقط، لا يظهر)</label>
+      <label class="file-btn sec">اختر صوتاً 🎵<input type="file" id="audio" accept="audio/*"></label>
       <label>نص الافتتاح</label>
       <input type="text" id="intro" value="رفيقك مع القرآن في تطبيق واحد" oninput="draw0()">
       <label>نص الختام</label>
@@ -60,6 +62,11 @@ const P=[]; for(let i=0;i<30;i++) P.push({x:Math.random(),y:Math.random(),r:2+Ma
 
 document.getElementById('files').addEventListener('change', e=>{ [...e.target.files].forEach(f=>{ const r=new FileReader(); r.onload=()=>{ const im=new Image(); im.onload=()=>{ shots.push({img:im,text:DEFAULTS[shots.length%DEFAULTS.length]}); renderShots(); draw0(); }; im.src=r.result; }; r.readAsDataURL(f); }); e.target.value=''; });
 document.getElementById('logo').addEventListener('change', e=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{ logo=new Image(); logo.onload=draw0; logo.src=r.result; }; r.readAsDataURL(f); });
+let audioEl=null, actx=null, aDest=null;
+document.getElementById('audio').addEventListener('change', e=>{ const f=e.target.files[0]; if(!f)return; if(!audioEl){ audioEl=new Audio(); } audioEl.src=URL.createObjectURL(f); st('تم تحميل الصوت 🎵'); });
+function audioGraph(){ if(!audioEl) return null; if(!actx){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); const s=actx.createMediaElementSource(audioEl); aDest=actx.createMediaStreamDestination(); s.connect(aDest); s.connect(actx.destination); }catch(e){ return null; } } return aDest; }
+function startAudio(){ if(!audioEl) return; try{ audioGraph(); actx&&actx.resume(); audioEl.currentTime=0; audioEl.play(); }catch(e){} }
+function stopAudio(){ if(audioEl){ try{ audioEl.pause(); }catch(e){} } }
 function renderShots(){ document.getElementById('shotlist').innerHTML=shots.map((s,i)=>`<div class="shot"><img src="${s.img.src}"><input type="text" value="${s.text.replace(/"/g,'&quot;')}" oninput="shots[${i}].text=this.value"><div class="mv"><button onclick="mv(${i},-1)">▲</button><button onclick="mv(${i},1)">▼</button></div><button class="del" onclick="shots.splice(${i},1);renderShots();draw0()">✕</button></div>`).join(''); }
 function mv(i,d){ const j=i+d; if(j<0||j>=shots.length)return; [shots[i],shots[j]]=[shots[j],shots[i]]; renderShots(); }
 function scenes(){ const s=[{type:'title',text:document.getElementById('intro').value,dur:2.8}]; shots.forEach((sh,i)=>s.push({type:'shot',text:sh.text,img:sh.img,dur:2.9,dir:i%2})); s.push({type:'end',text:document.getElementById('outro').value,dur:3.6}); return s; }
@@ -124,13 +131,15 @@ function draw0(){ drawFrame(0.05); }
 
 let raf=null;
 function playLoop(onEnd){ const T=total(),start=performance.now(); (function fr(){ const t=(performance.now()-start)/1000; if(t>=T){ drawFrame(T); onEnd&&onEnd(); return; } drawFrame(t); raf=requestAnimationFrame(fr); })(); }
-function preview(){ if(!shots.length){ st('أضف لقطات أولاً'); return; } st('▶ يعمل... سجّل شاشتك'); cancelAnimationFrame(raf); playLoop(()=>st('انتهى ✅')); }
+function preview(){ if(!shots.length){ st('أضف لقطات أولاً'); return; } st('▶ يعمل...'); startAudio(); cancelAnimationFrame(raf); playLoop(()=>{ stopAudio(); st('انتهى ✅'); }); }
 function record(){ if(!shots.length){ st('أضف لقطات أولاً'); return; } if(!cv.captureStream){ st('استخدم «تشغيل» وسجّل شاشتك'); return; }
-  const stream=cv.captureStream(30); let mime='video/webm'; try{ if(MediaRecorder.isTypeSupported('video/mp4'))mime='video/mp4'; }catch(e){}
-  const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:10000000}); const ch=[];
+  const vstream=cv.captureStream(30); let comb=vstream;
+  const d=audioGraph(); if(d){ comb=new MediaStream([...vstream.getVideoTracks(), ...d.stream.getAudioTracks()]); }
+  let mime='video/webm'; try{ if(MediaRecorder.isTypeSupported('video/mp4'))mime='video/mp4'; }catch(e){}
+  const rec=new MediaRecorder(comb,{mimeType:mime,videoBitsPerSecond:10000000}); const ch=[];
   rec.ondataavailable=e=>{ if(e.data.size)ch.push(e.data); };
-  rec.onstop=()=>{ const b=new Blob(ch,{type:mime}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='anwar-reel.'+(mime.includes('mp4')?'mp4':'webm'); a.click(); setTimeout(()=>URL.revokeObjectURL(u),2000); st('نُزّل الفيديو ✅'); };
-  st('⏺️ يسجّل...'); rec.start(); cancelAnimationFrame(raf); playLoop(()=>setTimeout(()=>rec.stop(),200)); }
+  rec.onstop=()=>{ stopAudio(); const b=new Blob(ch,{type:mime}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='anwar-reel.'+(mime.includes('mp4')?'mp4':'webm'); a.click(); setTimeout(()=>URL.revokeObjectURL(u),2000); st('نُزّل الفيديو ✅'); };
+  st('⏺️ يسجّل...'); startAudio(); rec.start(); cancelAnimationFrame(raf); playLoop(()=>setTimeout(()=>rec.stop(),200)); }
 function st(m){ document.getElementById('status').textContent=m; document.getElementById('s2').textContent=m; }
 draw0();
 </script>
