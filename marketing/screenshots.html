@@ -71,6 +71,9 @@
       <label>سطر فرعي داخل الصورة (اختياري)</label>
       <textarea id="subtitle" oninput="draw()">تجويد ملوّن • تلاوة بتظليل الآيات • تفسير بضغطة</textarea>
 
+      <label>نقاط الميزات بالوسط (سطر لكل ميزة — تُخفي الجوّال)</label>
+      <textarea id="features" placeholder="📖 قرآن كامل بلا إنترنت&#10;🕌 مواقيت صلاة وأذان" oninput="draw()" style="min-height:130px"></textarea>
+
       <label>لون الخلفية</label>
       <div class="swatches" id="swatches"></div>
 
@@ -162,8 +165,39 @@ function draw(){
   x.strokeStyle=lg; x.lineWidth=2.4*S; x.beginPath(); x.moveTo(W/2-dw,dy); x.lineTo(W/2+dw,dy); x.stroke();
   x.save(); x.translate(W/2,dy); x.rotate(Math.PI/4); x.fillStyle='#F2D27A'; const ds=9*S; x.fillRect(-ds,-ds,ds*2,ds*2); x.restore();
 
-  // منطقة الجوّال
+  // منطقة الوسط
   const zoneTop=dy+24*S, zoneBottom=H-sigH-badgesH-8*S, zoneW=W*0.72, zoneH=Math.max(120*S, zoneBottom-zoneTop);
+
+  // ---- قائمة الميزات بالوسط (بديلة عن الجوّال) ----
+  const featTxt=(document.getElementById('features').value||'').trim();
+  if(featTxt){
+    const fl=featTxt.split('\n').map(s=>s.trim()).filter(Boolean);
+    const n=fl.length, slot=Math.min(zoneH/n, 130*S), ffs=Math.min(Math.round(46*S), Math.round(slot*0.42));
+    x.textAlign='center'; x.textBaseline='middle';
+    let fyy=zoneTop+slot/2;
+    fl.forEach(line=>{
+      // بطاقة خفيفة خلف كل ميزة
+      x.font='700 '+ffs+'px -apple-system,Segoe UI,Tahoma,Arial';
+      const tw=x.measureText(line).width, cw=Math.min(zoneW*1.15, tw+70*S), ch=slot*0.82;
+      roundRect(W/2-cw/2,x,fyy-ch/2,cw,ch,ch/2); x.fillStyle='rgba(242,210,122,0.07)'; x.fill();
+      x.lineWidth=1.6*S; x.strokeStyle='rgba(242,210,122,0.25)'; x.stroke();
+      x.fillStyle='#F4D98A'; x.fillText(line, W/2, fyy);
+      fyy+=slot;
+    });
+    x.textBaseline='alphabetic';
+    // شارات + توقيع ثم إنهاء (بلا جوّال)
+    if(showBadges){ const bh=74*S, bf=Math.round(29*S), gap=18*S, by=H-sigH-badgesH+(badgesH-bh)/2;
+      x.font='700 '+bf+'px -apple-system,Segoe UI,Tahoma,Arial'; x.textBaseline='middle';
+      const t1='متوفر على App Store', t2='قريباً على Google Play';
+      const w1=x.measureText(t1).width+58*S, w2=x.measureText(t2).width+58*S; let bx=(W-(w1+w2+gap))/2;
+      roundRect(bx,x,by,w1,bh,bh/2); const bgg=x.createLinearGradient(bx,by,bx,by+bh); bgg.addColorStop(0,'#F5D98A'); bgg.addColorStop(1,'#C5A059'); x.fillStyle=bgg; x.fill(); x.fillStyle='#14110B'; x.textAlign='center'; x.fillText(t1,bx+w1/2,by+bh/2);
+      bx+=w1+gap; roundRect(bx,x,by,w2,bh,bh/2); x.fillStyle='rgba(255,255,255,0.04)'; x.fill(); x.lineWidth=2.4*S; x.strokeStyle='rgba(242,210,122,0.65)'; x.stroke(); x.fillStyle='rgba(244,217,138,0.92)'; x.fillText(t2,bx+w2/2,by+bh/2); x.textBaseline='alphabetic'; }
+    x.textAlign='center'; x.textBaseline='middle'; x.fillStyle='rgba(242,210,122,0.6)'; x.font='700 '+Math.round(34*S)+'px -apple-system,Segoe UI,Tahoma,Arial';
+    const nm='تطبيق الأنوار', nmW=x.measureText(nm).width, ly2=H-30*S;
+    if(logo){ const ls=54*S; x.drawImage(logo, W/2+nmW/2+14*S, ly2-ls/2, ls, ls); x.fillText(nm, W/2-ls*0.4, ly2); } else x.fillText(nm, W/2, ly2);
+    x.textBaseline='alphabetic';
+    return;
+  }
   const IPHONE_AR=1290/2796; // نسبة آيفون الحقيقية (طويل ونحيف)
   const ar = showFrame ? IPHONE_AR : (img ? img.width/img.height : zoneW/zoneH);
   let fw=zoneW, fh=zoneH; if(zoneW/zoneH>ar){ fh=zoneH; fw=fh*ar; } else { fw=zoneW; fh=fw/ar; }
