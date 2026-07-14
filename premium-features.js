@@ -158,7 +158,7 @@ const FOCUS_AYAHS = [
 const DHIKRS = [ {t:'سُبْحَانَ اللَّه', max:33}, {t:'الْحَمْدُ لِلَّه', max:33}, {t:'اللَّهُ أَكْبَر', max:34} ];
 window.AnwarFocus = {
     _timers:[], _ai:0, _di:0, _dc:0, _audio:null,
-    open:function(){ if(!gate('الوضع التأمّلي','Focus mode')) return;
+    open:function(){ if(!gate('الوضع الليلي','Night mode')) return;
         let f=$('focus-mode');
         if(!f){ f=document.createElement('div'); f.id='focus-mode'; f.className='focus-overlay';
             f.innerHTML=`<div class="focus-stars"></div><div class="focus-moon"></div>

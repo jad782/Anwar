@@ -612,7 +612,7 @@ PRO._refreshDonatePrices = function(){
     } catch(e){}
     if (st){
         if (loaded > 0){
-            st.innerHTML = `<i class="fa-solid fa-circle-check" style="color:#22c55e"></i> ${tr('متّصل بمنتجات آبل ('+loaded+'/'+SUPPORT_TIERS.length+')','Connected ('+loaded+'/'+SUPPORT_TIERS.length+')')}`;
+            st.innerHTML = '';
         } else {
             // تشخيص: يظهر سبب عدم عمل الدفع (صوّره وأرسله للمطوّر)
             const ok='<span style="color:#22c55e">نعم</span>', no='<span style="color:#e0524d">لا</span>';
