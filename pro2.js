@@ -250,7 +250,9 @@ PRO2.openStory = function(){
     const a = window._lastAyah; if(!a){ return; }
     ensureStory();
     $('story-text').innerText = a.text || '';
-    $('story-ref').innerText = a.refText ? a.refText : `﴿ ${tr('سورة','')} ${sN(a.surah)} : ${a.ayah} ﴾`;
+    $('story-ref').innerText = _defRef(a);
+    if($('story-edit')) $('story-edit').value = a.text || '';
+    if($('story-refedit')) $('story-refedit').value = (a._customRef && a.refText) ? a.refText : '';
     const m=$('story-modal'); m.classList.add('active');
     // أعد تشغيل الأنيميشن
     const card=$('story-card'); card.style.animation='none'; void card.offsetWidth; card.style.animation='';
@@ -288,6 +290,16 @@ const CARDS = [
     {t:'خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ', r:'رواه البخاري'},
     {t:'مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ طَرِيقًا إِلَى الْجَنَّةِ', r:'رواه مسلم'},
 ];
+// مصدر ألوان موحّد (يُشتق منه المعاينة والحفظ — 18 لوناً)
+const STORY_COLORS = [
+    ['#4A2C1A','#14110B'],['#0D3B2E','#07160F'],['#1B2A4A','#070C16'],['#3A2140','#140A18'],
+    ['#5A4410','#14110B'],['#1A1A1A','#000000'],['#0B3B3B','#06181A'],['#4A1420','#16090C'],
+    ['#14294A','#05080F'],['#2E2A12','#100E06'],['#123A2A','#04140D'],['#3B2A0E','#120C04'],
+    ['#2A1240','#0C0518'],['#0E2E3A','#04121A'],['#40200E','#140A04'],['#243A16','#0A1206'],
+    ['#3A1230','#140816'],['#1E2440','#080A18']
+];
+const STORY_ORN_NAMES=['بسيط','مزدوج','سميك','خطوط','نجوم','منقّط','زوايا','شريطان','أركان'];
+const STORY_ORN_EN=['Simple','Double','Thick','Lines','Stars','Dotted','Corners','Bands','Arabesque'];
 window.AnwarCards = {
     open:function(){
         let m=$('cards-modal');
@@ -295,14 +307,21 @@ window.AnwarCards = {
             m.innerHTML=`<div class="qibla-modal" style="width:94%;max-width:460px;text-align:right;max-height:86vh;overflow-y:auto;">
                 <button class="close-qibla" onclick="document.getElementById('cards-modal').classList.remove('active')"><i class="fa-solid fa-xmark"></i></button>
                 <h2 style="color:var(--accent-color);margin-bottom:4px;text-align:center;"><i class="fa-solid fa-wand-magic-sparkles"></i> ${tr('بطاقات وتصاميم','Cards & Designs')}</h2>
-                <p style="color:var(--text-muted);font-size:0.82rem;text-align:center;margin-bottom:14px;">${tr('اختر آية أو حديثاً، صمّم لونه وخلفيته، ثم احفظه أو انشره.','Pick an ayah or hadith, design its color, then save or share.')}</p>
+                <p style="color:var(--text-muted);font-size:0.82rem;text-align:center;margin-bottom:14px;">${tr('اكتب نصّك الخاص أو اختر جاهزاً، صمّم لونه وزخرفته، ثم احفظه أو انشره.','Write your own or pick a ready one, design it, then save or share.')}</p>
                 <div id="cards-grid" class="cards-grid"></div></div>`;
             document.body.appendChild(m);
-            $('cards-grid').innerHTML = CARDS.map((c,i)=>`<div class="design-card" onclick="AnwarCards.design(${i})">
+            const customCard = `<div class="design-card dc-custom" onclick="AnwarCards.custom()"><span class="dc-quote"><i class="fa-solid fa-pen-nib"></i> ${tr('اكتب نصّك الخاص','Write your own')}</span><span class="dc-ref">${tr('آية · حديث · دعاء','Ayah · Hadith · Dua')}</span></div>`;
+            $('cards-grid').innerHTML = customCard + CARDS.map((c,i)=>`<div class="design-card" onclick="AnwarCards.design(${i})">
                 <span class="dc-quote">${c.t}</span>
                 <span class="dc-ref">${c.r ? c.r : ('﴿ '+sN(c.s)+' : '+c.a+' ﴾')}</span></div>`).join('');
         }
         m.classList.add('active');
+    },
+    custom:function(){
+        window._lastAyah = { text:'', refText:'' };
+        const m=$('cards-modal'); if(m) m.classList.remove('active');
+        PRO2.openStory();
+        setTimeout(()=>{ const e=$('story-edit'); if(e) e.focus(); }, 250);
     },
     design:function(i){
         const c=CARDS[i]; if(!c) return;
@@ -314,22 +333,9 @@ window.AnwarCards = {
 function ensureStory(){
     if ($('story-modal')) return;
     const d=document.createElement('div'); d.id='story-modal'; d.className='story-overlay';
-    const bgs = [
-        'radial-gradient(circle at 50% 30%, #4A2C1A, #14110B 75%)',
-        'radial-gradient(circle at 50% 30%, #0D3B2E, #07160F 75%)',
-        'radial-gradient(circle at 50% 25%, #1B2A4A, #070C16 75%)',
-        'radial-gradient(circle at 50% 30%, #3A2140, #140A18 75%)',
-        'radial-gradient(circle at 50% 30%, #5A4410, #14110B 75%)',
-        'linear-gradient(160deg, #1A1A1A, #000)',
-        'radial-gradient(circle at 50% 30%, #0B3B3B, #06181A 75%)',
-        'radial-gradient(circle at 50% 30%, #4A1420, #16090C 75%)',
-        'radial-gradient(circle at 50% 30%, #14294A, #05080F 75%)',
-        'radial-gradient(circle at 50% 30%, #2E2A12, #100E06 75%)'
-    ];
+    const bgs = STORY_COLORS.map(([a,b])=>`radial-gradient(circle at 50% 30%, ${a}, ${b} 78%)`);
     const swatches = bgs.map((b,i)=>`<button class="story-sw" style="background:${b}" onclick="PRO2.setStoryBg(${i})"></button>`).join('');
-    const ornNames=['بسيط','مزدوج','سميك','خطوط','نجوم'];
-    const ornEn=['Simple','Double','Thick','Lines','Stars'];
-    const orns = ornNames.map((n,i)=>`<button class="story-orn-btn" onclick="PRO2.setStoryOrn(${i})">${L()==='en'?ornEn[i]:n}</button>`).join('');
+    const orns = STORY_ORN_NAMES.map((n,i)=>`<button class="story-orn-btn" onclick="PRO2.setStoryOrn(${i})">${L()==='en'?STORY_ORN_EN[i]:n}</button>`).join('');
     d.innerHTML = `<button class="story-close" onclick="PRO2.closeStory()"><i class="fa-solid fa-xmark"></i></button>
         <div id="story-card" class="story-card">
             <div class="story-bismillah">﷽</div>
@@ -337,15 +343,23 @@ function ensureStory(){
             <div id="story-ref" class="story-ref"></div>
             <div class="story-brand">anwar</div>
         </div>
+        <div class="story-editrow">
+            <textarea id="story-edit" class="story-edit" rows="2" placeholder="${tr('اكتب نصّك هنا أو عدّل...','Type your text here...')}"></textarea>
+            <input id="story-refedit" class="story-refedit" placeholder="${tr('المصدر (اختياري): سورة الشرح ٥ · رواه مسلم','Source (optional)')}">
+        </div>
         <div class="story-swatches">${swatches}</div>
         <div class="story-orns">${orns}</div>
         <button class="story-save" onclick="PRO2.saveStoryImage()"><i class="fa-solid fa-download"></i> ${tr('حفظ الصورة بدقة عالية','Save HD image')}</button>
-        <p class="story-hint">${tr('اختر اللون والزخرفة ثم احفظ الصورة','Pick color & frame then save')}</p>`;
+        <p class="story-hint">${tr('اكتب نصّك، اختر اللون والزخرفة، ثم احفظ','Type text, pick color & frame, then save')}</p>`;
     document.body.appendChild(d);
     d._bgs = bgs;
-    const sb = localStorage.getItem('story_bg'); PRO2.setStoryBg(sb!=null?+sb:0);
+    // محرّر النص والمصدر — تحديث حيّ للمعاينة
+    $('story-edit').addEventListener('input', e=>{ const v=e.target.value; $('story-text').innerText=v; if(window._lastAyah) window._lastAyah.text=v; });
+    $('story-refedit').addEventListener('input', e=>{ const v=e.target.value.trim(); if(window._lastAyah){ window._lastAyah.refText=v; window._lastAyah._customRef=true; } $('story-ref').innerText = v || _defRef(window._lastAyah); });
+    const sb = localStorage.getItem('story_bg'); PRO2.setStoryBg(sb!=null&&+sb<STORY_COLORS.length?+sb:0);
     const so = localStorage.getItem('story_orn'); PRO2.setStoryOrn(so!=null?+so:0);
 }
+function _defRef(a){ if(!a) return ''; if(a.refText) return a.refText; if(a.surah) return '﴿ '+tr('سورة','')+' '+sN(a.surah)+' : '+a.ayah+' ﴾'; return ''; }
 PRO2.setStoryBg = function(i){
     const d=$('story-modal'); const card=$('story-card'); if(!d||!card||!d._bgs[i]) return;
     card.style.background = d._bgs[i]; localStorage.setItem('story_bg', i);
@@ -353,7 +367,7 @@ PRO2.setStoryBg = function(i){
 };
 PRO2.setStoryOrn = function(i){
     const card=$('story-card'); const d=$('story-modal'); if(!card) return;
-    card.classList.remove('orn-0','orn-1','orn-2','orn-3','orn-4');
+    for(let k=0;k<9;k++) card.classList.remove('orn-'+k);
     card.classList.add('orn-'+i); localStorage.setItem('story_orn', i);
     if(d) d.querySelectorAll('.story-orn-btn').forEach((b,bi)=>b.classList.toggle('on', bi===i));
 };
@@ -368,8 +382,7 @@ PRO2.saveStoryImage = async function(){
     const a=window._lastAyah; if(!a){ return; }
     const idx=+(localStorage.getItem('story_bg')||0);
     const orn=+(localStorage.getItem('story_orn')||0);
-    const pairs=[['#4A2C1A','#14110B'],['#0D3B2E','#07160F'],['#1B2A4A','#070C16'],['#3A2140','#140A18'],['#5A4410','#14110B'],['#262626','#000000'],['#0B3B3B','#06181A'],['#4A1420','#16090C'],['#14294A','#05080F'],['#2E2A12','#100E06']];
-    const [c1,c2]=pairs[idx]||pairs[0];
+    const [c1,c2]=STORY_COLORS[idx]||STORY_COLORS[0];
     const W=1080,H=1920; const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const ctx=cv.getContext('2d');
     try{ await document.fonts.load('64px Amiri'); await document.fonts.load('120px Amiri'); }catch(e){}
     const g=ctx.createRadialGradient(W/2,H*0.30,60,W/2,H*0.30,H); g.addColorStop(0,c1); g.addColorStop(1,c2);
@@ -380,14 +393,17 @@ PRO2.saveStoryImage = async function(){
     else if(orn===1){ ctx.strokeStyle=GD; ctx.lineWidth=6; ctx.strokeRect(40,40,W-80,H-80); ctx.strokeStyle=GD2; ctx.lineWidth=3; ctx.strokeRect(64,64,W-128,H-128); }
     else if(orn===2){ ctx.strokeStyle=GD; ctx.lineWidth=16; ctx.strokeRect(56,56,W-112,H-112); }
     else if(orn===3){ ctx.strokeStyle=GD; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(120,150); ctx.lineTo(W-120,150); ctx.moveTo(120,H-150); ctx.lineTo(W-120,H-150); ctx.stroke(); }
-    else if(orn===4){ ctx.strokeStyle=GD2; ctx.lineWidth=4; ctx.strokeRect(50,50,W-100,H-100); ctx.fillStyle=GD; ctx.font='70px Amiri, serif'; ctx.textAlign='center'; ['۞'].forEach(()=>{}); ctx.fillText('۞',110,130); ctx.fillText('۞',W-110,130); ctx.fillText('۞',110,H-90); ctx.fillText('۞',W-110,H-90); }
+    else if(orn===4){ ctx.strokeStyle=GD2; ctx.lineWidth=4; ctx.strokeRect(50,50,W-100,H-100); ctx.fillStyle=GD; ctx.font='70px Amiri, serif'; ctx.textAlign='center'; ctx.fillText('۞',110,130); ctx.fillText('۞',W-110,130); ctx.fillText('۞',110,H-90); ctx.fillText('۞',W-110,H-90); }
+    else if(orn===5){ ctx.strokeStyle=GD; ctx.lineWidth=6; ctx.setLineDash([4,22]); ctx.lineCap='round'; ctx.strokeRect(52,52,W-104,H-104); ctx.setLineDash([]); }
+    else if(orn===6){ ctx.strokeStyle=GD; ctx.lineWidth=7; const m=60,L=150; [[m,m,1,1],[W-m,m,-1,1],[m,H-m,1,-1],[W-m,H-m,-1,-1]].forEach(p=>{ ctx.beginPath(); ctx.moveTo(p[0],p[1]+p[3]*L); ctx.lineTo(p[0],p[1]); ctx.lineTo(p[0]+p[2]*L,p[1]); ctx.stroke(); }); }
+    else if(orn===7){ ctx.strokeStyle=GD; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(90,220); ctx.lineTo(W-90,220); ctx.moveTo(90,H-220); ctx.lineTo(W-90,H-220); ctx.stroke(); ctx.fillStyle=GD; ctx.font='54px Amiri, serif'; ctx.textAlign='center'; ctx.fillText('۞',W/2,205); ctx.fillText('۞',W/2,H-180); }
+    else if(orn===8){ ctx.strokeStyle=GD2; ctx.lineWidth=4; ctx.strokeRect(48,48,W-96,H-96); ctx.strokeStyle=GD; ctx.lineWidth=2; ctx.strokeRect(70,70,W-140,H-140); ctx.fillStyle=GD; ctx.font='90px Amiri, serif'; ctx.textAlign='center'; ctx.fillText('﴾',150,H/2+30); ctx.fillText('﴿',W-150,H/2+30); }
     ctx.textAlign='center'; try{ctx.direction='rtl';}catch(e){}
     ctx.fillStyle='rgba(212,168,67,0.6)'; ctx.font='150px Amiri, serif'; ctx.fillText('﷽', W/2, 360);
     ctx.fillStyle='#FAF6EE'; ctx.font='66px Amiri, serif';
     const lines=_wrapText(ctx, a.text, W-300);
     let y=H/2 - (lines.length-1)*62; lines.forEach(l=>{ ctx.fillText(l, W/2, y); y+=124; });
-    ctx.fillStyle='#D4A843'; ctx.font='46px Amiri, serif';
-    ctx.fillText(a.refText ? a.refText : ('﴿ '+tr('سورة','')+' '+sN(a.surah)+' : '+a.ayah+' ﴾'), W/2, y+30);
+    const _rf=_defRef(a); if(_rf){ ctx.fillStyle='#D4A843'; ctx.font='46px Amiri, serif'; ctx.fillText(_rf, W/2, y+30); }
     ctx.fillStyle='rgba(250,246,238,0.5)'; ctx.font='32px Tajawal, sans-serif';
     ctx.fillText('anwar', W/2, H-110);
     cv.toBlob(async (blob)=>{

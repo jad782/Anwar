@@ -934,6 +934,22 @@ body.reading-immersive #reading-view { padding-top: calc(env(safe-area-inset-top
 .story-card.orn-3::before { top:22px; } .story-card.orn-3::after { bottom:22px; }
 .story-card.orn-4 { border:1px solid rgba(212,168,67,0.4); }
 .story-card.orn-4::before { content:'۞ ۞'; position:absolute; top:8px; left:0; right:0; text-align:center; color:rgba(242,210,122,0.7); font-size:1rem; letter-spacing:230px; }
+.story-card.orn-5 { border:3px dashed rgba(242,210,122,0.55); }
+.story-card.orn-6 { border:none; position:relative; }
+.story-card.orn-6::before,.story-card.orn-6::after { content:''; position:absolute; width:44px; height:44px; border:3px solid rgba(242,210,122,0.7); }
+.story-card.orn-6::before { top:10px; inset-inline-start:10px; border-inline-end:none; border-bottom:none; }
+.story-card.orn-6::after { bottom:10px; inset-inline-end:10px; border-inline-start:none; border-top:none; }
+.story-card.orn-7 { border:none; position:relative; }
+.story-card.orn-7::before,.story-card.orn-7::after { content:'۞'; position:absolute; left:0; right:0; text-align:center; color:rgba(242,210,122,0.75); font-size:1.1rem; }
+.story-card.orn-7::before { top:14px; } .story-card.orn-7::after { bottom:10px; }
+.story-card.orn-8 { border:2px solid rgba(212,168,67,0.5); outline:1px solid rgba(242,210,122,0.4); outline-offset:-10px; }
+
+/* محرّر نص البطاقة اليدوي */
+.story-editrow { width:100%; max-width:340px; margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+.story-edit { width:100%; background:rgba(0,0,0,0.35); color:#F7EFDC; border:1px solid rgba(242,210,122,0.35); border-radius:12px; padding:11px; font-family:'Amiri',serif; font-size:1.05rem; resize:vertical; text-align:center; }
+.story-refedit { width:100%; background:rgba(0,0,0,0.35); color:#F2D27A; border:1px solid rgba(242,210,122,0.25); border-radius:10px; padding:9px; font-family:'Tajawal','Cairo',sans-serif; font-size:0.85rem; text-align:center; }
+.design-card.dc-custom { background:linear-gradient(135deg, rgba(242,210,122,0.16), rgba(46,37,21,0.9)); border:1px dashed rgba(242,210,122,0.6); }
+.design-card.dc-custom .dc-quote { color:var(--accent-light,#F2D27A); }
 
 /* أيقونة نافذة التحديث */
 .upd-ico { width:66px; height:66px; margin:0 auto; border-radius:50%; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--accent-color,#C5A059),var(--accent-light,#F2D27A)); color:#14110B; font-size:1.7rem; box-shadow:0 0 22px rgba(242,210,122,0.5); }
