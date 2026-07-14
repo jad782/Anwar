@@ -172,16 +172,24 @@ function draw(){
   const featTxt=(document.getElementById('features').value||'').trim();
   if(featTxt){
     const fl=featTxt.split('\n').map(s=>s.trim()).filter(Boolean);
-    const n=fl.length, slot=Math.min(zoneH/n, 130*S), ffs=Math.min(Math.round(46*S), Math.round(slot*0.42));
+    const n=fl.length, slotRaw=zoneH/n, slot=Math.min(slotRaw, 150*S), gap=slot*0.16, ch=slot-gap;
+    const ffs=Math.min(Math.round(44*S), Math.round(ch*0.46));
+    // توهّج ناعم خلف القائمة
+    const glow=x.createRadialGradient(W/2,(zoneTop+zoneBottom)/2,0,W/2,(zoneTop+zoneBottom)/2,zoneW*0.9);
+    glow.addColorStop(0,'rgba(242,210,122,0.10)'); glow.addColorStop(1,'transparent'); x.fillStyle=glow; x.fillRect(0,zoneTop,W,zoneH);
     x.textAlign='center'; x.textBaseline='middle';
     let fyy=zoneTop+slot/2;
     fl.forEach(line=>{
-      // بطاقة خفيفة خلف كل ميزة
       x.font='700 '+ffs+'px -apple-system,Segoe UI,Tahoma,Arial';
-      const tw=x.measureText(line).width, cw=Math.min(zoneW*1.15, tw+70*S), ch=slot*0.82;
-      roundRect(W/2-cw/2,x,fyy-ch/2,cw,ch,ch/2); x.fillStyle='rgba(242,210,122,0.07)'; x.fill();
-      x.lineWidth=1.6*S; x.strokeStyle='rgba(242,210,122,0.25)'; x.stroke();
-      x.fillStyle='#F4D98A'; x.fillText(line, W/2, fyy);
+      const tw=x.measureText(line).width, cw=Math.min(W*0.86, Math.max(zoneW, tw+90*S)), cx=W/2-cw/2, cy=fyy-ch/2, r=ch/2;
+      // بطاقة متدرّجة فاخرة
+      x.save(); x.shadowColor='rgba(0,0,0,0.35)'; x.shadowBlur=18*S; x.shadowOffsetY=6*S;
+      roundRect(cx,x,cy,cw,ch,r); const cg=x.createLinearGradient(cx,cy,cx,cy+ch); cg.addColorStop(0,'rgba(242,210,122,0.14)'); cg.addColorStop(1,'rgba(242,210,122,0.05)'); x.fillStyle=cg; x.fill(); x.restore();
+      x.lineWidth=1.6*S; x.strokeStyle='rgba(242,210,122,0.35)'; x.stroke();
+      // شريط ذهبي جانبي (لمسة فخامة)
+      const bw=6*S; roundRect(cx+cw-bw-r*0.5, x, cy+ch*0.22, bw, ch*0.56, bw/2); x.fillStyle='#F2D27A'; x.fill();
+      // النص
+      x.fillStyle='#F7E7B8'; x.fillText(line, W/2, fyy);
       fyy+=slot;
     });
     x.textBaseline='alphabetic';
