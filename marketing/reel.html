@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>مولّد الريل التلقائي — الأنوار</title>
+<title>مولّد الريل السينمائي — الأنوار</title>
 <style>
   :root{ --gold:#C9A24B; --gold2:#F2D27A; --bg:#0f0d0a; --card:#1a1712; --text:#efe8db; --muted:#b8ad98; }
   *{ box-sizing:border-box; }
@@ -32,114 +32,102 @@
 </style>
 </head>
 <body>
-  <h1>مولّد الريل التلقائي 🎬</h1>
-  <p class="hint">ارفع لقطاتك ← عدّل نص كل لقطة ← تشغيل أو تسجيل ← ريل جاهز بلا مونتاج 🤍</p>
+  <h1>مولّد الريل السينمائي 🎬</h1>
+  <p class="hint">ارفع لقطاتك ← عدّل النصوص ← تشغيل أو تسجيل ← ريل احترافي بلا مونتاج 🤍</p>
   <div class="wrap">
     <div class="panel">
       <label class="file-btn">＋ أضف لقطات شاشة 📷<input type="file" id="files" accept="image/*" multiple></label>
       <div id="shotlist"></div>
-
-      <label>لوقو التطبيق (اختياري — يظهر بالبداية والنهاية)</label>
+      <label>لوقو التطبيق (اختياري)</label>
       <label class="file-btn sec">اختر اللوقو 🖼️<input type="file" id="logo" accept="image/*"></label>
-
       <label>نص الافتتاح</label>
       <input type="text" id="intro" value="رفيقك مع القرآن في تطبيق واحد" oninput="draw0()">
       <label>نص الختام</label>
       <input type="text" id="outro" value="تطبيق الأنوار — حمّله مجاناً" oninput="draw0()">
-
       <button class="btn play" onclick="preview()">▶ تشغيل (سجّل شاشتك أثناءه)</button>
       <button class="btn rec" onclick="record()">⏺️ تسجيل وتحميل الفيديو</button>
       <div class="status" id="status"></div>
-      <div class="tip"><b>طريقتان:</b> ١) «تشغيل» ثم سجّل شاشتك (آيفون: مركز التحكّم → تسجيل). ٢) «تسجيل وتحميل» تصنع ملف الفيديو وتنزّله (لو webm حوّله mp4 بـ CapCut).</div>
+      <div class="tip"><b>طريقتان:</b> ١) «تشغيل» ثم سجّل شاشتك. ٢) «تسجيل وتحميل» تصنع الملف وتنزّله (لو webm حوّله mp4 بـ CapCut).</div>
     </div>
     <div style="text-align:center"><canvas id="cv" width="1080" height="1920"></canvas><div class="status" id="s2"></div></div>
   </div>
 
 <script>
-const cv=document.getElementById('cv'), x=cv.getContext('2d'), W=1080, H=1920;
-const DEFAULTS=['قرآن كامل — يعمل بلا إنترنت','قبلتك أمام عينيك بالكاميرا','مواقيت دقيقة + أذان حقيقي','احفظ القرآن بالتسميع','حصن المسلم وأدعية بمصادرها','بطاقات آيات فنية','وضع تأمّلي ليلي'];
-let shots=[]; // {img, text}
-let logo=null;
+const cv=document.getElementById('cv'), x=cv.getContext('2d'), W=1080, H=1920, AR=1290/2796;
+const DEFAULTS=['قرآن كامل — يعمل بلا إنترنت','قبلتك أمام عينيك بالكاميرا','مواقيت دقيقة + أذان حقيقي','تجويد ملوّن + تلاوة بالتظليل','حصن المسلم ومسبحة إلكترونية','أذكار وأدعية بمصادرها'];
+let shots=[], logo=null;
+const P=[]; for(let i=0;i<30;i++) P.push({x:Math.random(),y:Math.random(),r:2+Math.random()*5,sp:0.012+Math.random()*0.045,ph:Math.random()*6.283});
 
-document.getElementById('files').addEventListener('change', e=>{
-  [...e.target.files].forEach(f=>{ const r=new FileReader(); r.onload=()=>{ const im=new Image(); im.onload=()=>{ shots.push({img:im, text:DEFAULTS[(shots.length)%DEFAULTS.length]}); renderShots(); draw0(); }; im.src=r.result; }; r.readAsDataURL(f); });
-  e.target.value='';
-});
+document.getElementById('files').addEventListener('change', e=>{ [...e.target.files].forEach(f=>{ const r=new FileReader(); r.onload=()=>{ const im=new Image(); im.onload=()=>{ shots.push({img:im,text:DEFAULTS[shots.length%DEFAULTS.length]}); renderShots(); draw0(); }; im.src=r.result; }; r.readAsDataURL(f); }); e.target.value=''; });
 document.getElementById('logo').addEventListener('change', e=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{ logo=new Image(); logo.onload=draw0; logo.src=r.result; }; r.readAsDataURL(f); });
-
-function renderShots(){ document.getElementById('shotlist').innerHTML = shots.map((s,i)=>`<div class="shot">
-  <img src="${s.img.src}"><input type="text" value="${s.text.replace(/"/g,'&quot;')}" oninput="shots[${i}].text=this.value">
-  <div class="mv"><button onclick="mv(${i},-1)">▲</button><button onclick="mv(${i},1)">▼</button></div>
-  <button class="del" onclick="shots.splice(${i},1);renderShots();draw0()">✕</button></div>`).join(''); }
+function renderShots(){ document.getElementById('shotlist').innerHTML=shots.map((s,i)=>`<div class="shot"><img src="${s.img.src}"><input type="text" value="${s.text.replace(/"/g,'&quot;')}" oninput="shots[${i}].text=this.value"><div class="mv"><button onclick="mv(${i},-1)">▲</button><button onclick="mv(${i},1)">▼</button></div><button class="del" onclick="shots.splice(${i},1);renderShots();draw0()">✕</button></div>`).join(''); }
 function mv(i,d){ const j=i+d; if(j<0||j>=shots.length)return; [shots[i],shots[j]]=[shots[j],shots[i]]; renderShots(); }
-
-function scenes(){ const s=[{type:'title',text:document.getElementById('intro').value,dur:2.6}];
-  shots.forEach((sh,i)=>s.push({type:'shot',text:sh.text,img:sh.img,dur:2.7,dir:i%2})); s.push({type:'end',text:document.getElementById('outro').value,dur:3.4}); return s; }
+function scenes(){ const s=[{type:'title',text:document.getElementById('intro').value,dur:2.8}]; shots.forEach((sh,i)=>s.push({type:'shot',text:sh.text,img:sh.img,dur:2.9,dir:i%2})); s.push({type:'end',text:document.getElementById('outro').value,dur:3.6}); return s; }
+function total(){ return scenes().reduce((a,c)=>a+c.dur,0); }
 
 function rr(cx,cy,w,h,r){ x.beginPath(); x.moveTo(cx+r,cy); x.arcTo(cx+w,cy,cx+w,cy+h,r); x.arcTo(cx+w,cy+h,cx,cy+h,r); x.arcTo(cx,cy+h,cx,cy,r); x.arcTo(cx,cy,cx+w,cy,r); x.closePath(); }
-function bgGold(cy){ const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,'#1c1408'); g.addColorStop(0.5,'#0d0a05'); g.addColorStop(1,'#05040a'); x.fillStyle=g; x.fillRect(0,0,W,H);
-  const rg=x.createRadialGradient(W/2,cy,0,W/2,cy,W); rg.addColorStop(0,'rgba(242,210,122,0.20)'); rg.addColorStop(1,'transparent'); x.fillStyle=rg; x.fillRect(0,0,W,H);
-  decorate(); }
-// زخرفة خلفية: أقواس وبريق ذهبي خفيف
-function decorate(){ x.save();
-  x.strokeStyle='rgba(242,210,122,0.06)'; x.lineWidth=2;
-  for(let i=1;i<=3;i++){ x.beginPath(); x.arc(W/2, H*0.34, W*0.32*i, 0, Math.PI*2); x.stroke(); }
-  const dots=[[0.14,0.12],[0.86,0.18],[0.10,0.7],[0.9,0.62],[0.5,0.06],[0.22,0.9],[0.78,0.88],[0.5,0.95]];
-  dots.forEach(d=>{ x.beginPath(); x.arc(W*d[0],H*d[1], (d[0]*7%3+2), 0, 7); x.fillStyle='rgba(242,210,122,0.5)'; x.fill();
-    const gl=x.createRadialGradient(W*d[0],H*d[1],0,W*d[0],H*d[1],26); gl.addColorStop(0,'rgba(242,210,122,0.35)'); gl.addColorStop(1,'transparent'); x.fillStyle=gl; x.beginPath(); x.arc(W*d[0],H*d[1],26,0,7); x.fill(); });
-  x.restore(); }
-// التفاف النص ضمن العرض مع تصغير تلقائي عند الطول
-function wrapFit(text,maxW,size){ let s=size, lines;
-  for(let k=0;k<6;k++){ x.font='800 '+s+'px -apple-system,Segoe UI,Tahoma,Arial'; const words=(text||'').split(/\s+/); lines=[]; let ln='';
-    words.forEach(w=>{ const t=ln?ln+' '+w:w; if(x.measureText(t).width>maxW && ln){lines.push(ln);ln=w;}else ln=t; }); if(ln)lines.push(ln);
-    if(lines.length<=2) break; s=Math.round(s*0.9); }
-  return {lines, size:s}; }
-function vignette(){ const v=x.createRadialGradient(W/2,H/2,H*0.3,W/2,H/2,H*0.72); v.addColorStop(0,'transparent'); v.addColorStop(1,'rgba(0,0,0,0.45)'); x.fillStyle=v; x.fillRect(0,0,W,H); }
-function ornDivider(cy,a){ x.save(); x.globalAlpha=a; const dw=W*0.26; const lg=x.createLinearGradient(W/2-dw,0,W/2+dw,0); lg.addColorStop(0,'transparent'); lg.addColorStop(0.5,'rgba(242,210,122,0.9)'); lg.addColorStop(1,'transparent'); x.strokeStyle=lg; x.lineWidth=3; x.beginPath(); x.moveTo(W/2-dw,cy); x.lineTo(W/2+dw,cy); x.stroke(); x.translate(W/2,cy); x.rotate(Math.PI/4); x.fillStyle='#F2D27A'; x.fillRect(-9,-9,18,18); x.restore(); }
-function emblem(cy,s,a){ x.save(); x.globalAlpha=a; const cxp=W/2, cyp=cy+s/2;
-  // هالة متوهّجة
-  const glow=x.createRadialGradient(cxp,cyp,0,cxp,cyp,s*1.5); glow.addColorStop(0,'rgba(242,210,122,0.40)'); glow.addColorStop(1,'transparent'); x.fillStyle=glow; x.beginPath(); x.arc(cxp,cyp,s*1.5,0,7); x.fill();
-  if(logo){ // دائرة أنيقة بحلقة ذهبية + اللوقو بالداخل
-    x.beginPath(); x.arc(cxp,cyp,s*0.6,0,7); x.save(); x.clip(); const sc2=Math.max(s*1.2/logo.width, s*1.2/logo.height); x.drawImage(logo, cxp-logo.width*sc2/2, cyp-logo.height*sc2/2, logo.width*sc2, logo.height*sc2); x.restore();
-    x.lineWidth=s*0.05; const rg=x.createLinearGradient(cxp-s*0.6,cyp-s*0.6,cxp+s*0.6,cyp+s*0.6); rg.addColorStop(0,'#F2D27A'); rg.addColorStop(1,'#C5A059'); x.strokeStyle=rg; x.beginPath(); x.arc(cxp,cyp,s*0.6,0,7); x.stroke();
-  } else { rr(W/2-s/2,cy,s,s,s*0.28); const g=x.createLinearGradient(W/2-s/2,cy,W/2+s/2,cy+s); g.addColorStop(0,'#C5A059'); g.addColorStop(1,'#F2D27A'); x.fillStyle=g; x.fill();
-    x.fillStyle='#14110B'; x.font='800 '+s*0.5+'px Amiri,serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillText('۩',W/2,cyp+2); x.textBaseline='alphabetic'; }
-  x.restore(); }
-function drawText(text,cy,size,a,rise){ const {lines,size:fs}=wrapFit(text,W*0.84,size); x.save(); x.globalAlpha=a; x.textAlign='center'; x.fillStyle='#F6E3AE'; x.font='800 '+fs+'px -apple-system,Segoe UI,Tahoma,Arial'; x.shadowColor='rgba(0,0,0,0.6)'; x.shadowBlur=22; const startY=cy-(lines.length-1)*fs*1.22/2; lines.forEach((l,i)=>x.fillText(l,W/2,startY+i*fs*1.22-rise)); x.restore(); return lines.length; }
+function ease(t){ t=Math.max(0,Math.min(1,t)); return 1-Math.pow(1-t,3); }
+function wrapFit(text,maxW,size){ let s=size,lines; for(let k=0;k<7;k++){ x.font='800 '+s+'px -apple-system,Segoe UI,Tahoma,Arial'; const w=(text||'').split(/\s+/); lines=[]; let ln=''; w.forEach(o=>{ const t=ln?ln+' '+o:o; if(x.measureText(t).width>maxW&&ln){lines.push(ln);ln=o;}else ln=t; }); if(ln)lines.push(ln); if(lines.length<=2)break; s=Math.round(s*0.9);} return {lines,size:s}; }
 
-function drawScene(sc,p){
-  const fin=Math.min(1,p/0.16), fout=Math.min(1,(1-p)/0.16), fade=Math.min(fin,fout);
+// ===== خلفية سينمائية متحركة =====
+function animBg(t){
+  const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,'#241809'); g.addColorStop(0.5,'#0c0905'); g.addColorStop(1,'#07050c'); x.fillStyle=g; x.fillRect(0,0,W,H);
+  const gx=W/2+Math.sin(t*0.5)*W*0.16, gy=H*0.40+Math.cos(t*0.42)*H*0.07;
+  const rg=x.createRadialGradient(gx,gy,0,gx,gy,W*0.95); rg.addColorStop(0,'rgba(242,210,122,0.24)'); rg.addColorStop(0.45,'rgba(201,162,75,0.07)'); rg.addColorStop(1,'transparent'); x.fillStyle=rg; x.fillRect(0,0,W,H);
+  // أقواس زخرفية دوّارة خفيفة
+  x.save(); x.translate(W/2,H*0.4); x.rotate(t*0.05); x.strokeStyle='rgba(242,210,122,0.05)'; x.lineWidth=2; for(let i=1;i<=3;i++){ x.beginPath(); x.arc(0,0,W*0.3*i,0,6.283); x.stroke(); } x.restore();
+  // جزيئات (بوكيه) تطفو للأعلى
+  P.forEach(p=>{ const py=((p.y - t*p.sp)%1+1)%1; const X=W*p.x+Math.sin(t*0.8+p.ph)*26, Y=H*py;
+    const gl=x.createRadialGradient(X,Y,0,X,Y,p.r*7); gl.addColorStop(0,'rgba(242,210,122,0.45)'); gl.addColorStop(1,'transparent'); x.fillStyle=gl; x.beginPath(); x.arc(X,Y,p.r*7,0,7); x.fill();
+    x.fillStyle='rgba(255,242,205,0.85)'; x.beginPath(); x.arc(X,Y,p.r,0,7); x.fill(); });
+  const v=x.createRadialGradient(W/2,H/2,H*0.28,W/2,H/2,H*0.78); v.addColorStop(0,'transparent'); v.addColorStop(1,'rgba(0,0,0,0.55)'); x.fillStyle=v; x.fillRect(0,0,W,H);
+}
+// ===== إطار آيفون يطفو =====
+function drawPhone(img,cx,cy,ph,alpha,kz){
+  const pw=ph*AR, px=cx-pw/2, py=cy-ph/2, bez=pw*0.036, rad=pw*0.14;
+  x.save(); x.globalAlpha=alpha;
+  x.save(); x.shadowColor='rgba(0,0,0,0.6)'; x.shadowBlur=70; x.shadowOffsetY=34; rr(px-bez,py-bez,pw+2*bez,ph+2*bez,rad+bez*0.8); x.fillStyle='#050506'; x.fill(); x.restore();
+  rr(px-bez,py-bez,pw+2*bez,ph+2*bez,rad+bez*0.8); x.lineWidth=3; const eg=x.createLinearGradient(px-bez,py,px+pw+bez,py+ph); eg.addColorStop(0,'rgba(255,255,255,0.32)'); eg.addColorStop(0.5,'rgba(255,255,255,0.06)'); eg.addColorStop(1,'rgba(255,255,255,0.26)'); x.strokeStyle=eg; x.stroke();
+  x.save(); rr(px,py,pw,ph,rad*0.86); x.clip(); x.fillStyle='#000'; x.fillRect(px,py,pw,ph);
+  if(img){ const sc=Math.max(pw/img.width,ph/img.height)*kz, dw=img.width*sc, dh=img.height*sc; x.drawImage(img,px+(pw-dw)/2,py+(ph-dh)/2,dw,dh); }
+  const iw=pw*0.32, ih=ph*0.026; x.fillStyle='#000'; rr(cx-iw/2,py+ph*0.014,iw,ih,ih/2); x.fill();
+  x.restore(); x.restore();
+}
+function emblem(cx,cy,s,a,t){ x.save(); x.globalAlpha=a; const pr=1+Math.sin(t*2)*0.06;
+  const glow=x.createRadialGradient(cx,cy,0,cx,cy,s*1.6*pr); glow.addColorStop(0,'rgba(242,210,122,0.45)'); glow.addColorStop(1,'transparent'); x.fillStyle=glow; x.beginPath(); x.arc(cx,cy,s*1.6*pr,0,7); x.fill();
+  if(logo){ x.beginPath(); x.arc(cx,cy,s*0.6,0,7); x.save(); x.clip(); const sc=Math.max(s*1.2/logo.width,s*1.2/logo.height); x.drawImage(logo,cx-logo.width*sc/2,cy-logo.height*sc/2,logo.width*sc,logo.height*sc); x.restore(); x.lineWidth=s*0.05; const rgg=x.createLinearGradient(cx-s,cy-s,cx+s,cy+s); rgg.addColorStop(0,'#F2D27A'); rgg.addColorStop(1,'#C5A059'); x.strokeStyle=rgg; x.beginPath(); x.arc(cx,cy,s*0.6,0,7); x.stroke(); }
+  else { rr(cx-s/2,cy-s/2,s,s,s*0.28); const g=x.createLinearGradient(cx-s/2,cy-s/2,cx+s/2,cy+s/2); g.addColorStop(0,'#C5A059'); g.addColorStop(1,'#F2D27A'); x.fillStyle=g; x.fill(); x.fillStyle='#14110B'; x.font='800 '+s*0.5+'px Amiri,serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillText('۩',cx,cy+2); x.textBaseline='alphabetic'; }
+  x.restore(); }
+function drawText(text,cy,size,a,rise){ const {lines,size:fs}=wrapFit(text,W*0.84,size); x.save(); x.globalAlpha=a; x.textAlign='center'; x.fillStyle='#F8E7B0'; x.font='800 '+fs+'px -apple-system,Segoe UI,Tahoma,Arial'; x.shadowColor='rgba(0,0,0,0.7)'; x.shadowBlur=24; const sy=cy-(lines.length-1)*fs*1.22/2; lines.forEach((l,i)=>x.fillText(l,W/2,sy+i*fs*1.22-rise)); x.restore(); return {lines:lines.length,size:fs,bottom:cy+(lines.length-1)*fs*1.22/2-rise}; }
+function underline(cy,w,a){ x.save(); x.globalAlpha=a; const g=x.createLinearGradient(W/2-w,0,W/2+w,0); g.addColorStop(0,'transparent'); g.addColorStop(.5,'rgba(242,210,122,0.95)'); g.addColorStop(1,'transparent'); x.strokeStyle=g; x.lineWidth=4; x.beginPath(); x.moveTo(W/2-w,cy); x.lineTo(W/2+w,cy); x.stroke(); x.save(); x.translate(W/2,cy); x.rotate(Math.PI/4); x.fillStyle='#F2D27A'; x.fillRect(-8,-8,16,16); x.restore(); x.restore(); }
+
+function drawFg(sc,p,t){
+  const fade=Math.min(1,p/0.14,(1-p)/0.14);
   if(sc.type==='title'||sc.type==='end'){
-    bgGold(H*0.34); emblem(H*0.24,210,fade);
-    drawText(sc.text, H*0.58, 76, fade, (1-fin)*30);
-    ornDivider(H*0.50, fade);
-    if(sc.type==='end'){ x.save(); x.globalAlpha=fade; const bw=580,bh=124,bx=(W-bw)/2,by=H*0.68; rr(bx,by,bw,bh,bh/2); const bg=x.createLinearGradient(bx,by,bx,by+bh); bg.addColorStop(0,'#F5D98A'); bg.addColorStop(1,'#C5A059'); x.fillStyle=bg; x.fill(); x.fillStyle='#14110B'; x.font='800 46px -apple-system,Segoe UI,Tahoma,Arial'; x.textAlign='center'; x.textBaseline='middle'; x.fillText('متوفر على App Store',W/2,by+bh/2); x.textBaseline='alphabetic'; x.restore(); }
-    vignette();
+    const e=ease(p/0.5);
+    emblem(W/2,H*0.32,215,fade,t);
+    const r=drawText(sc.text,H*0.58,76,fade,(1-e)*36);
+    underline(H*0.50,W*0.16*e+40, fade);
+    if(sc.type==='end'){ x.save(); x.globalAlpha=fade*e; const bw=590,bh=126,bx=(W-bw)/2,by=H*0.70; rr(bx,by,bw,bh,bh/2); const bg=x.createLinearGradient(bx,by,bx,by+bh); bg.addColorStop(0,'#F5D98A'); bg.addColorStop(1,'#C5A059'); x.fillStyle=bg; x.fill(); x.fillStyle='#14110B'; x.font='800 46px -apple-system,Segoe UI,Tahoma,Arial'; x.textAlign='center'; x.textBaseline='middle'; x.fillText('متوفر على App Store',W/2,by+bh/2); x.textBaseline='alphabetic'; x.restore(); }
   } else {
-    const im=sc.img;
-    if(im){ const zoom=1.05+0.12*p; const scale=Math.max(W/im.width,H/im.height)*zoom, dw=im.width*scale, dh=im.height*scale;
-      const panX=(sc.dir? (p-0.5):-(p-0.5))*40; x.save(); x.globalAlpha=fade; x.drawImage(im,(W-dw)/2+panX,(H-dh)/2,dw,dh); x.restore(); }
-    const grd=x.createLinearGradient(0,H*0.52,0,H); grd.addColorStop(0,'transparent'); grd.addColorStop(0.55,'rgba(5,4,3,0.55)'); grd.addColorStop(1,'rgba(5,4,3,0.96)'); x.fillStyle=grd; x.fillRect(0,H*0.5,W,H*0.5);
-    vignette();
-    const nl=drawText(sc.text, H*0.87, 58, fade, (1-fin)*36);
-    ornDivider(H*0.87 - (nl>1?nl*40:44), fade);
+    const e=ease(p/0.45);
+    const ph=H*0.585*(0.9+0.1*e);
+    const cy=H*0.40+(1-e)*80+Math.sin(t*1.6)*7;
+    drawPhone(sc.img,W/2,cy,ph,fade,1.03+0.06*p);
+    const capY=cy+ph/2+96;
+    drawText(sc.text,capY,56,fade,(1-e)*30);
+    underline(capY-64, W*0.14*e+30, fade*e);
   }
 }
-
-function drawFrame(t){ const S=scenes(); let acc=0; for(let i=0;i<S.length;i++){ if(t<acc+S[i].dur){ drawScene(S[i],(t-acc)/S[i].dur);
-    // crossfade مع المشهد التالي
-    const lp=(t-acc)/S[i].dur; if(lp>0.86 && i<S.length-1){ x.save(); x.globalAlpha=(lp-0.86)/0.14; drawScene(S[i+1],0.02); x.restore(); }
-    return; } acc+=S[i].dur; } drawScene(S[S.length-1],1); }
-function total(){ return scenes().reduce((s,c)=>s+c.dur,0); }
-function draw0(){ drawFrame(0.02); }
+function drawFrame(t){ animBg(t); const S=scenes(); let acc=0; for(let i=0;i<S.length;i++){ if(t<acc+S[i].dur){ const lp=(t-acc)/S[i].dur; drawFg(S[i],lp,t); if(lp>0.85&&i<S.length-1){ x.save(); x.globalAlpha=(lp-0.85)/0.15; drawFg(S[i+1],0.01,t); x.restore(); } return; } acc+=S[i].dur; } drawFg(S[S.length-1],1,t); }
+function draw0(){ drawFrame(0.05); }
 
 let raf=null;
-function playLoop(onEnd){ const T=total(), start=performance.now();
-  (function fr(now){ const t=(now-start)/1000; if(t>=T){ drawFrame(T); onEnd&&onEnd(); return; } drawFrame(t); raf=requestAnimationFrame(fr); })(performance.now()); }
+function playLoop(onEnd){ const T=total(),start=performance.now(); (function fr(){ const t=(performance.now()-start)/1000; if(t>=T){ drawFrame(T); onEnd&&onEnd(); return; } drawFrame(t); raf=requestAnimationFrame(fr); })(); }
 function preview(){ if(!shots.length){ st('أضف لقطات أولاً'); return; } st('▶ يعمل... سجّل شاشتك'); cancelAnimationFrame(raf); playLoop(()=>st('انتهى ✅')); }
 function record(){ if(!shots.length){ st('أضف لقطات أولاً'); return; } if(!cv.captureStream){ st('استخدم «تشغيل» وسجّل شاشتك'); return; }
   const stream=cv.captureStream(30); let mime='video/webm'; try{ if(MediaRecorder.isTypeSupported('video/mp4'))mime='video/mp4'; }catch(e){}
-  const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:9000000}); const ch=[];
+  const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:10000000}); const ch=[];
   rec.ondataavailable=e=>{ if(e.data.size)ch.push(e.data); };
   rec.onstop=()=>{ const b=new Blob(ch,{type:mime}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='anwar-reel.'+(mime.includes('mp4')?'mp4':'webm'); a.click(); setTimeout(()=>URL.revokeObjectURL(u),2000); st('نُزّل الفيديو ✅'); };
   st('⏺️ يسجّل...'); rec.start(); cancelAnimationFrame(raf); playLoop(()=>setTimeout(()=>rec.stop(),200)); }
