@@ -143,78 +143,97 @@ apply:function(){ const a=$('tm-c1').value, b=$('tm-c2').value; localStorage.set
 _apply:function(){ if(localStorage.getItem('custom_theme')==='1'){ const a=localStorage.getItem('custom_c1'), b=localStorage.getItem('custom_c2'); document.documentElement.style.setProperty('--accent-color',a); document.documentElement.style.setProperty('--accent-light',b); document.documentElement.style.setProperty('--primary-color',b); } },
 reset:function(){ localStorage.setItem('custom_theme','0'); document.documentElement.style.removeProperty('--accent-color'); document.documentElement.style.removeProperty('--accent-light'); document.documentElement.style.removeProperty('--primary-color'); if(window.applyAppTheme)applyAppTheme(); const m=$('thememaker-modal'); if(m)m.classList.remove('active'); } };
 
-// ===== (6) الوضع الليلي التأمّلي (Focus Mode) =====
-// آيات تأمّل مهدّئة للوضع الليلي
-const FOCUS_AYAHS = [
-    {t:'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ', r:'الرعد: 28'},
-    {t:'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا', r:'الشرح: 5'},
-    {t:'وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ', r:'الحديد: 4'},
-    {t:'وَاصْبِرْ وَمَا صَبْرُكَ إِلَّا بِاللَّهِ', r:'النحل: 127'},
-    {t:'وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ', r:'الطلاق: 3'},
-    {t:'إِنَّ رَبِّي قَرِيبٌ مُّجِيبٌ', r:'هود: 61'},
-    {t:'وَنَحْنُ أَقْرَبُ إِلَيْهِ مِنْ حَبْلِ الْوَرِيدِ', r:'ق: 16'},
-    {t:'رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي', r:'طه: 25-26'}
+// ===== (6) الوضع الليلي — رفيق قيام الليل الكامل =====
+function pt2(){ try{ return (typeof prayerTimings!=='undefined')?prayerTimings:null; }catch(e){ return null; } }
+function n2m(s){ if(!s||(''+s).indexOf(':')<0) return null; var w=(''+s).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)); var p=w.split(':'); return (+p[0])*60+(+p[1]); }
+function p2(n){ return (n<10?'0':'')+n; }
+const NIGHT_WIRD=[ {n:'المُلك',s:67}, {n:'السجدة',s:32}, {n:'يس',s:36}, {n:'الواقعة',s:56}, {n:'الكهف',s:18} ];
+const QIYAM_DUAS=[
+    {t:'اللَّهُمَّ رَبَّ جِبْرِيلَ وَمِيكَائِيلَ وَإِسْرَافِيلَ، فَاطِرَ السَّمَاوَاتِ وَالْأَرْضِ، عَالِمَ الْغَيْبِ وَالشَّهَادَةِ، أَنْتَ تَحْكُمُ بَيْنَ عِبَادِكَ فِيمَا كَانُوا فِيهِ يَخْتَلِفُونَ، اهْدِنِي لِمَا اخْتُلِفَ فِيهِ مِنَ الْحَقِّ بِإِذْنِكَ، إِنَّكَ تَهْدِي مَنْ تَشَاءُ إِلَى صِرَاطٍ مُسْتَقِيمٍ', r:'رواه مسلم — استفتاح قيام الليل'},
+    {t:'اللَّهُمَّ لَكَ الْحَمْدُ أَنْتَ نُورُ السَّمَاوَاتِ وَالْأَرْضِ وَمَنْ فِيهِنَّ، وَلَكَ الْحَمْدُ أَنْتَ قَيِّمُ السَّمَاوَاتِ وَالْأَرْضِ وَمَنْ فِيهِنَّ، أَنْتَ الْحَقُّ، وَوَعْدُكَ الْحَقُّ، وَلِقَاؤُكَ حَقٌّ', r:'متفق عليه'},
+    {t:'رَبِّ اغْفِرْ لِي وَتُبْ عَلَيَّ، إِنَّكَ أَنْتَ التَّوَّابُ الرَّحِيمُ', r:'أبو داود والترمذي'},
+    {t:'اللَّهُمَّ إِنِّي أَعُوذُ بِرِضَاكَ مِنْ سَخَطِكَ، وَبِمُعَافَاتِكَ مِنْ عُقُوبَتِكَ، وَأَعُوذُ بِكَ مِنْكَ، لَا أُحْصِي ثَنَاءً عَلَيْكَ أَنْتَ كَمَا أَثْنَيْتَ عَلَى نَفْسِكَ', r:'رواه مسلم — بعد الوتر'},
+    {t:'سُبْحَانَ الْمَلِكِ الْقُدُّوسِ (ثلاثاً، ويمدّ بالثالثة ويرفع بها صوته)', r:'أبو داود والنسائي — بعد الوتر'},
+    {t:'أَسْتَغْفِرُ اللَّهَ الْعَظِيمَ الَّذِي لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ وَأَتُوبُ إِلَيْهِ — أكثِر منه في السحر', r:'﴿وَبِالْأَسْحَارِ هُمْ يَسْتَغْفِرُونَ﴾'}
 ];
-const DHIKRS = [ {t:'سُبْحَانَ اللَّه', max:33}, {t:'الْحَمْدُ لِلَّه', max:33}, {t:'اللَّهُ أَكْبَر', max:34} ];
+const NIGHT_DHIKR=[ {t:'سُبْحَانَ اللَّهِ وَبِحَمْدِهِ', max:100}, {t:'أَسْتَغْفِرُ اللَّهَ', max:100}, {t:'اللَّهُمَّ صَلِّ عَلَى مُحَمَّد', max:100}, {t:'لَا إِلَهَ إِلَّا اللَّهُ', max:100} ];
+function qiyamNights(){ try{ return JSON.parse(localStorage.getItem('qiyam_nights')||'[]'); }catch(e){ return []; } }
+function qiyamStreak(){ const days=qiyamNights(); let s=0; const dt=new Date(); if(days.indexOf(dt.toISOString().slice(0,10))<0) dt.setDate(dt.getDate()-1);
+    for(;;){ const k=dt.toISOString().slice(0,10); if(days.indexOf(k)>=0){ s++; dt.setDate(dt.getDate()-1); } else break; } return s; }
+
 window.AnwarFocus = {
-    _timers:[], _ai:0, _di:0, _dc:0, _audio:null,
+    _iv:null, _di:0, _dc:0, _audio:null,
     open:function(){ if(!gate('الوضع الليلي','Night mode')) return;
         let f=$('focus-mode');
-        if(!f){ f=document.createElement('div'); f.id='focus-mode'; f.className='focus-overlay';
+        if(!f){ f=document.createElement('div'); f.id='focus-mode'; f.className='focus-overlay night';
             f.innerHTML=`<div class="focus-stars"></div><div class="focus-moon"></div>
                 <button class="focus-close" onclick="AnwarFocus.close()"><i class="fa-solid fa-xmark"></i></button>
-                <div class="focus-stage">
-                    <div class="focus-breath" id="focus-breath"><span id="focus-breath-txt"></span></div>
-                    <div class="focus-ayah" id="focus-ayah"></div>
-                    <div class="focus-ref" id="focus-ref"></div>
-                </div>
-                <div class="focus-dock">
-                    <button class="focus-dockbtn" id="focus-sound" onclick="AnwarFocus.toggleSound()" title="${tr('صوت هادئ','Ambient')}"><i class="fa-solid fa-volume-xmark"></i></button>
-                    <div class="focus-tasbeeh" onclick="AnwarFocus.tick()"><span id="focus-dhikr"></span><span class="focus-count" id="focus-count">0</span></div>
-                    <button class="focus-dockbtn" onclick="AnwarFocus.nextAyah()" title="${tr('آية أخرى','Next verse')}"><i class="fa-solid fa-arrows-rotate"></i></button>
-                </div>`;
+                <button class="focus-dockbtn night-sound" id="focus-sound" onclick="AnwarFocus.toggleSound()"><i class="fa-solid fa-volume-xmark"></i></button>
+                <div class="night-scroll" id="night-scroll"></div>`;
             document.body.appendChild(f);
         }
-        this._ai=new Date().getDate()%FOCUS_AYAHS.length; this._di=0; this._dc=0;
-        this.showAyah(); this.showDhikr();
+        this._di=0; this._dc=0;
         f.classList.add('active');
-        this.breathe();
+        this._render(); this._startClock();
     },
-    close:function(){ this._timers.forEach(clearTimeout); this._timers=[]; this.stopSound(); const f=$('focus-mode'); if(f) f.classList.remove('active'); },
-    breathe:function(){ // دورة 4-7-8: استنشق/احبس/ازفر
-        const orb=$('focus-breath'), txt=$('focus-breath-txt'); if(!orb) return;
-        const self=this;
-        function phase(name, cls, secs, next){
-            if(txt) txt.textContent=name; orb.className='focus-breath '+cls;
-            self._timers.push(setTimeout(next, secs*1000));
-        }
-        function cycle(){
-            phase(tr('استنشق','Inhale'),'inhale',4,function(){
-                phase(tr('احبس','Hold'),'hold',7,function(){
-                    phase(tr('ازفر','Exhale'),'exhale',8,cycle);
-                });
-            });
-        }
-        cycle();
+    close:function(){ clearInterval(this._iv); this.stopSound(); const f=$('focus-mode'); if(f) f.classList.remove('active'); },
+    _render:function(){
+        const done=qiyamNights().indexOf(new Date().toISOString().slice(0,10))>=0;
+        const wird=NIGHT_WIRD.map(w=>`<button class="night-wird" onclick="AnwarFocus.openSurah(${w.s})">${w.n}</button>`).join('');
+        const duas=QIYAM_DUAS.map(d=>`<div class="night-dua"><p>${d.t}</p><span>${d.r}</span></div>`).join('');
+        $('night-scroll').innerHTML=`
+            <h2 class="night-title"><i class="fa-solid fa-moon"></i> ${tr('الوضع الليلي','Night Mode')}</h2>
+            <div class="night-third" id="night-third"><span class="nt-label">${tr('جارٍ حساب الثلث الأخير…','Calculating…')}</span><b class="nt-timer" id="nt-timer">--:--:--</b><span class="nt-start" id="nt-start"></span></div>
+
+            <div class="night-sec">${tr('وردك الليلي','Night Wird')}</div>
+            <div class="night-wirds">${wird}</div>
+
+            <div class="night-sec">${tr('مسبحة الليل','Night Tasbih')}</div>
+            <div class="night-tasbeeh" onclick="AnwarFocus.tick()">
+                <span id="focus-dhikr" class="nt-dhikr"></span>
+                <span class="nt-count" id="focus-count">0</span>
+                <span class="nt-hint">${tr('اضغط للعدّ','Tap to count')}</span>
+            </div>
+
+            <div class="night-actions">
+                <button class="night-act" onclick="AnwarFocus.sleepAthkar()"><i class="fa-solid fa-bed"></i> ${tr('أذكار النوم','Sleep adhkar')}</button>
+                <button class="night-act ${done?'on':''}" id="night-qiyam" onclick="AnwarFocus.toggleQiyam()"><i class="fa-solid fa-check"></i> ${done?tr('قمتَ الليلة ✓','Prayed tonight ✓'):tr('سجّل قيامك','Log qiyam')} · ${qiyamStreak()}${tr('ل','n')}</button>
+            </div>
+
+            <div class="night-sec">${tr('أدعية القيام والسحر','Qiyam & Suhoor Duas')}</div>
+            ${duas}
+            <p class="night-foot">${tr('﴿ وَمِنَ اللَّيْلِ فَتَهَجَّدْ بِهِ نَافِلَةً لَّكَ ﴾ · الإسراء 79','﴿ And rise at night and pray... ﴾')}</p>`;
+        this.showDhikr();
     },
-    showAyah:function(){ const a=FOCUS_AYAHS[this._ai%FOCUS_AYAHS.length]; const ae=$('focus-ayah'), re=$('focus-ref');
-        if(ae){ ae.style.animation='none'; void ae.offsetWidth; ae.style.animation=''; ae.textContent=a.t; } if(re) re.textContent='﴿ '+a.r+' ﴾'; },
-    nextAyah:function(){ this._ai=(this._ai+1)%FOCUS_AYAHS.length; this.showAyah(); if(window.HAP)HAP.light(); },
-    showDhikr:function(){ const d=DHIKRS[this._di]; const de=$('focus-dhikr'), ce=$('focus-count'); if(de)de.textContent=d.t; if(ce)ce.textContent=this._dc; },
-    tick:function(){ const d=DHIKRS[this._di]; this._dc++; if(window.HAP)HAP.light();
-        if(this._dc>=d.max){ this._di=(this._di+1)%DHIKRS.length; this._dc=0; if(window.HAP)HAP.success(); }
-        this.showDhikr(); },
+    _startClock:function(){ clearInterval(this._iv);
+        const upd=()=>{ const f=$('focus-mode'); if(!f||!f.classList.contains('active')){ clearInterval(AnwarFocus._iv); return; }
+            const lbl=$('nt-label')?null:document.querySelector('.nt-label'), tm=$('nt-timer'), st=$('nt-start'); if(!tm) return;
+            const p=pt2(); const mg=n2m(p&&p.Maghrib), fj=n2m(p&&p.Fajr);
+            if(mg==null||fj==null){ if(lbl)lbl.textContent=tr('فعّل أوقات الصلاة','Enable prayer times'); tm.textContent='--:--:--'; return; }
+            const nightLen=(fj+1440)-mg, ltAbs=mg+nightLen*2/3, fjAbs=fj+1440;
+            const now=new Date(); let pos=now.getHours()*60+now.getMinutes()+now.getSeconds()/60; if(pos<mg) pos+=1440;
+            const ltM=((ltAbs%1440)+1440)%1440; const disp=p2(Math.floor(ltM/60))+':'+p2(Math.round(ltM%60)%60);
+            if(st) st.textContent=tr('يبدأ ','starts ')+disp;
+            let rem, txt;
+            if(pos<ltAbs){ txt=tr('باقٍ على الثلث الأخير','Until last third'); rem=(ltAbs-pos)*60; }
+            else if(pos<fjAbs){ txt=tr('أنت في الثلث الأخير — أكثِر من الدعاء','You are in the last third'); rem=(fjAbs-pos)*60; f.querySelector('#night-third').classList.add('active'); }
+            else { txt=tr('استعدّ لقيام الليلة','Prepare for tonight'); rem=0; }
+            if(lbl)lbl.textContent=txt;
+            if(rem>0){ const h=Math.floor(rem/3600), m=Math.floor((rem%3600)/60), s=Math.floor(rem%60); tm.textContent=p2(h)+':'+p2(m)+':'+p2(s); } else tm.textContent=disp;
+        };
+        upd(); this._iv=setInterval(upd,1000);
+    },
+    openSurah:function(n){ this.close(); try{ if(window.MUSHAF&&MUSHAF.openSurah){ if(typeof goToTab==='function')goToTab(1); MUSHAF.openSurah(n); } else if(typeof openFreeReading==='function'){ openFreeReading('surah',n,''); } }catch(e){} },
+    sleepAthkar:function(){ this.close(); try{ if(typeof goToTab==='function') goToTab(2); }catch(e){} },
+    toggleQiyam:function(){ const d=new Date().toISOString().slice(0,10); let days=qiyamNights(); const i=days.indexOf(d); if(i>=0)days.splice(i,1); else{ days.push(d); if(window.HAP)HAP.success(); } localStorage.setItem('qiyam_nights',JSON.stringify(days)); this._render(); },
+    showDhikr:function(){ const d=NIGHT_DHIKR[this._di]; const de=$('focus-dhikr'), ce=$('focus-count'); if(de)de.textContent=d.t; if(ce)ce.textContent=this._dc; },
+    tick:function(){ const d=NIGHT_DHIKR[this._di]; this._dc++; if(window.HAP)HAP.light(); if(this._dc>=d.max){ this._di=(this._di+1)%NIGHT_DHIKR.length; this._dc=0; if(window.HAP)HAP.success(); } this.showDhikr(); },
     toggleSound:function(){ if(this._audio){ this.stopSound(); } else { this.startSound(); } },
-    startSound:function(){ try{
-        const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    startSound:function(){ try{ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
         const ctx=new AC(); const g=ctx.createGain(); g.gain.value=0.05; g.connect(ctx.destination);
-        // نغمة رياح هادئة: مذبذبان مخفوتان + مرشّح
-        const o1=ctx.createOscillator(); o1.type='sine'; o1.frequency.value=110;
-        const o2=ctx.createOscillator(); o2.type='sine'; o2.frequency.value=110.5;
-        const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=400;
-        o1.connect(lp); o2.connect(lp); lp.connect(g); o1.start(); o2.start();
-        this._audio={ctx:ctx,osc:[o1,o2]};
-        const b=$('focus-sound'); if(b) b.innerHTML='<i class="fa-solid fa-volume-high"></i>'; b&&b.classList.add('on');
+        const o1=ctx.createOscillator(); o1.type='sine'; o1.frequency.value=110; const o2=ctx.createOscillator(); o2.type='sine'; o2.frequency.value=110.5;
+        const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=400; o1.connect(lp); o2.connect(lp); lp.connect(g); o1.start(); o2.start();
+        this._audio={ctx:ctx,osc:[o1,o2]}; const b=$('focus-sound'); if(b){ b.innerHTML='<i class="fa-solid fa-volume-high"></i>'; b.classList.add('on'); }
     }catch(e){} },
     stopSound:function(){ try{ if(this._audio){ this._audio.osc.forEach(function(o){ try{o.stop();}catch(e){} }); this._audio.ctx.close(); this._audio=null; const b=$('focus-sound'); if(b){ b.innerHTML='<i class="fa-solid fa-volume-xmark"></i>'; b.classList.remove('on'); } } }catch(e){} }
 };
