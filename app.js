@@ -347,6 +347,8 @@ window.openKhatmaPage = async function(id, pageNum) {
         
     } catch(e) { document.getElementById('khatma-container').innerHTML = `<div style="text-align:center; padding:40px;"><p style="color:red; font-weight:bold;">تأكد من اتصالك بالإنترنت لأول تحميل فقط</p><button onclick="openKhatmaPage(${activeKhatmaId}, ${currentPage})" class="tasbeeh-pill" style="margin-top:15px;">حاول مرة أخرى</button></div>`; }
 }
+// يحفظ صفحة الختمة النشطة (يستدعيه قارئ المصحف عند تغيير الصفحة)
+window.setKhatmaPage = function(id, page){ const idx = khatmas.findIndex(k => k.id === id); if(idx !== -1){ khatmas[idx].page = page; saveKhatmas(); if(typeof renderKhatmas==='function') renderKhatmas(); } };
 window.nextKhatmaPage = function() { const idx = khatmas.findIndex(k => k.id === activeKhatmaId); if(idx !== -1 && khatmas[idx].page < 604) openKhatmaPage(activeKhatmaId, khatmas[idx].page + 1); }
 window.prevKhatmaPage = function() { const idx = khatmas.findIndex(k => k.id === activeKhatmaId); if(idx !== -1 && khatmas[idx].page > 1) openKhatmaPage(activeKhatmaId, khatmas[idx].page - 1); }
 window.closeKhatma = function() { 
@@ -416,6 +418,8 @@ window.countTasbeeh = function() {
 window.resetTasbeeh = function() { tasbeehCount = 0; document.getElementById('misbaha-count').innerText = 0; localStorage.setItem('tasbeehCount', 0); }
 
 window.openAthkarCategory = function(catId) {
+    // استخدم المكتبة الكاملة الموثّقة (features.js) بدل البيانات القديمة المختصرة
+    if (window.QA && QA.openCat){ try{ if(QA.switchAthkarSection) QA.switchAthkarSection('athkar'); QA.openCat('athkar', catId); return; }catch(e){} }
     const listNames = { morning: 'أذكار الصباح', evening: 'أذكار المساء', postPrayer: 'أذكار بعد الصلاة', sleep: 'أذكار النوم' };
     document.getElementById('athkar-categories-list').style.display = 'none'; document.getElementById('athkar-reading-view').style.display = 'block'; document.getElementById('current-athkar-title').innerText = listNames[catId];
     currentAthkarState = athkarDB[catId].map(item => ({...item, current: 0})); renderAthkarCards();

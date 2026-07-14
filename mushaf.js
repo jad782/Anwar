@@ -116,8 +116,14 @@ MUSHAF.font = function(d){
     try{ localStorage.setItem('fontSize', currentFontSize); }catch(e){}
     document.querySelectorAll('#ayahs-container .ayah').forEach(a=>a.style.fontSize = currentFontSize+'px');
 };
-MUSHAF.openSurah = function(n){ tajOn=false; showChrome(); curPage = pageOfSurah(n); renderPage(curPage); };
+MUSHAF.openSurah = function(n){ window._activeKhatma=null; tajOn=false; showChrome(); curPage = pageOfSurah(n); renderPage(curPage); };
 MUSHAF.openPage  = function(p){ tajOn=false; showChrome(); curPage = Math.max(1,Math.min(604,p)); renderPage(curPage); };
+// الختمة تفتح قارئ المصحف الأوفلاين (تجويد + تقليب + كل الميزات) بدل القارئ القديم
+window.openKhatmaPage = function(id, pageNum){
+    window._activeKhatma = id;
+    try{ if(typeof window.setActiveKhatma==='function') window.setActiveKhatma(id); }catch(e){}
+    MUSHAF.openPage(parseInt(pageNum)||1);
+};
 
 async function renderPage(page){
     const cont = $('ayahs-container'); if(!cont) return;
@@ -155,6 +161,8 @@ async function renderPage(page){
     bindSwipe(cont);
     // تقدّم حلقة "إنجازات اليوم" عند القراءة
     try{ if(typeof updateAchievementState==='function') updateAchievementState('quran'); }catch(e){}
+    // حفظ تقدّم الختمة النشطة عند تغيير الصفحة
+    try{ if(window._activeKhatma!=null && typeof setKhatmaPage==='function') setKhatmaPage(window._activeKhatma, page); }catch(e){}
     try{ localStorage.setItem('last_read', JSON.stringify({type:'page', num:page, name:'سورة '+mainName, ts:Date.now()})); }catch(e){}
     if (window.PRO2 && PRO2.checkBadges) setTimeout(()=>PRO2.checkBadges(), 50);
 }
@@ -208,6 +216,7 @@ window.openFreeReading = function(type, num, name){
 const _origClose = window.closeSurah;
 window.closeSurah = function(){
     try{ if(window.AnwarFollow) AnwarFollow.stop(); }catch(e){}
+    window._activeKhatma = null;
     document.body.classList.remove('reading-fullscreen');
     document.body.classList.remove('reading-immersive');
     if (typeof _origClose==='function') _origClose();
