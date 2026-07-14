@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مولّد الريل التلقائي — الأنوار</title>
+<style>
+  :root{ --gold:#C9A24B; --gold2:#F2D27A; --bg:#0f0d0a; --card:#1a1712; --text:#efe8db; --muted:#b8ad98; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif; background:var(--bg); color:var(--text); padding:18px; }
+  h1{ color:var(--gold2); text-align:center; font-size:1.4rem; margin:4px 0; }
+  .hint{ text-align:center; color:var(--muted); font-size:.9rem; margin-bottom:16px; }
+  .wrap{ display:flex; gap:22px; flex-wrap:wrap; justify-content:center; align-items:flex-start; max-width:1000px; margin:0 auto; }
+  .panel{ background:var(--card); border:1px solid rgba(201,162,75,.25); border-radius:16px; padding:16px; width:340px; }
+  .file-btn{ display:block; text-align:center; background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#14110B; font-weight:800; padding:13px; border-radius:12px; cursor:pointer; margin-top:6px; }
+  input[type=file]{ display:none; }
+  .thumbs{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .thumbs img{ width:52px; height:92px; object-fit:cover; border-radius:8px; border:1px solid rgba(201,162,75,.3); }
+  .btn{ width:100%; margin-top:12px; padding:14px; border:none; border-radius:12px; font-weight:800; font-size:1rem; cursor:pointer; font-family:inherit; }
+  .play{ background:linear-gradient(135deg,#3fa46a,#5fd18f); color:#04120c; }
+  .rec{ background:linear-gradient(135deg,var(--gold),var(--gold2)); color:#14110B; }
+  label{ color:var(--muted); font-size:.85rem; font-weight:700; display:block; margin-top:12px; }
+  .tip{ color:var(--muted); font-size:.8rem; margin-top:10px; line-height:1.7; }
+  canvas{ width:280px; height:498px; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.55); background:#000; }
+  .status{ text-align:center; color:var(--gold2); font-weight:700; margin-top:8px; min-height:22px; }
+</style>
+</head>
+<body>
+  <h1>مولّد الريل التلقائي 🎬</h1>
+  <p class="hint">ارفع لقطات شاشتك ← اضغط تشغيل أو سجّل فيديو ← جاهز بلا مونتاج 🤍</p>
+  <div class="wrap">
+    <div class="panel">
+      <label>لقطات الشاشة (رتّبها بالترتيب: مصحف، قبلة، صلاة، حفظ، أذكار)</label>
+      <label class="file-btn">اختر صوراً 📷<input type="file" id="files" accept="image/*" multiple></label>
+      <div class="thumbs" id="thumbs"></div>
+
+      <button class="btn play" onclick="preview()">▶ تشغيل (سجّل شاشتك أثناءه)</button>
+      <button class="btn rec" onclick="record()">⏺️ تسجيل وتحميل الفيديو</button>
+      <div class="status" id="status"></div>
+
+      <div class="tip">
+        <b>طريقتان تحصل الفيديو:</b><br>
+        ١) <b>تشغيل</b> ثم <b>سجّل شاشتك</b> (آيفون: مركز التحكّم → زر التسجيل). الأوضح جودةً.<br>
+        ٢) <b>تسجيل وتحميل</b> — الأداة تصنع ملف فيديو وتنزّله (قد يكون بصيغة webm؛ حوّله mp4 عبر CapCut إن لزم).
+      </div>
+    </div>
+    <div style="text-align:center"><canvas id="cv" width="1080" height="1920"></canvas><div class="status" id="s2"></div></div>
+  </div>
+
+<script>
+const cv=document.getElementById('cv'), x=cv.getContext('2d'), W=1080, H=1920;
+let shots=[]; // Image objects
+const SCENES=[
+  {type:'title', text:'رفيقك مع القرآن\nفي تطبيق واحد', dur:2.6},
+  {type:'shot', text:'قرآن كامل — يعمل بلا إنترنت', dur:2.8},
+  {type:'shot', text:'قبلتك أمام عينيك بالكاميرا', dur:2.8},
+  {type:'shot', text:'مواقيت دقيقة + أذان حقيقي', dur:2.8},
+  {type:'shot', text:'احفظ القرآن بالتسميع', dur:2.8},
+  {type:'shot', text:'حصن المسلم وأدعية بمصادرها', dur:2.8},
+  {type:'end', text:'تطبيق الأنوار\nحمّله مجاناً الآن', dur:3.4}
+];
+const TOTAL=SCENES.reduce((s,c)=>s+c.dur,0);
+
+document.getElementById('files').addEventListener('change', e=>{
+  shots=[]; const th=document.getElementById('thumbs'); th.innerHTML='';
+  [...e.target.files].forEach(f=>{ const r=new FileReader(); r.onload=()=>{ const im=new Image(); im.onload=()=>{ drawFrame(0); }; im.src=r.result; shots.push(im);
+    const t=document.createElement('img'); t.src=r.result; th.appendChild(t); }; r.readAsDataURL(f); });
+});
+
+function rr(cx,cy,w,h,r){ x.beginPath(); x.moveTo(cx+r,cy); x.arcTo(cx+w,cy,cx+w,cy+h,r); x.arcTo(cx+w,cy+h,cx,cy+h,r); x.arcTo(cx,cy+h,cx,cy,r); x.arcTo(cx,cy,cx+w,cy,r); x.closePath(); }
+function bgGold(){ const g=x.createLinearGradient(0,0,W,H); g.addColorStop(0,'#1a1206'); g.addColorStop(1,'#05040a'); x.fillStyle=g; x.fillRect(0,0,W,H);
+  const rg=x.createRadialGradient(W/2,H*0.42,0,W/2,H*0.42,W); rg.addColorStop(0,'rgba(242,210,122,0.16)'); rg.addColorStop(1,'transparent'); x.fillStyle=rg; x.fillRect(0,0,W,H); }
+function goldText(lines, cy, size, alpha){ x.save(); x.globalAlpha=alpha; x.textAlign='center'; x.fillStyle='#F4D98A'; x.font='800 '+size+'px -apple-system,Segoe UI,Tahoma,Arial'; x.shadowColor='rgba(0,0,0,0.5)'; x.shadowBlur=18;
+  lines.forEach((l,i)=>x.fillText(l, W/2, cy+i*size*1.25)); x.restore(); }
+function emblem(cy,s,alpha){ x.save(); x.globalAlpha=alpha; rr(W/2-s/2,cy,s,s,s*0.28); const g=x.createLinearGradient(W/2-s/2,cy,W/2+s/2,cy+s); g.addColorStop(0,'#C5A059'); g.addColorStop(1,'#F2D27A'); x.fillStyle=g; x.fill();
+  x.fillStyle='#14110B'; x.font='800 '+s*0.5+'px Amiri,serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillText('۩', W/2, cy+s/2+2); x.textBaseline='alphabetic'; x.restore(); }
+
+function drawScene(si, p){ // p: 0..1 progress in scene
+  const sc=SCENES[si]; bgGold();
+  const fade=Math.min(1, p/0.18, (1-p)/0.18);
+  if(sc.type==='title' || sc.type==='end'){
+    emblem(H*0.30, 190, fade);
+    goldText(sc.text.split('\n'), H*0.52, 80, fade);
+    if(sc.type==='end'){
+      x.save(); x.globalAlpha=fade; const bw=560, bh=120, bx=(W-bw)/2, by=H*0.66; rr(bx,by,bw,bh,bh/2);
+      const bg=x.createLinearGradient(bx,by,bx,by+bh); bg.addColorStop(0,'#F5D98A'); bg.addColorStop(1,'#C5A059'); x.fillStyle=bg; x.fill();
+      x.fillStyle='#14110B'; x.font='800 44px -apple-system,Segoe UI,Tahoma,Arial'; x.textAlign='center'; x.textBaseline='middle'; x.fillText('متوفر على App Store', W/2, by+bh/2); x.textBaseline='alphabetic'; x.restore();
+    }
+  } else {
+    // لقطة شاشة (تكبير Ken Burns) + تدرّج سفلي + نص ينزلق
+    const idx=(si-1)%Math.max(1,shots.length); const im=shots[idx];
+    if(im){ const zoom=1.06+0.10*p; const iw=im.width, ih=im.height; const scale=Math.max(W/iw,H/ih)*zoom; const dw=iw*scale, dh=ih*scale;
+      x.save(); x.beginPath(); x.rect(0,0,W,H); x.clip(); x.globalAlpha=fade;
+      x.drawImage(im, (W-dw)/2, (H-dh)/2 - 30*p, dw, dh); x.restore();
+    } else { x.fillStyle='rgba(255,255,255,0.06)'; x.fillRect(0,0,W,H); x.fillStyle='#F2D27A'; x.font='40px Arial'; x.textAlign='center'; x.fillText('ارفع لقطات الشاشة', W/2, H/2); }
+    const grd=x.createLinearGradient(0,H*0.6,0,H); grd.addColorStop(0,'transparent'); grd.addColorStop(1,'rgba(5,4,3,0.92)'); x.fillStyle=grd; x.fillRect(0,H*0.55,W,H*0.45);
+    const slide=(1-fade)*40; goldText([sc.text], H*0.86 - slide, 62, fade);
+  }
+}
+
+function drawFrame(t){ let acc=0; for(let i=0;i<SCENES.length;i++){ if(t<acc+SCENES[i].dur){ drawScene(i,(t-acc)/SCENES[i].dur); return; } acc+=SCENES[i].dur; } drawScene(SCENES.length-1,1); }
+
+let raf=null;
+function playLoop(onEnd){ const start=performance.now();
+  function frame(now){ const t=(now-start)/1000; if(t>=TOTAL){ drawFrame(TOTAL); if(onEnd)onEnd(); return; } drawFrame(t); raf=requestAnimationFrame(frame); }
+  cancelAnimationFrame(raf); raf=requestAnimationFrame(frame);
+}
+function preview(){ if(!shots.length){ st('ارفع لقطات الشاشة أولاً'); return; } st('▶ يعمل... سجّل شاشتك الآن'); playLoop(()=>st('انتهى ✅')); }
+
+function record(){
+  if(!shots.length){ st('ارفع لقطات الشاشة أولاً'); return; }
+  if(!cv.captureStream){ st('المتصفح لا يدعم التسجيل — استخدم «تشغيل» وسجّل شاشتك'); return; }
+  const stream=cv.captureStream(30); let mime='video/webm'; if(MediaRecorder.isTypeSupported('video/mp4')) mime='video/mp4';
+  const rec=new MediaRecorder(stream,{mimeType:mime, videoBitsPerSecond:8000000}); const chunks=[];
+  rec.ondataavailable=e=>{ if(e.data.size)chunks.push(e.data); };
+  rec.onstop=()=>{ const blob=new Blob(chunks,{type:mime}); const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download='anwar-reel.'+(mime.includes('mp4')?'mp4':'webm'); a.click(); setTimeout(()=>URL.revokeObjectURL(u),2000); st('نُزّل الفيديو ✅'); };
+  st('⏺️ يسجّل...'); rec.start(); playLoop(()=>{ setTimeout(()=>rec.stop(),200); });
+}
+function st(m){ document.getElementById('status').textContent=m; document.getElementById('s2').textContent=m; }
+drawFrame(0);
+</script>
+</body>
+</html>
