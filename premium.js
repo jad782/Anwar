@@ -16,7 +16,7 @@ AnwarPremium.setForTesting = function(v){ localStorage.setItem('anwar_premium', 
 // الميزات المميّزة (شرح مبسّط لكل واحدة)
 const FEATURES = [
     { ico:'fa-kaaba',            ar:'رفيق العمرة والحج',        d:'أدلة المناسك خطوة بخطوة + عدّاد أشواط الطواف والسعي + أدعية كل موقف.', act:"AnwarHajj&&AnwarHajj.open()" },
-    { ico:'fa-calendar-star',    ar:'تنبيهات المناسبات الإسلامية', d:'تنبيهات تلقائية قبل كل مناسبة (رمضان/العشر/عاشوراء/الأيام البيض) لئلّا تفوتك.', act:"PRO&&PRO.openCalendar()" },
+    { ico:'fa-calendar-check',   ar:'تنبيهات المناسبات الإسلامية', d:'تنبيهات تلقائية قبل كل مناسبة (رمضان/العشر/عاشوراء/الأيام البيض) لئلّا تفوتك.', act:"PRO&&PRO.openCalendar()" },
     { ico:'fa-headphones',       ar:'مكتبة تلاوات بلا نت',       d:'تحميل سور كاملة بأصوات كبار القرّاء للاستماع أوفلاين وبالخلفية.', act:"AnwarRecite&&AnwarRecite.open()" },
     { ico:'fa-palette',          ar:'حزمة التخصيص الكاملة',      d:'خطوط مصحف وثيمات فاخرة وخلفيات قراءة حصرية — لا تتوفّر مجاناً.', act:"AnwarLuxe&&AnwarLuxe.open()" },
     { ico:'fa-clapperboard',     ar:'استوديو الآيات السينمائي',  d:'صمّم الآيات والأحاديث بتأثيرات متحرّكة واحفظها/انشرها بجودة عالية.', act:"AnwarCards&&AnwarCards.open()" },
