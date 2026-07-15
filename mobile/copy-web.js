@@ -23,6 +23,8 @@ const INCLUDE = [
   'keys.js',
   'premium.js',
   'hajj.js',
+  'loved.js',
+  'kids.js',
   'recitations.js',
   'premium-features.js',
   'qibla-ar.js',

@@ -56,7 +56,7 @@ window.AnwarChallenge = {
         AnwarChallenge.toggle(id);
     }
 };
-window.awardPoints = function(base){ const p=loadPts(); const g=Math.max(1,base||1); p.balance+=g; p.lifetime=(p.lifetime||0)+g; savePts(p); logToday(); ptToast('+'+g+' '+tr('نقطة','pts')); renderAll(); return g; };
+window.awardPoints = function(){ return 0; }; // نظام النقاط مُلغى
 
 // ---------- المكافآت (تُصرف بالنقاط) ----------
 // perm = دائمة بسعر واحد | rent = مؤقتة (شهر/3 أشهر) وتتقفل عند انتهاء المدة
@@ -238,17 +238,9 @@ window.AnwarProfile = {
           <div class="prof-head">
             <div class="prof-avatar"><i class="fa-solid fa-user"></i></div>
             <input id="prof-name" class="modal-input" style="text-align:center;margin:10px 0 4px;" placeholder="${tr('اكتب اسمك (اختياري)','Your name (optional)')}" value="${name.replace(/"/g,'&quot;')}" onchange="AnwarProfile.save()">
-            ${badge?`<div class="member-badge"><i class="fa-solid fa-medal"></i> ${tr('عضو الأنوار','Anwar Member')}</div>`:`<span style="color:var(--text-muted);font-size:0.78rem;">${tr('افتح شارة العضوية من المتجر','Unlock the member badge in the store')}</span>`}
+            ${badge?`<div class="member-badge"><i class="fa-solid fa-medal"></i> ${tr('عضو الأنوار','Anwar Member')}</div>`:''}
           </div>
-          <div class="prof-stats">
-            <div class="prof-stat"><b>${p.balance}</b><span>${tr('نقاطك','Points')}</span></div>
-            <div class="prof-stat"><b>${p.lifetime||0}</b><span>${tr('الإجمالي','Lifetime')}</span></div>
-            <div class="prof-stat"><b>${localStorage.getItem('streak_count')||0}</b><span>${tr('سلسلة','Streak')}</span></div>
-          </div>
-          <div class="pts-sec-title">${tr('مكافآتك المفعّلة','Active rewards')}</div>
-          <div class="prof-rewards">${activeRewards}</div>
           <div class="pts-sec-title">${tr('حسابي والإعدادات','Account & settings')}</div>
-          ${amRow('fa-star','نقاط الأنوار والمكافآت','Points & rewards',"AnwarPoints2.open()",true)}
           ${amRow('fa-chart-simple','إحصائياتي الروحية','My spiritual stats',"window.QA&&QA.openStats&&QA.openStats()",true)}
           ${amRow('fa-palette','المظهر والخلفية','Theme & background',"AnwarTheme2.open()",true)}
           ${amRow('fa-table-cells-large','تخصيص الصفحة الرئيسية','Customize home',"window.PRO2&&PRO2.openCustomizeHome()")}
@@ -269,15 +261,7 @@ window.AnwarProfile = {
 };
 
 // ---------- اختصار صغير ----------
-window.renderPointsEntry = function(){
-    const host=$('points-entry'); if(!host) return;
-    const p=loadPts(); const d=loadDone(); const earned=CHALLENGES.filter(c=>d.ids.includes(c.id)).reduce((s,c)=>s+c.pts,0);
-    const badge=isActive('badge')?'<i class="fa-solid fa-medal" style="color:var(--accent-light,#F2D27A);margin-right:5px"></i>':'';
-    host.innerHTML=`<div class="pts-entry" onclick="AnwarPoints2.open()">
-        <span class="pe-ico"><i class="fa-solid fa-star"></i></span>
-        <span class="pe-txt">${badge}<b>${p.balance}</b> ${tr('نقطة','pts')} · ${tr('مهام اليوم','today')} ${earned}/${maxDaily()}</span>
-        <i class="fa-solid fa-chevron-left pe-go"></i></div>`;
-};
+window.renderPointsEntry = function(){ const host=$('points-entry'); if(host) host.innerHTML=''; }; // نظام النقاط مُلغى
 
 // ---------- اختصار الأذكار حسب الوقت ----------
 function toMin(s){ if(!s||s.indexOf(':')<0)return null; const [h,m]=s.split(':').map(Number); return h*60+m; }
@@ -305,7 +289,6 @@ window.renderAthkarShortcut = function(){
 window.AnwarPoints = { goAthkar:function(key){
     if(typeof goToTab==='function') goToTab(2);
     setTimeout(()=>{ try{ if(window.QA&&QA.openCat&&key) QA.openCat('athkar',key); }catch(e){} },250);
-    if(key==='morning'||key==='evening'){ const d=loadDone(); if(!d.ids.includes(key)) window.AnwarChallenge.toggle(key); }
 }};
 
 // ---------- مودال عام ----------
@@ -324,7 +307,6 @@ function inject(){
     const anchor = home.querySelector('#ayah-of-day-card') || home.querySelector('.prayer-grid') || home.querySelector('.hero-section');
     if(anchor && !$('athkar-shortcut')){
         const a=document.createElement('div'); a.id='athkar-shortcut'; anchor.insertAdjacentElement('afterend', a);
-        const e=document.createElement('div'); e.id='points-entry'; a.insertAdjacentElement('afterend', e);
     }
     applyVisual(); renderAll();
     try{ const list=document.querySelector('#tab-settings .settings-list');
@@ -335,9 +317,6 @@ function inject(){
             ar.innerHTML=`<span class="set-ico"><i class="fa-solid fa-circle-user"></i></span><span class="set-label">${tr('حسابي','My Account')}</span><i class="fa-solid fa-chevron-left ath-chevron"></i>`;
             ar.onclick=()=>AnwarProfile.open(); list.insertBefore(ar, list.firstChild); }
         if(list && !$('acct-grp')){ const g=document.createElement('div'); g.className='set-group-title'; g.id='acct-grp'; g.textContent=tr('حسابي والمظهر','Account & appearance'); list.insertBefore(g, list.firstChild); }
-        if(list && !$('points-row')){ const row=document.createElement('div'); row.className='setting-item'; row.id='points-row';
-            row.innerHTML=`<span class="set-ico"><i class="fa-solid fa-star"></i></span><span class="set-label">${tr('نقاط الأنوار والمكافآت','PlusPoints & rewards')}</span><i class="fa-solid fa-chevron-left ath-chevron"></i>`;
-            row.onclick=()=>AnwarPoints2.open(); if($('account-row')) list.insertBefore(row, $('account-row').nextSibling); else list.appendChild(row); }
     }catch(e){}
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', ()=>setTimeout(inject,800));

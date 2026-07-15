@@ -488,6 +488,7 @@ const SUB_IDS = ['com.alanwar.premium.monthly','com.alanwar.premium.yearly'];
 const LIFETIME_ID = 'com.alanwar.premium.lifetime';
 window.PREMIUM_PRODUCTS = { subs: SUB_IDS, lifetime: LIFETIME_ID };
 let _iapReady = false;
+let _receiptsSeen = false; // صارت الإيصالات محمّلة؟ (يُسمح بسحب البريميوم عند الانتهاء بعدها فقط)
 let _iapState = { plugin:false, initialized:false, err:'' };
 function initIAP(){
     try {
@@ -501,13 +502,15 @@ function initIAP(){
         store.when().approved(tr2 => tr2.verify());
         store.when().verified(rc => {
             rc.finish();
+            _receiptsSeen = true;
             const isPrem = rc.id && (SUB_IDS.includes(rc.id) || rc.id===LIFETIME_ID);
             if (isPrem){ localStorage.setItem('anwar_premium','true'); if(window.AnwarPremium&&AnwarPremium.onUnlocked) AnwarPremium.onUnlocked(); }
             else if(typeof showBadgeToast==='function') showBadgeToast({emoji:'🤍', name:tr('جزاك الله خيراً','JazakAllah khayr'), desc:tr('شكراً لدعمك التطبيق','Thank you for your support')});
             PRO.syncPremium();
         });
         store.when().productUpdated(()=>{ try{ PRO._refreshDonatePrices && PRO._refreshDonatePrices(); if(window.AnwarPremium&&AnwarPremium.refreshPrices) AnwarPremium.refreshPrices(); }catch(e){} PRO.syncPremium(); });
-        if (store.when().receiptUpdated) { try{ store.when().receiptUpdated(()=>PRO.syncPremium()); }catch(e){} }
+        if (store.when().receiptUpdated) { try{ store.when().receiptUpdated(()=>{ _receiptsSeen = true; PRO.syncPremium(); }); }catch(e){} }
+        try{ if(store.when().receiptsReady) store.when().receiptsReady(()=>{ _receiptsSeen = true; PRO.syncPremium(); }); }catch(e){}
         if (typeof store.error === 'function') store.error(e => { _iapState.err = (e && ((e.code||'')+' '+(e.message||''))) || String(e); try{ PRO._refreshDonatePrices && PRO._refreshDonatePrices(); }catch(x){} });
         store.initialize([Platform.APPLE_APPSTORE]);
         _iapState.initialized = true;
@@ -516,19 +519,28 @@ function initIAP(){
         [1500, 4000, 8000].forEach(ms => setTimeout(()=>{ try{ PRO.syncPremium(); }catch(e){} }, ms));
     } catch(e){ _iapState.err = 'init: ' + (e && e.message || e); }
 }
-// يتحقّق من ملكية أي منتج مميّز (اشتراك فعّال أو مدى الحياة) ويفتح البريميوم — يُستدعى عند كل تشغيل
-// ملاحظة: منح فقط (لا يسحب) لتجنّب قفل مشترك بسبب تأخّر تحميل الإيصالات
+// يتحقّق من ملكية أي منتج مميّز (اشتراك فعّال أو مدى الحياة) ويفتح/يقفل البريميوم — يُستدعى عند كل تشغيل
+//  • يفتح فوراً عند الملكية (مدى الحياة = دائم؛ الاشتراك = ما دام فعّالاً).
+//  • يقفل عند انتهاء الاشتراك وعدم التجديد — لكن فقط بعد تأكّد تحميل الإيصالات (_receiptsSeen)
+//    حتى لا يُقفل مشترك بالغلط بسبب تأخّر تحميل الإيصالات عند الإقلاع.
 PRO.syncPremium = function(){
     try{
         const C=window.CdvPurchase; if(!C||!C.store) return false;
-        const ids=[LIFETIME_ID].concat(SUB_IDS);
-        let owned=false;
-        for(let i=0;i<ids.length;i++){
-            try{ const p=C.store.get(ids[i], C.Platform.APPLE_APPSTORE); if(p && p.owned){ owned=true; break; } }catch(e){}
+        // مدى الحياة: ملكية دائمة لا تنتهي أبداً
+        let lifetime=false, subActive=false;
+        try{ const lp=C.store.get(LIFETIME_ID, C.Platform.APPLE_APPSTORE); if(lp && lp.owned) lifetime=true; }catch(e){}
+        for(let i=0;i<SUB_IDS.length;i++){
+            try{ const p=C.store.get(SUB_IDS[i], C.Platform.APPLE_APPSTORE); if(p && p.owned){ subActive=true; break; } }catch(e){}
         }
-        if(owned && localStorage.getItem('anwar_premium')!=='true'){
+        const owned = lifetime || subActive;
+        const cur = localStorage.getItem('anwar_premium')==='true';
+        if(owned && !cur){
             localStorage.setItem('anwar_premium','true');
             if(window.AnwarPremium&&AnwarPremium.onUnlocked) AnwarPremium.onUnlocked();
+        } else if(!owned && cur && _receiptsSeen){
+            // انتهى الاشتراك ولم يُجدَّد — أقفل الميزات المميّزة
+            localStorage.setItem('anwar_premium','false');
+            try{ if(window.AnwarPremium&&AnwarPremium.onLocked) AnwarPremium.onLocked(); }catch(e){}
         }
         return owned;
     }catch(e){ return false; }

@@ -15,7 +15,9 @@ AnwarPremium.setForTesting = function(v){ localStorage.setItem('anwar_premium', 
 
 // الميزات المميّزة (شرح مبسّط لكل واحدة)
 const FEATURES = [
-    { ico:'fa-kaaba',            ar:'رفيق العمرة والحج',        d:'أدلة المناسك خطوة بخطوة + عدّاد أشواط الطواف والسعي + أدعية كل موقف.', act:"AnwarHajj&&AnwarHajj.open()" },
+    { ico:'fa-hand-holding-heart',ar:'أذكار الأحبّة',           d:'اكتب أدعية لمن تحبّ (والديك/أبنائك/من فقدت) + تذكير يومي + شاركها كبطاقة أو PDF. دعاؤك لهم صدقة جارية.', act:"AnwarLoved&&AnwarLoved.open()" },
+    { ico:'fa-child-reaching',   ar:'أذكار الصغار',            d:'أذكار المواقف اليومية لطفلك بتصميم ملوّن مرح وبلغة يفهمها — علّمه ذكر كل موقف بمتعة.', act:"AnwarKids&&AnwarKids.open()" },
+    { ico:'fa-kaaba',            ar:'رفيق العمرة والحج',        d:'أدلة المناسك خطوة بخطوة + عدّاد أشواط + شروط ومواقيت ومحظورات + أدعية كل موقف.', act:"AnwarHajj&&AnwarHajj.open()" },
     { ico:'fa-calendar-check',   ar:'تنبيهات المناسبات الإسلامية', d:'تنبيهات تلقائية قبل كل مناسبة (رمضان/العشر/عاشوراء/الأيام البيض) لئلّا تفوتك.', act:"PRO&&PRO.openCalendar()" },
     { ico:'fa-headphones',       ar:'مكتبة تلاوات بلا نت',       d:'تحميل سور كاملة بأصوات كبار القرّاء للاستماع أوفلاين وبالخلفية.', act:"AnwarRecite&&AnwarRecite.open()" },
     { ico:'fa-palette',          ar:'حزمة التخصيص الكاملة',      d:'خطوط مصحف وثيمات فاخرة وخلفيات قراءة حصرية — لا تتوفّر مجاناً.', act:"AnwarLuxe&&AnwarLuxe.open()" },
@@ -89,6 +91,8 @@ window.requirePremium = function(featAr, featEn){
 };
 AnwarPremium.refreshPrices = function(){ if($('premium-modal') && $('premium-modal').classList.contains('active')) AnwarPremium._render(); };
 AnwarPremium.onUnlocked = function(){ try{ AnwarPremium._render(); updateBanner(); if(typeof showBadgeToast==='function') showBadgeToast({emoji:'👑', name:tr('أهلاً بك في بريميوم','Welcome to Premium'), desc:tr('كل الميزات مفتوحة','All features unlocked')}); }catch(e){} };
+// عند انتهاء الاشتراك (يقفل الميزات ويعيد بناء الواجهة بدون رسالة ترحيب)
+AnwarPremium.onLocked = function(){ try{ AnwarPremium._render(); updateBanner(); const m=$('premium-modal'); if(m) m.classList.remove('active'); if(typeof showBadgeToast==='function') showBadgeToast({emoji:'🔒', name:tr('انتهى الاشتراك','Subscription ended'), desc:tr('جدّد لمتابعة الميزات المميّزة','Renew to keep premium features')}); }catch(e){} };
 
 // ---------- قسم البريميوم المستقل على الرئيسية ----------
 // نقرة على ميزة: إن كان مشتركاً تُفتح مباشرة، وإلا تُعرض خطط الاشتراك

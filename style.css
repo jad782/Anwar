@@ -1206,6 +1206,7 @@ body.light-mode .ps-chip-lbl { color:#6b5d49; }
 .qar-hint.show { display:block; }
 .prem-terms { text-align:center; font-size:0.66rem; color:var(--text-muted); margin-top:10px; line-height:1.6; }
 body.light-mode .pf-txt b { color:var(--text-main); }
+body.light-mode .pf-txt span, body.light-mode .prem-hero p { color:#6b5d49; }
 
 /* ============================================================
    نظام التصميم الموحّد (Design System v2) — فخامة + وضوح + انسيابية
@@ -1431,3 +1432,91 @@ body.light-mode .nc-name { color:#9a6f12; }
 
 /* التاريخ في الهيرو أوضح */
 .date-card-emerald .day { text-shadow:0 1px 8px rgba(0,0,0,0.3); }
+
+/* ===== أذكار الأحبّة (loved.js) ===== */
+.loved-list{ display:flex; flex-direction:column; gap:10px; }
+.loved-card{ display:flex; align-items:center; gap:12px; padding:13px 14px; border-radius:16px;
+  background:rgba(255,255,255,0.04); border:1px solid rgba(212,168,67,0.18); cursor:pointer; transition:.2s; }
+.loved-card:active{ transform:scale(0.98); }
+.loved-card .lv-ico{ flex:none; width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,var(--accent-color),var(--accent-light)); color:#14110B; font-size:1.15rem; }
+.loved-card .lv-txt{ flex:1; display:flex; flex-direction:column; gap:3px; min-width:0; }
+.loved-card .lv-txt b{ color:var(--cream,#F2EAD9); font-size:1rem; }
+.loved-card .lv-txt span{ color:var(--text-muted); font-size:0.76rem; }
+.loved-empty{ text-align:center; padding:24px 10px; color:var(--text-muted); }
+.loved-empty i{ font-size:2.4rem; color:var(--accent-color); opacity:.55; margin-bottom:12px; }
+.loved-empty p{ font-size:0.9rem; line-height:1.9; }
+.loved-types{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.loved-type{ display:flex; flex-direction:column; align-items:center; gap:8px; padding:18px 8px; border-radius:16px;
+  background:rgba(255,255,255,0.04); border:1px solid rgba(212,168,67,0.2); color:var(--cream,#F2EAD9); cursor:pointer; font-family:inherit; font-size:0.86rem; transition:.2s; }
+.loved-type:active{ transform:scale(0.96); background:rgba(212,168,67,0.12); }
+.loved-type i{ font-size:1.5rem; color:var(--accent-color); }
+.loved-remind{ display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:14px;
+  background:rgba(212,168,67,0.08); border:1px solid rgba(212,168,67,0.2); margin-bottom:14px; cursor:pointer; }
+.loved-remind .set-label{ flex:1; font-size:0.9rem; }
+.loved-duas{ display:flex; flex-direction:column; gap:10px; }
+.loved-dua{ position:relative; padding:14px 16px; border-radius:14px; background:rgba(255,255,255,0.03);
+  border:1px solid rgba(212,168,67,0.14); }
+.loved-dua p{ font-family:'Amiri',serif; font-size:1.12rem; line-height:2.05; color:var(--cream,#F2EAD9); margin:0; padding-inline-end:26px; }
+.loved-dua-del{ position:absolute; top:10px; inset-inline-start:10px; background:none; border:none; color:#c0392b; opacity:.55; cursor:pointer; font-size:0.85rem; }
+.loved-dua-del:active{ opacity:1; }
+.loved-dua-src{ margin-top:8px; font-size:0.72rem; color:var(--accent-color); opacity:.85; }
+.loved-dua-src i{ margin-inline-end:3px; }
+.kid-dhikr-src{ margin-top:8px; font-size:0.72rem; color:var(--accent-color); opacity:.85; }
+body.light-mode .loved-dua-src, body.light-mode .kid-dhikr-src{ color:#9a6f12; }
+.loved-share-row{ display:flex; gap:8px; margin-top:12px; }
+.loved-sbtn{ flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:11px 6px; border-radius:12px;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(212,168,67,0.22); color:var(--cream,#F2EAD9); cursor:pointer; font-family:inherit; font-size:0.82rem; }
+.loved-sbtn:active{ background:rgba(212,168,67,0.15); }
+.loved-sbtn i{ color:var(--accent-color); }
+
+/* ===== أذكار الصغار (kids.js) ===== */
+.kids-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.kid-cell{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; min-height:120px;
+  border-radius:20px; border:none; cursor:pointer; color:#fff; font-family:inherit; padding:14px 8px; transition:.15s;
+  box-shadow:0 6px 18px rgba(0,0,0,0.25); }
+.kid-cell:active{ transform:scale(0.95); }
+.kid-emoji{ font-size:2.6rem; line-height:1; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.25)); }
+.kid-lbl{ font-size:0.98rem; font-weight:700; text-align:center; text-shadow:0 1px 4px rgba(0,0,0,0.3); }
+.kid-head{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:22px; border-radius:20px; color:#fff; margin-bottom:16px; box-shadow:0 6px 18px rgba(0,0,0,0.25); }
+.kid-head-emoji{ font-size:3rem; }
+.kid-head h2{ margin:0; color:#fff; text-shadow:0 1px 6px rgba(0,0,0,0.3); }
+.kids-dhikr-list{ display:flex; flex-direction:column; gap:12px; }
+.kid-dhikr{ padding:18px 16px; border-radius:16px; background:rgba(255,255,255,0.04); border:2px solid rgba(212,168,67,0.25); cursor:pointer; transition:.2s; text-align:center; }
+.kid-dhikr:active{ transform:scale(0.98); }
+.kid-dhikr.kid-done{ border-color:#3bceac; background:rgba(59,206,172,0.12); }
+.kid-dhikr-txt{ font-family:'Amiri',serif; font-size:1.28rem; line-height:2.1; color:var(--cream,#F2EAD9); }
+.kid-dhikr-tap{ margin-top:10px; font-size:0.82rem; color:var(--accent-color); }
+.kid-dhikr.kid-done .kid-dhikr-tap{ color:#3bceac; font-weight:700; }
+
+/* ===== دليل الحج المعمّق (hajj.js) ===== */
+.hajj-group{ margin-bottom:16px; }
+.hajj-group-t{ font-weight:700; color:var(--accent-color); font-size:0.98rem; margin-bottom:10px; padding-inline-start:10px; border-inline-start:3px solid var(--accent-color); }
+.hajj-group-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+.hajj-group-list li{ position:relative; padding:10px 30px 10px 12px; border-radius:12px; background:rgba(255,255,255,0.03);
+  border:1px solid rgba(212,168,67,0.14); font-size:0.9rem; line-height:1.8; color:var(--cream,#F2EAD9); }
+.hajj-group-list li::before{ content:'\f111'; font-family:'Font Awesome 6 Free'; font-weight:900; font-size:0.4rem;
+  color:var(--accent-color); position:absolute; inset-inline-end:14px; top:16px; }
+.hajj-group-src{ margin-top:8px; font-size:0.72rem; color:var(--accent-color); opacity:.85; line-height:1.7; }
+body.light-mode .hajj-group-src{ color:#9a6f12; }
+
+/* تجاوزات الوضع الفاتح لنصوص الميزات الجديدة */
+body.light-mode .loved-card .lv-txt b,
+body.light-mode .loved-dua p,
+body.light-mode .loved-type,
+body.light-mode .loved-sbtn,
+body.light-mode .kid-dhikr-txt,
+body.light-mode .hajj-group-list li{ color:var(--text-main); }
+
+/* تجاوزات الوضع الفاتح لميزات البريميوم القديمة (نصوص كانت فاتحة على خلفية فاتحة) */
+body.light-mode .luxe-sec h4,
+body.light-mode .hajj-hint,
+body.light-mode .ram-t span,
+body.light-mode .ram-next,
+body.light-mode .wp-sec,
+body.light-mode .hajj-tab:not(.active),
+body.light-mode .ram-day:not(.on){ color:#6b5d49; }
+body.light-mode .luxe-sub,
+body.light-mode .hcc-name,
+body.light-mode .ram-t b,
+body.light-mode .ram-timer{ color:#9a6f12; }

@@ -30,7 +30,6 @@ const CATALOG = [
     { id:'continue', ar:'أكمل الختمة',      en:'Continue Khatma',ico:'fa-book-open-reader',act:"continueKhatma()" },
     { id:'bookmarks',ar:'المفضّلة',         en:'Bookmarks',     ico:'fa-bookmark',         act:"window.PRO&&PRO.openBookmarks()" },
     { id:'radio',    ar:'إذاعة القرآن',     en:'Quran Radio',   ico:'fa-radio',            act:"toggleRadio()" },
-    { id:'points',   ar:'نقاط الأنوار',     en:'PlusPoints',    ico:'fa-star',             act:"window.AnwarPoints2&&AnwarPoints2.open()" },
     { id:'stats',    ar:'إحصائياتي',        en:'My Stats',      ico:'fa-chart-simple',     act:"window.QA&&QA.openStats&&QA.openStats()" },
     { id:'badges',   ar:'إنجازاتي',         en:'Badges',        ico:'fa-medal',            act:"window.PRO2&&PRO2.openBadges()" },
 ];
