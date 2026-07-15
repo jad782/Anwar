@@ -472,7 +472,7 @@ PRO2.openAbout = function(){
          <div class="info-feats">
            ${['fa-book-quran|مصحف كامل أوفلاين|Full offline Quran','fa-person-praying|أذكار وأدعية بمصادرها|Sourced adhkar & du\'a','fa-mosque|أوقات صلاة دقيقة + قبلة|Accurate prayer times & qibla','fa-bell|تنبيهات أذان تعمل والهاتف مقفل|Athan alerts when locked','fa-users|ختمة جماعية متزامنة|Live group khatma','fa-star|نقاط ومكافآت للتحفيز|Points & rewards'].map(f=>{const[i,a,e]=f.split('|');return `<div class="info-feat"><i class="fa-solid ${i}"></i><span>${L()==='en'?e:a}</span></div>`;}).join('')}
          </div>
-         <p class="info-ver">${tr('تطبيق الأنوار · الإصدار 1.7','Al-Anwar · Version 1.7')}</p>`);
+         <p class="info-ver">${tr('تطبيق الأنوار · الإصدار 1.8','Al-Anwar · Version 1.8')}</p>`);
 };
 PRO2.openPrivacy = function(){
     const items = L()==='en'
