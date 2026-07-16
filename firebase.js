@@ -47,3 +47,35 @@ try {
     if ('requestIdleCallback' in window) requestIdleCallback(boot, { timeout: 5000 });
     else setTimeout(boot, 3000);
 })();
+
+// =======================================================
+//  عدّاد التحميلات اللحظي — يزيد بالثانية عند أول فتح للتطبيق على أي جهاز.
+//  تراه فوراً في Firestore: مستند stats/installs (total + يومي + حسب المنصّة)،
+//  ومجموعة installs (سطر لكل تحميل بطابع زمني للعدّ الدقيق واللحظي).
+//  خلفية تماماً، مرة واحدة لكل جهاز، ويتعطّل بأمان بلا إنترنت.
+// =======================================================
+(function(){
+    try{
+        if(!window.FB || !FB.ready) return;
+        if(localStorage.getItem('anwar_installed')==='1') return; // مرة واحدة لكل جهاز
+        function logInstall(){
+            try{
+                var db=firebase.firestore();
+                var FV=firebase.firestore.FieldValue;
+                var today=new Date().toISOString().slice(0,10);
+                var plat='web'; try{ if(window.Capacitor && Capacitor.getPlatform) plat=Capacitor.getPlatform(); }catch(e){}
+                var lang=(localStorage.getItem('lang')||'ar');
+                var doc={ total:FV.increment(1), lastAt:Date.now() };
+                doc['day_'+today]=FV.increment(1);
+                doc['plat_'+plat]=FV.increment(1);
+                db.collection('stats').doc('installs').set(doc, {merge:true})
+                    .then(function(){ localStorage.setItem('anwar_installed','1'); })
+                    .catch(function(){});
+                // سطر لكل تحميل (للعدّ الدقيق ومعرفة توقيت كل تحميل لحظياً)
+                db.collection('installs').add({ ts:FV.serverTimestamp(), plat:plat, lang:lang, at:Date.now() }).catch(function(){});
+            }catch(e){}
+        }
+        if('requestIdleCallback' in window) requestIdleCallback(logInstall, { timeout:6000 });
+        else setTimeout(logInstall, 3500);
+    }catch(e){}
+})();
