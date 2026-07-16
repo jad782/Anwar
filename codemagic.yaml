@@ -154,7 +154,7 @@ workflows:
           BUILD_NUMBER=$((LATEST_BUILD + 1))
 
           $P -c "Set :CFBundleVersion $BUILD_NUMBER" "$PLIST" 2>/dev/null || $P -c "Add :CFBundleVersion string $BUILD_NUMBER" "$PLIST"
-          $P -c "Set :CFBundleShortVersionString 1.8.1" "$PLIST" 2>/dev/null || $P -c "Add :CFBundleShortVersionString string 1.8.1" "$PLIST"
+          $P -c "Set :CFBundleShortVersionString 1.8.2" "$PLIST" 2>/dev/null || $P -c "Add :CFBundleShortVersionString string 1.8.2" "$PLIST"
 
           echo "Build number: $BUILD_NUMBER"
 
