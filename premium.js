@@ -116,16 +116,19 @@ function renderSection(){
             <i class="fa-solid fa-chevron-left ps-go"></i>
         </div>
         <div class="ps-scroll" id="ps-scroll">${chips}</div>
-        ${prem?'':`<button class="ps-cta" onclick="AnwarPremium.openPlans()"><i class="fa-solid fa-gift"></i> ${tr('افتح كل الميزات — جرّب 7 أيام مجاناً','Unlock all — 7-day free trial')}</button>`}`;
-    // سكرول أفقي بعجلة الماوس/السحب لصف الميزات
+        ${prem?'':`<button class="ps-cta" onclick="AnwarPremium.openPlans()"><i class="fa-solid fa-gift"></i> ${tr('افتح كل الميزات المميّزة','Unlock all premium features')}</button>`}`;
+    // تمرير أفقي: على اللمس يعتمد التمرير الأصلي من CSS (overflow-x)، والسحب بالماوس لسطح المكتب فقط.
+    // مهم: لا نعترض الضغطة على اللمس أبداً (كان يلغي فتح الميزات مثل وضع الحفظ).
     const sc=$('ps-scroll');
     if(sc && !sc._b){ sc._b=1;
         sc.addEventListener('wheel',e=>{ if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){ sc.scrollLeft+=e.deltaY; e.preventDefault(); } },{passive:false});
-        let d=false,sx=0,sl=0,mv=false;
-        sc.addEventListener('mousedown',e=>{ d=true;mv=false;sx=e.pageX;sl=sc.scrollLeft; });
-        window.addEventListener('mousemove',e=>{ if(!d)return; const dx=e.pageX-sx; if(Math.abs(dx)>3)mv=true; sc.scrollLeft=sl-dx; });
-        window.addEventListener('mouseup',()=>{ d=false; });
-        sc.addEventListener('click',e=>{ if(mv){ e.stopPropagation(); e.preventDefault(); mv=false; } },true);
+        if(!('ontouchstart' in window)){ // سطح المكتب فقط
+            let d=false,sx=0,sl=0,mv=false;
+            sc.addEventListener('mousedown',e=>{ d=true;mv=false;sx=e.pageX;sl=sc.scrollLeft; });
+            window.addEventListener('mousemove',e=>{ if(!d)return; const dx=e.pageX-sx; if(Math.abs(dx)>3)mv=true; sc.scrollLeft=sl-dx; });
+            window.addEventListener('mouseup',()=>{ d=false; });
+            sc.addEventListener('click',e=>{ if(mv){ e.stopPropagation(); e.preventDefault(); mv=false; } },true);
+        }
     }
 }
 function updateBanner(){ renderSection(); }
