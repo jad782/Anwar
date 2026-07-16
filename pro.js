@@ -28,7 +28,7 @@ PRO.cacheAudio = function(url){
         try {
             const exists = await PRO.getCachedAudio(url);
             if (exists) return resolve(true);
-            const res = await fetch(url); const blob = await res.blob();
+            const blob = (window.anwarHttpBlob) ? await window.anwarHttpBlob(url) : await (await fetch(url)).blob();
             const tx = audioDB.transaction('audio','readwrite');
             tx.objectStore('audio').put({ url, blob });
             tx.oncomplete = () => resolve(true); tx.onerror = () => reject('store');

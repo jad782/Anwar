@@ -65,26 +65,48 @@ function resolveLocalQuran(url){
     return null;
 }
 
+// جلب أصلي عبر CapacitorHttp على iOS/أندرويد (يتجاوز قيود WKWebService worker والكاش)، ويرجع للـ fetch على الويب.
+// آمن تماماً: إن فشل الأصلي أو لم يتوفّر، يعود للسلوك القديم (fetch) — فلا يمكن أن يسوء عمّا هو عليه.
+function _capHttp(){ try{ return (window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform() && Capacitor.Plugins && Capacitor.Plugins.CapacitorHttp) ? Capacitor.Plugins.CapacitorHttp : null; }catch(e){ return null; } }
+window.anwarHttpJson = async function(url){
+    const H=_capHttp();
+    if(H){ try{ const res=await H.get({ url:url, responseType:'json', connectTimeout:20000, readTimeout:60000 });
+        if(res && res.status>=200 && res.status<300){ return (typeof res.data==='string')? JSON.parse(res.data) : res.data; }
+    }catch(e){} }
+    const r=await fetch(url); if(!r.ok) throw new Error('net'); return r.json();
+};
+window.anwarHttpBlob = async function(url){
+    const H=_capHttp();
+    if(H){ try{ const res=await H.get({ url:url, responseType:'blob', connectTimeout:20000, readTimeout:120000 });
+        if(res && res.status>=200 && res.status<300 && res.data){
+            let b64=res.data; if(typeof b64==='string' && b64.indexOf('base64,')>=0) b64=b64.split('base64,')[1];
+            const ct=(res.headers && (res.headers['Content-Type']||res.headers['content-type'])) || 'audio/mpeg';
+            const bin=atob(b64); const arr=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+            return new Blob([arr], { type: ct });
+        }
+    }catch(e){} }
+    const r=await fetch(url); if(!r.ok) throw new Error('net'); return r.blob();
+};
+
 async function fetchOffline(url) {
     const local = resolveLocalQuran(url);
     if (local) return local;
     return new Promise((resolve, reject) => {
-        if(!db) return fetch(url).then(r=>r.json()).then(resolve).catch(reject);
+        if(!db) return window.anwarHttpJson(url).then(resolve).catch(reject);
         const tx = db.transaction('quran', 'readonly');
         const store = tx.objectStore('quran');
         const getReq = store.get(url);
         getReq.onsuccess = () => {
             if(getReq.result) {
-                resolve(getReq.result.payload); 
+                resolve(getReq.result.payload);
             } else {
-                fetch(url).then(r=>{ if(!r.ok) throw new Error("Net Err"); return r.json(); }).then(data => {
-                    const tx2 = db.transaction('quran', 'readwrite');
-                    tx2.objectStore('quran').put({url: url, payload: data});
+                window.anwarHttpJson(url).then(data => {
+                    try{ const tx2 = db.transaction('quran', 'readwrite'); tx2.objectStore('quran').put({url: url, payload: data}); }catch(e){}
                     resolve(data);
                 }).catch(reject);
             }
         };
-        getReq.onerror = () => fetch(url).then(r=>r.json()).then(resolve).catch(reject);
+        getReq.onerror = () => window.anwarHttpJson(url).then(resolve).catch(reject);
     });
 }
 
