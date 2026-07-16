@@ -519,28 +519,20 @@ function initIAP(){
         [1500, 4000, 8000].forEach(ms => setTimeout(()=>{ try{ PRO.syncPremium(); }catch(e){} }, ms));
     } catch(e){ _iapState.err = 'init: ' + (e && e.message || e); }
 }
-// يتحقّق من ملكية أي منتج مميّز (اشتراك فعّال أو مدى الحياة) ويفتح/يقفل البريميوم — يُستدعى عند كل تشغيل
-//  • يفتح فوراً عند الملكية (مدى الحياة = دائم؛ الاشتراك = ما دام فعّالاً).
-//  • يقفل عند انتهاء الاشتراك وعدم التجديد — لكن فقط بعد تأكّد تحميل الإيصالات (_receiptsSeen)
-//    حتى لا يُقفل مشترك بالغلط بسبب تأخّر تحميل الإيصالات عند الإقلاع.
+// يتحقّق من ملكية أي منتج مميّز (اشتراك فعّال أو مدى الحياة) ويفتح البريميوم — يُستدعى عند كل تشغيل
+//  ملاحظة: منح فقط (لا يسحب) — لأنّ p.owned على iOS قد يقرأ false للحظة أثناء تحديث الإيصال،
+//  فالسحب الفوري يسبّب "وميضاً" للمشترك الفعلي. انتهاء الاشتراك يوقفه آبل تلقائياً من جهته.
 PRO.syncPremium = function(){
     try{
         const C=window.CdvPurchase; if(!C||!C.store) return false;
-        // مدى الحياة: ملكية دائمة لا تنتهي أبداً
-        let lifetime=false, subActive=false;
-        try{ const lp=C.store.get(LIFETIME_ID, C.Platform.APPLE_APPSTORE); if(lp && lp.owned) lifetime=true; }catch(e){}
-        for(let i=0;i<SUB_IDS.length;i++){
-            try{ const p=C.store.get(SUB_IDS[i], C.Platform.APPLE_APPSTORE); if(p && p.owned){ subActive=true; break; } }catch(e){}
+        const ids=[LIFETIME_ID].concat(SUB_IDS);
+        let owned=false;
+        for(let i=0;i<ids.length;i++){
+            try{ const p=C.store.get(ids[i], C.Platform.APPLE_APPSTORE); if(p && p.owned){ owned=true; break; } }catch(e){}
         }
-        const owned = lifetime || subActive;
-        const cur = localStorage.getItem('anwar_premium')==='true';
-        if(owned && !cur){
+        if(owned && localStorage.getItem('anwar_premium')!=='true'){
             localStorage.setItem('anwar_premium','true');
             if(window.AnwarPremium&&AnwarPremium.onUnlocked) AnwarPremium.onUnlocked();
-        } else if(!owned && cur && _receiptsSeen){
-            // انتهى الاشتراك ولم يُجدَّد — أقفل الميزات المميّزة
-            localStorage.setItem('anwar_premium','false');
-            try{ if(window.AnwarPremium&&AnwarPremium.onLocked) AnwarPremium.onLocked(); }catch(e){}
         }
         return owned;
     }catch(e){ return false; }

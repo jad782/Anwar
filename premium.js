@@ -77,7 +77,6 @@ AnwarPremium._render = function(){
             <h2>${tr('الأنوار بريميوم','Al-Anwar Premium')}</h2>
             <p>${tr('جوهر التطبيق مجاني دائماً. الاشتراك يفتح لك ميزات فاخرة تُثري رحلتك مع القرآن.','The core is always free. Premium unlocks luxurious features for your journey.')}</p></div>
         <div class="prem-feats">${feats}</div>
-        <div class="prem-trial"><i class="fa-solid fa-gift"></i> ${tr('جرّب 7 أيام مجاناً — ألغِ في أي وقت','7-day free trial — cancel anytime')}</div>
         <div class="prem-plans">${plans}</div>
         <button class="prem-restore" onclick="window.PRO&&PRO.restorePurchases()">${tr('استعادة المشتريات','Restore purchases')}</button>
         <p class="prem-terms">${tr('يُدار الاشتراك عبر حسابك في App Store ويتجدّد تلقائياً ما لم يُلغَ قبل 24 ساعة من نهاية المدة.','Billed via your App Store account; auto-renews unless canceled 24h before the period ends.')}</p>`;

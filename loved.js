@@ -152,7 +152,7 @@ window.AnwarLoved = {
             <div class="loved-remind" onclick="AnwarLoved.toggleRemind()">
                 <span class="set-ico" style="background:linear-gradient(135deg,var(--accent-color),var(--accent-light));color:#14110B;"><i class="fa-solid fa-bell"></i></span>
                 <span class="set-label">${tr('تذكير يومي بالدعاء له','Daily reminder to pray')}</span>
-                <label class="switch"><input type="checkbox" ${p.remind?'checked':''} onclick="event.preventDefault()"><span class="slider round"></span></label>
+                <label class="switch" style="pointer-events:none"><input type="checkbox" ${p.remind?'checked':''} style="pointer-events:none"><span class="slider round"></span></label>
             </div>
 
             <div class="loved-duas">${duas || `<p style="text-align:center;color:var(--text-muted);font-size:.85rem">${tr('لا أدعية بعد','No duas yet')}</p>`}</div>

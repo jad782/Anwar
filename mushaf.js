@@ -122,6 +122,7 @@ MUSHAF.openPage  = function(p){ tajOn=false; showChrome(); curPage = Math.max(1,
 window.openKhatmaPage = function(id, pageNum){
     window._activeKhatma = id;
     try{ if(typeof window.setActiveKhatma==='function') window.setActiveKhatma(id); }catch(e){}
+    try{ if(typeof goToTab==='function') goToTab(1); }catch(e){} // انتقل لتبويب القرآن أولاً وإلا يبقى المصحف مخفياً
     MUSHAF.openPage(parseInt(pageNum)||1);
 };
 
