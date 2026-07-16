@@ -517,6 +517,18 @@ function initIAP(){
         _iapReady = true;
         // فحوصات ملكية متأخّرة بعد تحميل الإيصالات (يفتح البريميوم إن كان الاشتراك فعّالاً)
         [1500, 4000, 8000].forEach(ms => setTimeout(()=>{ try{ PRO.syncPremium(); }catch(e){} }, ms));
+        // استعادة صامتة تلقائية مرة واحدة عند الإقلاع إن لم يكن مميّزاً —
+        // restoreCompletedTransactions صامتة (لا تطلب كلمة سر)، فيُكتشف الاشتراك الفعّال
+        // تلقائياً دون أن يضطر المستخدم للضغط على "استعادة المشتريات" في كل مرة.
+        setTimeout(function(){
+            try{
+                if(localStorage.getItem('anwar_premium')==='true') return;
+                if(sessionStorage.getItem('auto_restore_done')) return;
+                sessionStorage.setItem('auto_restore_done','1');
+                if(store.restorePurchases) store.restorePurchases();
+                [2500,6000,12000].forEach(function(ms){ setTimeout(function(){ try{ PRO.syncPremium(); }catch(e){} }, ms); });
+            }catch(e){}
+        }, 3000);
     } catch(e){ _iapState.err = 'init: ' + (e && e.message || e); }
 }
 // يتحقّق من ملكية أي منتج مميّز (اشتراك فعّال أو مدى الحياة) ويفتح البريميوم — يُستدعى عند كل تشغيل

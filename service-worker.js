@@ -1,5 +1,5 @@
 // Update Version 5
-const CACHE_NAME = 'anwar-cache-v109';
+const CACHE_NAME = 'anwar-cache-v110';
 
 const urlsToCache = [
   './',
@@ -12,7 +12,7 @@ const urlsToCache = [
   './haptics.js?v=1',
   './app.js?v=26',
   './features.js?v=21',
-  './pro.js?v=23',
+  './pro.js?v=24',
   './pro2.js?v=18',
   './points.js?v=14',
   './keys.js?v=6',
@@ -27,7 +27,7 @@ const urlsToCache = [
   './salah-track.js?v=1',
   './onboarding.js?v=1',
   './backup-rate.js?v=1',
-  './update.js?v=4',
+  './update.js?v=5',
   './sunan.js?v=1',
   './mushaf.js?v=12',
   './ambient.js?v=1',
