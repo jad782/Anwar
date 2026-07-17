@@ -340,14 +340,24 @@ QA.searchQuran = function(){
     if (!_searchIndex) _searchIndex = buildSearchIndex();
     if (!_searchIndex){ res.style.display='block'; res.innerHTML=`<p class="tasks-empty">${tr('جاري تحميل المصحف...','Loading...')}</p>`; return; }
     $('surah-list').style.display='none'; $('juz-list').style.display='none'; res.style.display='block';
+    // 1) مطابقة أسماء السور (تظهر بالأعلى — تفتح السورة مباشرة)
+    const surahHits=[];
+    try{ const QD=window.QURAN_DATA; if(QD&&QD.surahs){ QD.surahs.forEach(s=>{ if(normQ(s.name||'').indexOf(q)>=0) surahHits.push(s); }); } }catch(e){}
+    // 2) مطابقة نص الآيات
     const out=[]; for(let i=0;i<_searchIndex.length && out.length<60;i++){ if(_searchIndex[i].n.indexOf(q)>=0) out.push(_searchIndex[i]); }
-    if (!out.length){ res.innerHTML = `<p class="tasks-empty">${tr('لا نتائج','No results')}</p>`; return; }
+    if (!out.length && !surahHits.length){ res.innerHTML = `<p class="tasks-empty">${tr('لا نتائج','No results')}</p>`; return; }
+    const surahHtml = surahHits.slice(0,8).map(s=>`<div class="search-item search-surah" onclick="QA.goToSurah(${s.n})">
+            <div class="search-ayah"><i class="fa-solid fa-book-quran" style="opacity:.65;margin-inline-end:6px"></i> ${s.name}</div>
+            <div class="search-ref">${tr('افتح السورة','Open surah')} <i class="fa-solid fa-arrow-left-long" style="opacity:.5"></i></div></div>`).join('');
     const cnt = window.fmtDigits ? fmtDigits(out.length) : out.length;
-    res.innerHTML = `<div class="search-head">${tr('النتائج','Results')}: ${cnt}${out.length>=60?'+':''} — <button onclick="QA.clearSearch()">${tr('إغلاق','Close')}</button></div>` +
+    const head = `<div class="search-head">${tr('النتائج','Results')}: ${cnt}${out.length>=60?'+':''} — <button onclick="QA.clearSearch()">${tr('إغلاق','Close')}</button></div>`;
+    res.innerHTML = head + surahHtml +
         out.map(m=>`<div class="search-item" onclick="QA.goToResult(${m.s},${m.a})">
             <div class="search-ayah">${m.t}</div>
             <div class="search-ref">${surahNm(m.s)} : ${window.fmtDigits?fmtDigits(m.a):m.a} <i class="fa-solid fa-arrow-left-long" style="opacity:.5"></i></div></div>`).join('');
 };
+QA.goToSurah = function(n){ QA.clearSearch(); if(typeof goToTab==='function') goToTab(1);
+    if(window.MUSHAF && MUSHAF.openSurah) MUSHAF.openSurah(n); else if(typeof openFreeReading==='function') openFreeReading('surah', n, surahNm(n)); };
 QA.goToResult = function(num, ayah){
     QA.clearSearch();
     if (typeof goToTab==='function') goToTab(1);

@@ -82,7 +82,7 @@ MUSHAF.renderJuzList = function(){
 // =======================================================
 // قارئ الصفحة (سحب صفحة-صفحة)
 // =======================================================
-let curPage = 1, tajOn = false, _turnDir = 0;
+let curPage = 1, tajOn = false, _turnDir = 0, _scrollToSurah = null;
 const _origScroll = window.openFreeReading;     // القارئ التفصيلي القديم (للمزايا)
 window.openFreeReadingScroll = _origScroll;
 
@@ -116,7 +116,7 @@ MUSHAF.font = function(d){
     try{ localStorage.setItem('fontSize', currentFontSize); }catch(e){}
     document.querySelectorAll('#ayahs-container .ayah').forEach(a=>a.style.fontSize = currentFontSize+'px');
 };
-MUSHAF.openSurah = function(n){ window._activeKhatma=null; tajOn=false; showChrome(); curPage = pageOfSurah(n); renderPage(curPage); };
+MUSHAF.openSurah = function(n){ window._activeKhatma=null; tajOn=false; showChrome(); curPage = pageOfSurah(n); _scrollToSurah = n; renderPage(curPage); };
 MUSHAF.openPage  = function(p){ tajOn=false; showChrome(); curPage = Math.max(1,Math.min(604,p)); renderPage(curPage); };
 // الختمة تفتح قارئ المصحف الأوفلاين (تجويد + تقليب + كل الميزات) بدل القارئ القديم
 window.openKhatmaPage = function(id, pageNum){
@@ -156,6 +156,18 @@ async function renderPage(page){
         <div class="mushaf-foot"><div class="mushaf-pageno">${toArabic(page)} · ${toArabic(604)}</div></div>`;
     if (typeof applyReadingBg==='function') applyReadingBg();
     document.querySelector('.content-area').scrollTop = 0;
+    // عند فتح سورة تبدأ في وسط الصفحة (بعد نهاية السورة السابقة): انزل لبداية السورة المطلوبة وثبّت عنوانها
+    if (_scrollToSurah){ const _ts=_scrollToSurah; _scrollToSurah=null;
+        try{ const tEl=$('current-surah-name'); if(tEl) tEl.innerText='سورة '+nameOf(_ts); }catch(e){}
+        setTimeout(()=>{ try{
+            const b=cont.querySelector('.mushaf-banner[data-s="'+_ts+'"]');
+            const rv=$('reading-view'); if(!b||!rv) return;
+            const hdr=rv.querySelector('.reading-header'); const bar=$('msf-bar');
+            const off=(hdr?hdr.offsetHeight:0) + ((bar&&getComputedStyle(bar).position!=='static')?bar.offsetHeight:0) + 6;
+            const br=b.getBoundingClientRect(), rr=rv.getBoundingClientRect();
+            rv.scrollTop += (br.top - rr.top) - off;
+        }catch(e){} }, 60);
+    }
     const _pg = cont.querySelector('.mushaf-page');
     if (_pg && _turnDir){ _pg.classList.add(_turnDir>0?'pg-turn-next':'pg-turn-prev'); _turnDir=0; }
     window.CUR_READ = { type:'surah', num: mainS, name: mainName, page };
@@ -181,7 +193,7 @@ MUSHAF.detailed = function(){ // افتح القارئ التفصيلي (صوت/
 function banner(n){
     const m = surahMeta(n);
     const type = m.type==='Meccan'?'مكية':'مدنية';
-    return `<div class="mushaf-banner"><span class="mb-orn">۞</span><div class="mb-mid"><h2>${m.name}</h2><span class="mb-sub">${type} · ${toArabic(m.count)} آية</span></div><span class="mb-orn">۞</span></div>`;
+    return `<div class="mushaf-banner" data-s="${n}"><span class="mb-orn">۞</span><div class="mb-mid"><h2>${m.name}</h2><span class="mb-sub">${type} · ${toArabic(m.count)} آية</span></div><span class="mb-orn">۞</span></div>`;
 }
 
 // السحب الأفقي (لمس + ماوس) + لمسة لإظهار/إخفاء القوائم
