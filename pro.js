@@ -495,9 +495,11 @@ function initIAP(){
         store.when().verified(rc => {
             rc.finish();
             _receiptsSeen = true;
-            const isPrem = rc.id && (SUB_IDS.includes(rc.id) || rc.id===LIFETIME_ID);
-            if (isPrem){ localStorage.setItem('anwar_premium','true'); if(window.AnwarPremium&&AnwarPremium.onUnlocked) AnwarPremium.onUnlocked(); }
-            else if(typeof showBadgeToast==='function') showBadgeToast({emoji:'🤍', name:tr('جزاك الله خيراً','JazakAllah khayr'), desc:tr('شكراً لدعمك التطبيق','Thank you for your support')});
+            const isSubOrLife = rc.id && (SUB_IDS.includes(rc.id) || rc.id===LIFETIME_ID);
+            // شكر التبرّع (منتج استهلاكي غير اشتراك)
+            if (!isSubOrLife && typeof showBadgeToast==='function') showBadgeToast({emoji:'🤍', name:tr('جزاك الله خيراً','JazakAllah khayr'), desc:tr('شكراً لدعمك التطبيق','Thank you for your support')});
+            // مهم (أمان): لا نفتح البريميوم لمجرّد وجود إيصال — نتركه لـ syncPremium الذي يتحقّق من
+            // الملكية الفعلية (p.owned = اشتراك فعّال/غير منتهٍ)، فلا يُفتح لمعاملة ملغاة أو منتهية.
             PRO.syncPremium();
         });
         store.when().productUpdated(()=>{ try{ PRO._refreshDonatePrices && PRO._refreshDonatePrices(); if(window.AnwarPremium&&AnwarPremium.refreshPrices) AnwarPremium.refreshPrices(); }catch(e){} PRO.syncPremium(); });
