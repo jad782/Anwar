@@ -187,16 +187,8 @@ function ensureCalendarModal(){
 PRO.renderHomeExtras = function(){
     const host = $('pro-home'); if (!host) return;
     let html = '';
-    // متابعة القراءة
-    let lr=null; try{ lr=JSON.parse(localStorage.getItem('last_read')); }catch(e){}
-    if (lr){
-        html += `<div class="pro-card" onclick="PRO.resumeReading()">
-            <div class="pro-card-ico"><i class="fa-solid fa-book-open-reader"></i></div>
-            <div class="pro-card-info"><span class="pro-card-label">${tr('تابع القراءة','Continue reading')}</span>
-            <span class="pro-card-main">${lr.name||''}</span></div>
-            <i class="fa-solid fa-circle-play pro-card-go"></i></div>`;
-    }
-    // ورد اليوم الذكي
+    // (بطاقة "تابع القراءة" القديمة أُزيلت — استُبدلت ببطاقة daily.js على الرئيسية لتجنّب التكرار)
+    // ورد اليوم الذكي (خطة الختمة)
     try {
         const kh = JSON.parse(localStorage.getItem('khatmas_list')||'[]');
         const plans = JSON.parse(localStorage.getItem('khatma_plans')||'{}');
