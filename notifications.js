@@ -108,9 +108,42 @@ window.scheduleDhikrReminders = async function(){
     try { await LN.schedule({ notifications: notifs }); return true; } catch(e){ return false; }
 };
 
+// تذكيرات يوم الجمعة (سنن الجمعة) — أسبوعياً، تعمل والتطبيق مغلق
+const FRIDAY_IDS = [2200,2201,2202,2203];
+window.scheduleFridayReminders = async function(){
+    if (!isNative()) return false;
+    const LN = window.Capacitor.Plugins.LocalNotifications;
+    if (localStorage.getItem('fridayReminders') === 'false'){
+        try { await LN.cancel({ notifications: FRIDAY_IDS.map(id=>({id})) }); } catch(e){}
+        return false;
+    }
+    if (!(await ensurePermission(LN))) return false;
+    const en = lang()==='en';
+    const items = [
+        { id:2200, h:7,  m:30, t: en?'Blessed Friday 🕌':'يوم الجمعة المبارك 🕌',
+          b: en?'Sunnahs of Friday: ghusl (bathing), best clothes, perfume, and heading early to the mosque.'
+               :'من سُنن الجمعة: الاغتسال، ولبس أحسن الثياب، والتطيّب، والتبكير إلى المسجد.' },
+        { id:2201, h:9,  m:0,  t: en?'Send blessings on the Prophet ﷺ':'أكثِر من الصلاة على النبي ﷺ',
+          b: en?'“Increase your prayers upon me on Friday, for your prayers are presented to me.”'
+               :'«أكثِروا الصلاة عليَّ يوم الجمعة، فإنَّ صلاتكم معروضةٌ عليَّ»' },
+        { id:2202, h:10, m:30, t: en?'Read Surah Al-Kahf ✨':'لا تنسَ سورة الكهف ✨',
+          b: en?'“Whoever reads Surah Al-Kahf on Friday, light shines for him between the two Fridays.”'
+               :'«من قرأ سورة الكهف يوم الجمعة أضاء له من النور ما بين الجمعتين»' },
+    ];
+    // ساعة الإجابة: قبل المغرب بساعة (تُحسب من أوقات صلاتك، وإلا 16:30)
+    let sh=16, sm=30;
+    try{ if(typeof prayerTimings!=='undefined' && prayerTimings.Maghrib){ const [H,M]=prayerTimings.Maghrib.split(':').map(Number); let t=H*60+M-60; if(t<0)t+=1440; sh=Math.floor(t/60); sm=t%60; } }catch(e){}
+    items.push({ id:2203, h:sh, m:sm, t: en?'The hour of response 🤲':'ساعة الإجابة 🤲',
+        b: en?'In the last hour of Friday there is a time when du\'a is answered — pray much.'
+             :'في آخر ساعة من يوم الجمعة ساعةُ إجابة لا يُوافقها عبدٌ يسأل الله خيراً إلا أعطاه — أكثِر من الدعاء.' });
+    const notifs = items.map(n=>({ id:n.id, title:n.t, body:n.b,
+        schedule:{ on:{ weekday:6, hour:n.h, minute:n.m }, repeats:true, allowWhileIdle:true } })); // weekday 6 = الجمعة
+    try { await LN.schedule({ notifications: notifs }); return true; } catch(e){ return false; }
+};
+
 // نقطة دخول موحّدة — يستدعيها التطبيق بعد تحميل أوقات الصلاة وعند تغيير الإعدادات
 window.refreshAthanSchedule = function(){
-    if (isNative()) { window.scheduleNativeAthan(); window.scheduleDhikrReminders(); }
+    if (isNative()) { window.scheduleNativeAthan(); window.scheduleDhikrReminders(); window.scheduleFridayReminders(); }
     // على الويب: لا حاجة لشيء؛ app.js/features.js يطلقان الإشعارات أثناء التشغيل
 };
 

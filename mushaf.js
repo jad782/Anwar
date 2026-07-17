@@ -177,6 +177,7 @@ async function renderPage(page){
     // حفظ تقدّم الختمة النشطة عند تغيير الصفحة
     try{ if(window._activeKhatma!=null && typeof setKhatmaPage==='function') setKhatmaPage(window._activeKhatma, page); }catch(e){}
     try{ localStorage.setItem('last_read', JSON.stringify({type:'page', num:page, name:'سورة '+mainName, ts:Date.now()})); }catch(e){}
+    try{ if(window.AnwarDaily && AnwarDaily.markRead) AnwarDaily.markRead(); }catch(e){}
     if (window.PRO2 && PRO2.checkBadges) setTimeout(()=>PRO2.checkBadges(), 50);
 }
 // في المصحف: الصفحة التالية على اليسار (سحب لليسار)، والسابقة على اليمين

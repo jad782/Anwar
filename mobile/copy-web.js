@@ -34,6 +34,7 @@ const INCLUDE = [
   'update.js',
   'sunan.js',
   'mushaf.js',
+  'daily.js',
   'live-activity.js',
   'widget-bridge.js',
   'notifications.js',
