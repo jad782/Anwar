@@ -46,7 +46,7 @@ window.AnwarDaily = {
         const streakChip = st>0
             ? `<div class="dc-streak ${doneToday?'done':''}"><span class="dc-fire">🔥</span><b>${toAr(st)}</b><small>${tr('ورد','wird')}</small></div>`
             : `<div class="dc-streak"><i class="fa-solid fa-book-quran"></i></div>`;
-        host.innerHTML = `<div class="daily-card" onclick="AnwarDaily.resume()">
+        host.innerHTML = `<div class="resume-card" onclick="AnwarDaily.resume()">
             <div class="dc-ico"><i class="fa-solid fa-book-open-reader"></i></div>
             <div class="dc-body"><b>${title}</b><span>${sub}</span>
                 ${doneToday?`<span class="dc-today"><i class="fa-solid fa-circle-check"></i> ${tr('قرأت وردك اليوم — أحسنت 🤍','Today\'s wird done 🤍')}</span>`
