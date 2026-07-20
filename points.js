@@ -111,6 +111,7 @@ window.AnwarReward = {
 };
 const APP_THEMES = [
     { id:'',             ar:'ليل ذهبي',   en:'Golden Night', dot:'linear-gradient(135deg,#D4A843,#14110B)' },
+    { id:'oled',         ar:'ليل خالص',   en:'Pure Black',   dot:'linear-gradient(135deg,#F2D27A,#000)' },
     { id:'light',        ar:'نهاري فاتح', en:'Daylight',     dot:'linear-gradient(135deg,#FAF6EE,#D4A843)' },
     { id:'emerald-deep', ar:'أخضر زمردي', en:'Emerald',      dot:'linear-gradient(135deg,#3FB984,#08160F)' },
     { id:'navy',         ar:'أزرق ليلي',  en:'Night Blue',   dot:'linear-gradient(135deg,#5B8DEF,#070C18)' },
@@ -121,8 +122,9 @@ function applyAppTheme(){
     // الافتراضي عند أول تنزيل: الثيم النهاري الفاتح
     if(localStorage.getItem('app_theme')===null){ localStorage.setItem('app_theme','light'); if(localStorage.getItem('lightMode')===null) localStorage.setItem('lightMode','true'); }
     const t = localStorage.getItem('app_theme')||'';
-    document.body.classList.remove('light-mode','theme-emerald-deep','theme-navy','theme-purple','theme-rosewood');
+    document.body.classList.remove('light-mode','theme-oled','theme-emerald-deep','theme-navy','theme-purple','theme-rosewood');
     if(t==='light') document.body.classList.add('light-mode');
+    else if(t==='oled') document.body.classList.add('theme-oled');
     else if(t==='emerald-deep') document.body.classList.add('theme-emerald-deep');
     else if(t==='navy') document.body.classList.add('theme-navy');
     else if(t==='purple') document.body.classList.add('theme-purple');
