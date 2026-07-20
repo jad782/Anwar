@@ -79,8 +79,15 @@ AnwarPremium._render = function(){
         <div class="prem-feats">${feats}</div>
         <div class="prem-plans">${plans}</div>
         <button class="prem-restore" onclick="window.PRO&&PRO.restorePurchases()">${tr('استعادة المشتريات','Restore purchases')}</button>
-        <p class="prem-terms">${tr('يُدار الاشتراك عبر حسابك في App Store ويتجدّد تلقائياً ما لم يُلغَ قبل 24 ساعة من نهاية المدة.','Billed via your App Store account; auto-renews unless canceled 24h before the period ends.')}</p>`;
+        <p class="prem-terms">${tr('الاشتراك متجدّد تلقائياً ويُدار عبر حسابك في App Store. يُجدَّد ما لم يُلغَ قبل 24 ساعة من نهاية المدة، ويمكنك إدارته أو إلغاؤه من إعدادات حسابك.','Auto-renewable subscription managed via your App Store account. Renews unless canceled at least 24h before the period ends; manage or cancel anytime in your account settings.')}</p>
+        <div class="prem-links">
+            <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/" onclick="AnwarPremium._openLink(event,'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/')">${tr('شروط الاستخدام (EULA)','Terms of Use (EULA)')}</a>
+            <span>·</span>
+            <a href="https://jad782.github.io/Anwar/privacy.html" onclick="AnwarPremium._openLink(event,'https://jad782.github.io/Anwar/privacy.html')">${tr('سياسة الخصوصية','Privacy Policy')}</a>
+        </div>`;
 };
+// فتح الروابط بشكل موثوق على الويب والتطبيق الأصلي (مطلوب من آبل: روابط فعّالة)
+AnwarPremium._openLink = function(e, url){ try{ e.preventDefault(); }catch(x){} try{ window.open(url,'_blank'); }catch(x){} return false; };
 AnwarPremium.buy = function(id){ if(window.PRO&&PRO.subscribe) PRO.subscribe(id); };
 // جدار الحماية: تُستدعى قبل أي ميزة مميّزة
 window.requirePremium = function(featAr, featEn){
