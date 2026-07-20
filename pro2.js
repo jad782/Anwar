@@ -660,12 +660,45 @@ function ensureCustomizeModal(){
 const _oat = window.onAyahTap;
 window.onAyahTap = function(){ const r = (typeof _oat==='function') ? _oat.apply(this, arguments) : undefined; setTimeout(injectExtras, 150); return r; };
 
-// (4ج) صانع الاقتباسات: ضغط مطوّل على الآية → بطاقة تصميم (Story)
+// (4ج) ضغط مطوّل على الآية → قائمة سريعة (نسخ · نسخ بالتشكيل · مشاركة · بطاقة · تفسير)
 let _lpTimer=null;
+const _TASHKEEL=/[ؐ-ًؚ-ٰٟۖ-ۜ۟-۪ۨ-ۭـ]/g;
+function _ayToast(msg){ try{ if(typeof showBadgeToast==='function') showBadgeToast({emoji:'📋', name:msg, desc:''}); }catch(e){} }
+window.AY = {
+    open:function(s,a,g,full){
+        const plain = full.replace(_TASHKEEL,'');
+        window._lastAyah = { surah:s, ayah:a, global:g, text:full };
+        this._full=full; this._plain=plain; this._s=s; this._a=a; this._g=g;
+        let m=$('ayah-menu');
+        if(!m){ m=document.createElement('div'); m.id='ayah-menu'; m.className='ayah-menu'; document.body.appendChild(m);
+            m.addEventListener('click', function(e){ if(e.target===m) m.classList.remove('on'); }); }
+        m.innerHTML = `<div class="am-sheet">
+            <div class="am-grip"></div>
+            <div class="am-ref">﴿ ${full.length>46?full.slice(0,46)+'…':full} ﴾ — الآية ${toArabic2(a)}</div>
+            <div class="am-acts">
+                <button onclick="AY.copy(true)"><i class="fa-solid fa-language"></i><span>نسخ بالتشكيل</span></button>
+                <button onclick="AY.copy(false)"><i class="fa-solid fa-font"></i><span>نسخ بدون تشكيل</span></button>
+                <button onclick="AY.share()"><i class="fa-solid fa-share-nodes"></i><span>مشاركة نصّاً</span></button>
+                <button onclick="AY.card()"><i class="fa-solid fa-image"></i><span>تصميم بطاقة</span></button>
+                <button onclick="AY.tafsir()"><i class="fa-solid fa-book-open"></i><span>التفسير والتدبّر</span></button>
+            </div></div>`;
+        requestAnimationFrame(()=>m.classList.add('on'));
+        if(navigator.vibrate) navigator.vibrate(25);
+    },
+    close:function(){ const m=$('ayah-menu'); if(m) m.classList.remove('on'); },
+    copy:function(withT){ const t=(withT?this._full:this._plain)+'\n(سورة '+(typeof nameOf2==='function'?nameOf2(this._s):this._s)+' — '+this._a+')';
+        try{ navigator.clipboard.writeText(t); _ayToast('نُسخت الآية'); }catch(e){} this.close(); },
+    share:async function(){ const t=this._full+'\n(سورة '+(typeof nameOf2==='function'?nameOf2(this._s):this._s)+' — '+this._a+')';
+        try{ if(navigator.share){ await navigator.share({ text:t }); } else { await navigator.clipboard.writeText(t); _ayToast('نُسخت للمشاركة'); } }catch(e){} this.close(); },
+    card:function(){ this.close(); if(window.PRO2&&PRO2.openStory) PRO2.openStory(); },
+    tafsir:function(){ this.close(); if(window.onAyahTap) onAyahTap(this._s,this._a,this._g); }
+};
+function toArabic2(n){ return (localStorage.getItem('num_hindi')==='0')?String(n):String(n).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]); }
+function nameOf2(n){ try{ const s=window.QURAN_DATA&&QURAN_DATA.surahs[n-1]; return s?(s.name||'').replace(/سُورَةُ |سورة /,''):n; }catch(e){ return n; } }
 function lpStart(e){
     const ay = e.target.closest && e.target.closest('.ayah'); if(!ay) return;
     const s=+ay.dataset.surah, a=+ay.dataset.ayah, g=+ay.dataset.global; if(!s) return;
-    _lpTimer = setTimeout(()=>{ window._lastAyah = { surah:s, ayah:a, global:g, text: ay.textContent.replace(/[٠-٩]+\s*$/,'').trim() }; if(window.PRO2&&PRO2.openStory) PRO2.openStory(); if(navigator.vibrate) navigator.vibrate(30); }, 550);
+    _lpTimer = setTimeout(()=>{ const full = ay.textContent.replace(/[٠-٩]+\s*$/,'').trim(); AY.open(s,a,g,full); }, 500);
 }
 function lpCancel(){ if(_lpTimer){ clearTimeout(_lpTimer); _lpTimer=null; } }
 document.addEventListener('touchstart', lpStart, {passive:true});

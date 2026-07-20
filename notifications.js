@@ -141,9 +141,37 @@ window.scheduleFridayReminders = async function(){
     try { await LN.schedule({ notifications: notifs }); return true; } catch(e){ return false; }
 };
 
+// تكبيرات العيد — تُجدول في أيام العشر من ذي الحجة (خاصةً عرفة والعيد) وعيد الفطر، عبر التقويم الهجري (أم القرى)
+const EID_IDS = []; for(let i=2210;i<2260;i++) EID_IDS.push(i);
+const TAKBIR_TEXT = 'اللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ، لَا إِلَهَ إِلَّا اللَّهُ، وَاللَّهُ أَكْبَرُ اللَّهُ أَكْبَرُ وَلِلَّهِ الْحَمْدُ';
+window.scheduleEidTakbeer = async function(){
+    if (!isNative()) return false;
+    const LN = window.Capacitor.Plugins.LocalNotifications;
+    if (localStorage.getItem('dhikrReminders') === 'false'){ try{ await LN.cancel({ notifications: EID_IDS.map(id=>({id})) }); }catch(e){} return false; }
+    if (!(await ensurePermission(LN))) return false;
+    let mF, dF;
+    try{ mF=new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura',{month:'numeric'}); dF=new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura',{day:'numeric'}); }catch(e){ return false; }
+    try{ await LN.cancel({ notifications: EID_IDS.map(id=>({id})) }); }catch(e){}
+    const now=new Date(); const notifs=[]; let id=2210; const en=lang()==='en';
+    for(let d=0; d<70 && id<2258; d++){
+        const day=new Date(now.getFullYear(), now.getMonth(), now.getDate()+d, 8, 0, 0); // 8 صباحاً
+        if(day<=now) continue;
+        let hm,hd; try{ hm=parseInt(mF.format(day)); hd=parseInt(dF.format(day)); }catch(e){ continue; }
+        let title=null;
+        if(hm===12 && hd>=1 && hd<=13){ // ذو الحجة: العشر + التشريق
+            title = hd===10 ? (en?'Eid al-Adha Mubarak 🕌':'عيد الأضحى المبارك 🕌')
+                  : hd===9 ? (en?'Day of Arafah 🤍':'يوم عرفة — أكثِر من التكبير والدعاء 🤍')
+                  : (en?'The ten days — Takbeer 🕌':'العشر من ذي الحجة — كبّر 🕌');
+        } else if(hm===10 && hd===1){ title = en?'Eid al-Fitr Mubarak 🕌':'عيد الفطر المبارك 🕌'; }
+        if(title){ notifs.push({ id:id++, title:title, body:TAKBIR_TEXT, schedule:{ at:day, allowWhileIdle:true } }); }
+    }
+    if(notifs.length){ try{ await LN.schedule({ notifications: notifs }); return true; }catch(e){ return false; } }
+    return false;
+};
+
 // نقطة دخول موحّدة — يستدعيها التطبيق بعد تحميل أوقات الصلاة وعند تغيير الإعدادات
 window.refreshAthanSchedule = function(){
-    if (isNative()) { window.scheduleNativeAthan(); window.scheduleDhikrReminders(); window.scheduleFridayReminders(); }
+    if (isNative()) { window.scheduleNativeAthan(); window.scheduleDhikrReminders(); window.scheduleFridayReminders(); window.scheduleEidTakbeer(); }
     // على الويب: لا حاجة لشيء؛ app.js/features.js يطلقان الإشعارات أثناء التشغيل
 };
 
