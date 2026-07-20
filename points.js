@@ -323,6 +323,27 @@ function inject(){
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', ()=>setTimeout(inject,800));
 else setTimeout(inject,800);
+
+// ألوان أيقونات الإعدادات (بطاقات ملوّنة فخمة بدل الذهبي الموحّد) — باقة دوّارة، آمنة ومرة واحدة لكل أيقونة
+const _SET_PAL=[['#2f80ff','#4f9bff'],['#e5484d','#f56b70'],['#f5901e','#ffab48'],['#1e8a5a','#25b374'],
+    ['#9b5de5','#b47cf0'],['#00a3a3','#22c7c7'],['#e5479e','#f26bb4'],['#6a5cff','#8a7dff'],
+    ['#22a55a','#31c46f'],['#c98b1a','#e0a52f'],['#3aa0ff','#5cb3ff'],['#d4569e','#ef7ab8']];
+function colorizeSettings(){
+    try{
+        document.querySelectorAll('.settings-list .set-ico').forEach(function(el,i){
+            if(el.dataset.clr || el.classList.contains('set-ico-danger')) return; // مرة واحدة، وتجاهل الأحمر (الخطر)
+            var c=_SET_PAL[i % _SET_PAL.length];
+            el.style.background='linear-gradient(135deg,'+c[0]+','+c[1]+')';
+            el.style.color='#fff'; el.style.border='none'; el.style.boxShadow='0 4px 12px rgba(0,0,0,0.32)';
+            el.dataset.clr='1';
+        });
+    }catch(e){}
+}
+window.colorizeSettings=colorizeSettings;
+[1500,2600,4200,6500].forEach(function(ms){ setTimeout(colorizeSettings, ms); });
+// لوّن عند فتح تبويب الإعدادات (يلتقط أي أيقونات مُضافة لاحقاً)
+try{ var _gt=window.goToTab; if(typeof _gt==='function'){ window.goToTab=function(){ var r=_gt.apply(this,arguments); setTimeout(colorizeSettings,120); return r; }; } }catch(e){}
+
 const _sp=window.setPrayerTimings;
 if(typeof _sp==='function'){ window.setPrayerTimings=function(){ const r=_sp.apply(this,arguments); try{renderAthkarShortcut();}catch(e){} return r; }; }
 })();
