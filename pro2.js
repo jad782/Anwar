@@ -682,7 +682,7 @@ window.AY = {
                 <button onclick="AY.card()"><i class="fa-solid fa-image"></i><span>تصميم بطاقة</span></button>
                 <button onclick="AY.tafsir()"><i class="fa-solid fa-book-open"></i><span>التفسير والتدبّر</span></button>
             </div></div>`;
-        requestAnimationFrame(()=>m.classList.add('on'));
+        void m.offsetWidth; m.classList.add('on'); // إجبار إعادة التخطيط ثم إظهار (أضمن من rAF)
         if(navigator.vibrate) navigator.vibrate(25);
     },
     close:function(){ const m=$('ayah-menu'); if(m) m.classList.remove('on'); },
