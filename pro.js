@@ -523,8 +523,23 @@ function initIAP(){
                 [2500,6000,12000].forEach(function(ms){ setTimeout(function(){ try{ PRO.syncPremium(); }catch(e){} }, ms); });
             }catch(e){}
         }, 3000);
+        // إنفاذ الملكية (لمرة واحدة، متأخّر): بعد تأكّد تحميل إيصال آبل والاستعادة، إن لم يوجد اشتراك
+        // فعّال/مدى حياة، أقفل البريميوم — لسدّ من فتحه بثغرة قديمة. متأخّر 16 ثانية بعد الاستعادة
+        // كي لا يُقفل مشترك فعلي (يُعاد فتحه تلقائياً في التشغيل التالي عبر الاستعادة الصامتة).
+        setTimeout(function(){ try{ PRO.enforceOwnership(); }catch(e){} }, 16000);
     } catch(e){ _iapState.err = 'init: ' + (e && e.message || e); }
 }
+// يقفل البريميوم مرة واحدة إن ثبت عدم وجود اشتراك فعّال (بعد تحميل الإيصالات) — يمنع الاستفادة بثغرة سابقة
+PRO.enforceOwnership = function(){
+    try{
+        if(!_receiptsSeen) return; // لم تُحمّل الإيصالات — لا تُقفل (أمان للأوفلاين)
+        if(localStorage.getItem('anwar_premium')!=='true') return; // ليس مميّزاً أصلاً
+        const C=window.CdvPurchase; if(!C||!C.store) return;
+        const ids=[LIFETIME_ID].concat(SUB_IDS); let owned=false;
+        for(let i=0;i<ids.length;i++){ try{ const p=C.store.get(ids[i], C.Platform.APPLE_APPSTORE); if(p&&p.owned){ owned=true; break; } }catch(e){} }
+        if(!owned){ localStorage.setItem('anwar_premium','false'); if(window.AnwarPremium&&AnwarPremium.onLocked) AnwarPremium.onLocked(); }
+    }catch(e){}
+};
 // يتحقّق من ملكية أي منتج مميّز (اشتراك فعّال أو مدى الحياة) ويفتح البريميوم — يُستدعى عند كل تشغيل
 //  ملاحظة: منح فقط (لا يسحب) — لأنّ p.owned على iOS قد يقرأ false للحظة أثناء تحديث الإيصال،
 //  فالسحب الفوري يسبّب "وميضاً" للمشترك الفعلي. انتهاء الاشتراك يوقفه آبل تلقائياً من جهته.
