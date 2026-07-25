@@ -338,7 +338,7 @@ QA.searchQuran = function(){
     const res = $('quran-search-results');
     if (q.length < 2){ res.style.display='none'; $('surah-list').style.display = document.getElementById('tab-btn-surahs').classList.contains('active')?'block':'none'; $('juz-list').style.display = document.getElementById('tab-btn-juzs').classList.contains('active')?'block':'none'; return; }
     if (!_searchIndex) _searchIndex = buildSearchIndex();
-    if (!_searchIndex){ res.style.display='block'; res.innerHTML=`<p class="tasks-empty">${tr('جاري تحميل المصحف...','Loading...')}</p>`; return; }
+    if (!_searchIndex){ res.style.display='block'; res.innerHTML=`<span class="sk sk-line w90"></span><span class="sk sk-line w70"></span><span class="sk sk-line w45"></span>`; return; }
     $('surah-list').style.display='none'; $('juz-list').style.display='none'; res.style.display='block';
     // 1) مطابقة أسماء السور (تظهر بالأعلى — تفتح السورة مباشرة)
     const surahHits=[];

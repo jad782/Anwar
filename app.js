@@ -255,6 +255,8 @@ window.setPrayerTimings = function(t, label){
 };
 
 let _countdownStarted = false;
+// أسماء الصلوات بالإنجليزية لحلقة الصلاة القادمة
+const LABELS_EN_NEXT = { Fajr:'Fajr', Sunrise:'Sunrise', Dhuhr:'Dhuhr', Asr:'Asr', Maghrib:'Maghrib', Isha:'Isha' };
 function startCountdown() {
     if (_countdownStarted) return; // لا تشغّل أكثر من مؤقّت
     _countdownStarted = true;
@@ -285,7 +287,26 @@ function startCountdown() {
         const h = Math.floor(diff/3600000), m = Math.floor(diff%3600000/60000), s = Math.floor(diff%60000/1000);
         const card = document.getElementById('p-'+next.id); if(card) card.classList.add('active-prayer');
         const rem = document.getElementById('remain-'+next.id); if(rem) rem.innerText = `${pad(h)}:${pad(m)}:${pad(s)}`;
-        const pill = document.getElementById('pill-countdown'); if(pill) pill.innerText = `${next.name} بعد ${pad(h)}:${pad(m)}`;
+
+        // ===== حلقة الصلاة القادمة: اسم + عدّ تنازلي + قوس تقدّم بين الأذانين =====
+        const en = (typeof currentLang!=='undefined' && currentLang==='en');
+        const nameEl = document.getElementById('npr-name');
+        if(nameEl) nameEl.innerText = en ? (LABELS_EN_NEXT[next.id]||next.id) : next.name;
+        const pill = document.getElementById('pill-countdown');
+        if(pill) pill.innerText = `${pad(h)}:${pad(m)}:${pad(s)}`;
+        // الصلاة السابقة (حدّ بداية الفترة) — مع التعامل مع الالتفاف حول منتصف الليل
+        const ni = order.indexOf(next);
+        const prev = order[(ni - 1 + order.length) % order.length];
+        const [pH,pM] = prev.time.split(':').map(Number);
+        const prevTs = new Date(); prevTs.setHours(pH, pM, 0, 0);
+        if (prevTs > now) prevTs.setDate(prevTs.getDate() - 1);   // سابقة أمس (مثل العشاء قبل فجر اليوم)
+        const total = target - prevTs, elapsed = now - prevTs;
+        let pct = total > 0 ? elapsed / total : 0;
+        pct = pct < 0 ? 0 : (pct > 1 ? 1 : pct);
+        const arc = document.getElementById('npr-arc');
+        if(arc){ const C = 2 * Math.PI * 19; arc.style.strokeDashoffset = (C * (1 - pct)).toFixed(2); }
+        const ring = document.getElementById('next-prayer-ring');
+        if(ring) ring.classList.toggle('soon', diff <= 600000);   // آخر 10 دقائق
         _maybeFireNotification();
     }, 1000);
 }
@@ -301,7 +322,15 @@ function saveKhatmas() { localStorage.setItem('khatmas_list', JSON.stringify(kha
 window.renderKhatmas = function() {
     const container = document.getElementById('khatma-list-preview');
     if (!container) return;
-    if (khatmas.length === 0) { container.innerHTML = '<p style="font-size:0.9rem; color:var(--text-muted); text-align:center; width:100%;">لا توجد ختمات حالية، ابدأ الآن.</p>'; return; }
+    if (khatmas.length === 0) {
+        const en = (typeof currentLang!=='undefined' && currentLang==='en');
+        container.innerHTML = `<div class="empty-state">
+            <span class="es-ico"><i class="fa-solid fa-book-quran"></i></span>
+            <span class="es-title">${en?'No active khatma':'لا توجد ختمة حالية'}</span>
+            <span class="es-desc">${en?'Start a khatma and track your daily wird page by page.':'ابدأ ختمة وتابع وردك اليومي صفحةً صفحة.'}</span>
+        </div>`;
+        return;
+    }
     let html = '';
     khatmas.forEach(k => {
         const pct = Math.round((k.page / 604) * 100);
@@ -786,7 +815,7 @@ const I18N = {
   surahs:"السور",juzs:"الأجزاء",athkar_morning:"أذكار الصباح",athkar_evening:"أذكار المساء",athkar_post:"أذكار بعد الصلاة",athkar_sleep:"أذكار النوم",
   language:"اللغة",reading_bg:"خلفية القراءة",notif_athan:"تنبيهات الأذان",gps_auto:"تحديد الموقع تلقائياً (GPS)",keep_awake:"إبقاء الشاشة مضاءة",night_mode:"الوضع النهاري (فاتح)",font_size:"حجم خط القراءة",factory_reset:"تصفير بيانات التطبيق",
   grp_general:"التخصيص",grp_reading:"القراءة",grp_alerts:"التنبيهات والموقع",grp_data:"البيانات",athan_sound:"صوت الأذان عند الوقت",pre_athan:"تنبيه قبل الأذان (دقائق)",my_stats:"إحصائياتي الروحية",
-  qibla_dir:"اتجاه القبلة",qibla_hint:"امسك الهاتف بشكل مسطح ووجّهه حتى تنطبق الكعبة على السهم.",qibla_enable:"تفعيل البوصلة",qibla_denied:"لم يتم السماح باستخدام البوصلة.",qibla_from_north:"درجة من الشمال",
+  qibla_dir:"اتجاه القبلة",qibla_hint:"امسك الهاتف بشكل مسطح ووجّهه حتى تنطبق الكعبة على السهم.",qibla_enable:"تفعيل البوصلة",qibla_denied:"لم يتم السماح باستخدام البوصلة.",qibla_from_north:"درجة من الشمال",next_prayer:"الصلاة القادمة",
   add_task_title:"إضافة مهمة",add_surah_task:"إضافة سورة للقراءة اليومية",add_custom_task:"مهمة مخصّصة (ذكر/عبادة)",add_munjiyat:"المنجّيات السبع",pick_surah:"اختر سورة",open_full:"فتح كاملة",mark_done:"تمّت القراءة",
   greeting:"وقت مبارك",tasbeeh_cta:"لِنُسبّح الله",tasks_empty:"لا توجد مهام، أضف وردك اليومي.",all_done:"أتممت ورد اليوم 🌿",of:"من",done_count:"مهمة",custom_prompt:"اكتب اسم المهمة:",munjiyat_note:"السجدة، يس، الدخان، الواقعة، الحشر، المُلك، الإنسان — (صيغة شائعة، عدّلها حسب مصدرك الموثّق)" },
  en:{ nav_home:"Home",nav_quran:"Quran",nav_athkar:"Athkar",nav_settings:"Settings",nav_donate:"Support",donate_title:"Support the Developer",
@@ -794,7 +823,7 @@ const I18N = {
   surahs:"Surahs",juzs:"Juz",athkar_morning:"Morning Athkar",athkar_evening:"Evening Athkar",athkar_post:"After-Prayer Athkar",athkar_sleep:"Sleep Athkar",
   language:"Language",reading_bg:"Reading Background",notif_athan:"Athan Notifications",gps_auto:"Auto Location (GPS)",keep_awake:"Keep Screen On",night_mode:"Day Mode (light)",font_size:"Reading Font Size",factory_reset:"Reset App Data",
   grp_general:"General",grp_reading:"Reading",grp_alerts:"Alerts & Location",grp_data:"Data",athan_sound:"Play Athan sound",pre_athan:"Pre-Athan reminder (min)",my_stats:"My Spiritual Stats",
-  qibla_dir:"Qibla Direction",qibla_hint:"Hold the phone flat and turn it until the Kaaba aligns with the arrow.",qibla_enable:"Enable Compass",qibla_denied:"Compass permission was denied.",qibla_from_north:"degrees from North",
+  qibla_dir:"Qibla Direction",qibla_hint:"Hold the phone flat and turn it until the Kaaba aligns with the arrow.",qibla_enable:"Enable Compass",qibla_denied:"Compass permission was denied.",qibla_from_north:"degrees from North",next_prayer:"Next prayer",
   add_task_title:"Add Task",add_surah_task:"Add a Surah to daily reading",add_custom_task:"Custom task (dhikr/worship)",add_munjiyat:"The Seven Protective Surahs",pick_surah:"Choose a Surah",open_full:"Open full",mark_done:"Mark as read",
   greeting:"A Blessed Time",tasbeeh_cta:"Let's glorify Allah",tasks_empty:"No tasks yet, add your daily wird.",all_done:"Daily wird complete 🌿",of:"of",done_count:"tasks",custom_prompt:"Enter task name:",munjiyat_note:"As-Sajdah, Ya-Sin, Ad-Dukhan, Al-Waqi'ah, Al-Hashr, Al-Mulk, Al-Insan — (common set, edit per your verified source)" }
 };

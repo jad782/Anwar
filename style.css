@@ -1488,6 +1488,80 @@ body.light-mode .nc-name { color:#9a6f12; }
 .qibla-modal::-webkit-scrollbar { width:5px; }
 .qibla-modal::-webkit-scrollbar-thumb { background:rgba(212,168,67,0.3); border-radius:3px; }
 
+/* ====== هياكل التحميل (Skeleton) وحالات الفراغ ====== */
+.sk { position:relative; overflow:hidden; border-radius:8px; background:var(--pill-bg); }
+.sk::after {
+    content:''; position:absolute; inset:0; transform:translateX(-100%);
+    background:linear-gradient(90deg, transparent, rgba(212,168,67,0.16), transparent);
+    animation:sk-shine 1.5s ease-in-out infinite;
+}
+body.light-mode .sk::after { background:linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent); }
+@keyframes sk-shine { 100% { transform:translateX(100%); } }
+.sk-line { display:block; height:13px; margin:9px 0; }
+.sk-line.w90 { width:90%; } .sk-line.w70 { width:70%; } .sk-line.w45 { width:45%; }
+@media (prefers-reduced-motion: reduce) { .sk::after { animation:none; } }
+
+/* حالة فارغة أنيقة */
+.empty-state { display:flex; flex-direction:column; align-items:center; gap:9px; text-align:center; width:100%; padding:20px 14px; }
+.empty-state .es-ico {
+    width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:1.25rem; color:var(--accent-color);
+    background:radial-gradient(circle at 40% 35%, rgba(212,168,67,0.22), rgba(212,168,67,0.06));
+    border:1px solid rgba(212,168,67,0.28);
+}
+.empty-state .es-title { font-size:0.95rem; font-weight:800; color:var(--text-main); }
+.empty-state .es-desc { font-size:0.82rem; line-height:1.7; color:var(--text-muted); max-width:270px; }
+
+/* ====== حاسبة الزكاة ====== */
+.zk-modal { width:94%; max-width:430px; text-align:right; max-height:90vh; overflow-y:auto; }
+.zk-title { color:var(--accent-color); font-size:1.15rem; margin-bottom:6px; }
+.zk-sub { color:var(--text-muted); font-size:0.82rem; line-height:1.7; margin-bottom:16px; }
+.zk-fields { display:flex; flex-direction:column; gap:10px; }
+.zk-row { display:flex; flex-direction:column; gap:5px; text-align:right; }
+.zk-row label { font-size:0.8rem; font-weight:600; color:var(--text-soft,#cbbfa6); }
+.zk-row input, .zk-row select {
+    background:var(--pill-bg); border:1px solid var(--border-color); color:var(--text-main);
+    border-radius:12px; padding:11px 13px; font-family:inherit; font-size:0.95rem; font-weight:700;
+    width:100%; box-sizing:border-box; -webkit-appearance:none; appearance:none;
+}
+.zk-row input:focus, .zk-row select:focus { outline:none; border-color:var(--accent-color); }
+.zk-sel { margin-top:12px; }
+.zk-check { display:flex; align-items:center; gap:9px; margin-top:12px; cursor:pointer; font-size:0.85rem; font-weight:600; color:var(--text-soft,#cbbfa6); }
+.zk-check input { width:18px; height:18px; accent-color:var(--accent-color); flex:0 0 18px; }
+.zk-result { margin-top:16px; border-radius:14px; padding:13px 14px; border:1px solid var(--border-color); background:var(--pill-bg); }
+.zk-result.warn { border-color:rgba(231,124,58,0.5); background:rgba(231,124,58,0.12); color:#e77c3a; display:flex; gap:8px; align-items:center; font-size:0.84rem; font-weight:700; line-height:1.6; }
+.zk-result.due { border-color:rgba(212,168,67,0.55); }
+.zk-line { display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:0.86rem; padding:4px 0; color:var(--text-soft,#cbbfa6); }
+.zk-line b { color:var(--text-main); font-variant-numeric:tabular-nums; }
+.zk-due { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:9px; padding-top:11px; border-top:1px dashed var(--border-color); }
+.zk-due span { font-size:0.86rem; font-weight:700; color:var(--text-soft,#cbbfa6); }
+.zk-due strong { font-size:1.5rem; font-weight:800; color:var(--accent-color); font-variant-numeric:tabular-nums; letter-spacing:-0.5px; }
+.zk-hint { margin-top:8px; font-size:0.79rem; line-height:1.7; color:var(--text-muted); }
+.zk-note { margin-top:16px; display:flex; flex-direction:column; gap:5px; background:rgba(0,0,0,0.16); border:1px solid var(--border-color); border-radius:12px; padding:11px 12px; }
+.zk-note b { color:var(--accent-color); font-size:0.8rem; margin-bottom:2px; }
+.zk-note span { font-size:0.74rem; line-height:1.75; color:var(--text-muted); }
+.zk-note em { font-size:0.74rem; line-height:1.75; color:var(--text-soft,#cbbfa6); margin-top:4px; font-style:normal; font-weight:600; }
+body.light-mode .zk-note { background:rgba(0,0,0,0.04); }
+body.light-mode .zk-row input, body.light-mode .zk-row select { background:#fff; }
+
+/* ====== حلقة الصلاة القادمة (تقدّم حيّ بين الأذانين) ====== */
+.next-prayer-pill.npr { gap:10px; padding:7px 14px 7px 8px; align-items:center; width:100%; justify-content:flex-start; }
+.npr-circle { position:relative; width:38px; height:38px; flex:0 0 38px; }
+.npr-circle svg { width:38px; height:38px; transform:rotate(-90deg); }
+.npr-track { fill:none; stroke:currentColor; stroke-width:3.4; opacity:0.18; }
+.npr-arc {
+    fill:none; stroke:var(--accent-color,#C9A227); stroke-width:3.4; stroke-linecap:round;
+    stroke-dasharray:119.38; stroke-dashoffset:119.38;   /* 2πr, r=19 */
+    transition:stroke-dashoffset .9s linear;
+}
+.npr-circle i { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:0.82rem; color:var(--accent-color,#C9A227); }
+.npr-txt { display:flex; flex-direction:column; line-height:1.25; min-width:0; }
+.npr-name { font-size:0.72rem; font-weight:600; opacity:0.75; }
+.npr-count { font-size:1.02rem; font-weight:800; letter-spacing:0.2px; font-variant-numeric:tabular-nums; }
+/* توهّج لطيف عند اقتراب الأذان (آخر 10 دقائق) */
+.next-prayer-pill.npr.soon { border:1px solid rgba(212,168,67,0.55); box-shadow:0 0 16px rgba(212,168,67,0.18); }
+.next-prayer-pill.npr.soon .npr-count { color:var(--accent-color,#C9A227); }
+
 /* ====== قراءة الدرجة (البطل) + تحسينات شكل القبلة ====== */
 .qibla-degwrap { margin-top:18px; display:flex; flex-direction:column; align-items:center; gap:2px; }
 .qibla-degree {

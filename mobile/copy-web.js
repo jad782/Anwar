@@ -34,6 +34,7 @@ const INCLUDE = [
   'backup-rate.js',
   'update.js',
   'sunan.js',
+  'zakat.js',
   'mushaf.js',
   'daily.js',
   'guide.js',
