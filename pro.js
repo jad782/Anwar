@@ -533,38 +533,66 @@ function initIAP(){
         [16000, 30000].forEach(function(ms){ setTimeout(function(){ try{ PRO.enforceOwnership(); }catch(e){} }, ms); });
     } catch(e){ _iapState.err = 'init: ' + (e && e.message || e); }
 }
-// يقفل البريميوم مرة واحدة إن ثبت عدم وجود اشتراك فعّال (بعد تحميل الإيصالات) — يمنع الاستفادة بثغرة سابقة
+// ============================================================================
+//  الملكية الفعليّة: هل يوجد دفع مكتمل حقيقي؟
+//  لا نستخدم p.owned أبداً: عند الضغط على الباقة تُطلق آبل purchaseEnqueued فتُنشئ
+//  الإضافة معاملة بحالة INITIATED (قبل الدفع) وتحقنها في الإيصال المحلّي، و isOwned
+//  لا يرفضها لأن فحص isPending مُطبَّق في محوّل Google Play فقط ولا يُضبط على آبل =>
+//  p.owned تعود true قبل أي دفع (وكذلك بعد الإلغاء). لذلك نفحص حالة المعاملة بأنفسنا:
+//  INITIATED → PENDING → APPROVED → FINISHED   (الدفع يكتمل عند APPROVED)
+// ============================================================================
+PRO._ownsPremium = function(){
+    try{
+        const C=window.CdvPurchase; if(!C||!C.store) return false;
+        const ids=[LIFETIME_ID].concat(SUB_IDS);
+        let txs=[];
+        try{ txs = C.store.localTransactions || []; }catch(e){}
+        if(!txs.length){ try{ (C.store.localReceipts||[]).forEach(function(r){ (r&&r.transactions||[]).forEach(function(t){ txs.push(t); }); }); }catch(e){} }
+        let best=null, bestAt=-1;
+        for(let i=0;i<txs.length;i++){
+            const t=txs[i]; if(!t) continue;
+            const st=String(t.state||'').toLowerCase();
+            if(st!=='approved' && st!=='finished') continue;      // قيد الشراء/ملغاة => ليست ملكية
+            if(t.isConsumed || t.isPending) continue;
+            const prods=t.products||[];
+            let match=false;
+            for(let j=0;j<prods.length;j++){ if(prods[j] && ids.indexOf(prods[j].id)>=0){ match=true; break; } }
+            if(!match) continue;
+            const at = t.purchaseDate ? (+new Date(t.purchaseDate)) : 0;
+            if(at>=bestAt){ bestAt=at; best=t; }                 // الأحدث
+        }
+        if(!best) return false;
+        // اشتراك منتهٍ (شهري/سنوي لم يُجدَّد) => ليس مالكاً
+        if(best.expirationDate){ const exp=+new Date(best.expirationDate); if(!(exp>Date.now())) return false; }
+        return true;
+    }catch(e){ return false; }
+};
+// يقفل البريميوم إن ثبت عدم وجود دفع مكتمل (بعد تحميل الإيصالات) — يسدّ أي فتح بثغرة سابقة
 PRO.enforceOwnership = function(){
     try{
         if(!_receiptsSeen) return; // لم تُحمّل الإيصالات — لا تُقفل (أمان للأوفلاين)
         if(localStorage.getItem('anwar_premium')!=='true') return; // ليس مميّزاً أصلاً
         const C=window.CdvPurchase; if(!C||!C.store) return;
-        const ids=[LIFETIME_ID].concat(SUB_IDS); let owned=false, loaded=false;
+        if(PRO._ownsPremium()) return;                 // دفع حقيقي فعّال — اتركه
+        const ids=[LIFETIME_ID].concat(SUB_IDS); let loaded=false;
         for(let i=0;i<ids.length;i++){
             try{
                 const p=C.store.get(ids[i], C.Platform.APPLE_APPSTORE);
                 if(!p) continue;
-                if(p.owned){ owned=true; break; }
                 // اعتبر المتجر "محمّلاً" فقط إذا وصلت بيانات المنتج فعلاً (عروض/سعر/قابل للشراء)
                 if((p.offers&&p.offers.length) || p.pricing || p.canPurchase) loaded=true;
             }catch(e){}
         }
-        if(owned) return;
         if(!loaded) return; // المتجر لم يُحمّل المنتجات بعد (شبكة/سلة App Store) — لا تُقفل مشتركاً فعلياً بالخطأ
         localStorage.setItem('anwar_premium','false'); if(window.AnwarPremium&&AnwarPremium.onLocked) AnwarPremium.onLocked();
     }catch(e){}
 };
-// يتحقّق من ملكية أي منتج مميّز (اشتراك فعّال أو مدى الحياة) ويفتح البريميوم — يُستدعى عند كل تشغيل
-//  ملاحظة: منح فقط (لا يسحب) — لأنّ p.owned على iOS قد يقرأ false للحظة أثناء تحديث الإيصال،
-//  فالسحب الفوري يسبّب "وميضاً" للمشترك الفعلي. انتهاء الاشتراك يوقفه آبل تلقائياً من جهته.
+// يتحقّق من وجود دفع مكتمل (اشتراك فعّال أو مدى الحياة) ويفتح البريميوم — يُستدعى عند كل تشغيل
+//  منح فقط (لا يسحب) — السحب مسؤولية enforceOwnership المتأخّر، تجنّباً لأي "وميض" للمشترك الفعلي.
 PRO.syncPremium = function(){
     try{
         const C=window.CdvPurchase; if(!C||!C.store) return false;
-        const ids=[LIFETIME_ID].concat(SUB_IDS);
-        let owned=false;
-        for(let i=0;i<ids.length;i++){
-            try{ const p=C.store.get(ids[i], C.Platform.APPLE_APPSTORE); if(p && p.owned){ owned=true; break; } }catch(e){}
-        }
+        const owned = PRO._ownsPremium();   // دفع مكتمل فعلاً (لا تكفي معاملة قيد الشراء)
         if(owned && localStorage.getItem('anwar_premium')!=='true'){
             localStorage.setItem('anwar_premium','true');
             if(window.AnwarPremium&&AnwarPremium.onUnlocked) AnwarPremium.onUnlocked();

@@ -1,5 +1,5 @@
 // Update Version 5
-const CACHE_NAME = 'anwar-cache-v127';
+const CACHE_NAME = 'anwar-cache-v128';
 
 const urlsToCache = [
   './',
@@ -12,7 +12,7 @@ const urlsToCache = [
   './haptics.js?v=1',
   './app.js?v=27',
   './features.js?v=23',
-  './pro.js?v=29',
+  './pro.js?v=30',
   './pro2.js?v=20',
   './points.js?v=16',
   './keys.js?v=6',
