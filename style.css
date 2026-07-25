@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&family=Tajawal:wght@400;500;700;800&display=swap');
-
+/* الخطوط مُدمجة محليّاً في fonts.css — أُزيل @import الخارجي (كان يحجب الرسم ويحتاج إنترنت) */
 /* ===== هوية "ليل الأنوار" (الافتراضية): داكن فحمي + توهّج ذهبي ===== */
 :root {
     --primary-color: #E6BE5C;     /* ذهبي دافئ للعناوين */
@@ -1701,3 +1700,90 @@ body.light-mode .luxe-sub,
 body.light-mode .hcc-name,
 body.light-mode .ram-t b,
 body.light-mode .ram-timer{ color:#9a6f12; }
+
+/* ==========================================================================
+   طبقة الصنعة (Craft Layer) — تفاصيل العمق والفخامة
+   تُلحق آخر الملف لتفوز في التعارض. لا تضيف ميزات، تُتقن الموجود.
+   ========================================================================== */
+
+/* ---- ١) لغة الحركة الموحّدة: منحنى واحد وثلاث مدّات ---- */
+:root {
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);      /* خروج ناعم فخم */
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --dur-fast: 0.16s;    /* لمس/ضغط */
+    --dur-mid: 0.26s;     /* تبديل حالة */
+    --dur-slow: 0.42s;    /* دخول عنصر */
+}
+
+/* ---- ٢) جودة رسم الخط العربي (كانت غائبة تماماً) ---- */
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+body {
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;   /* تقنين + إشكال متصل */
+    font-variant-ligatures: common-ligatures contextual;
+}
+
+/* ---- ٣) العربية لا تُباعَد حروفها: التباعد للاتينية والأرقام فقط ----
+   letter-spacing على النص العربي يفكّ الحروف المتصلة ويُفقده رصانته. */
+.greeting,
+.section-header h3,
+.qibla-modal h2,
+.set-group-title,
+.ayah-day-label,
+.qibla-degcap,
+.es-title, .es-desc,
+.zk-title, .zk-sub,
+.npr-name { letter-spacing: normal; }
+/* تبقى الأناقة اللاتينية عند التبديل للإنجليزية */
+html[lang="en"] .set-group-title { letter-spacing: 1px; }
+html[lang="en"] .greeting { letter-spacing: -0.5px; }
+html[lang="en"] .section-header h3 { letter-spacing: -0.3px; }
+
+/* ---- ٤) أرقام ثابتة العرض: تمنع رجفة العدّادات أثناء العدّ ---- */
+.prayer-remain, .npr-count, .ram-timer, .nt-timer,
+.qibla-degree, .zk-line b, .zk-due strong,
+.khatma-item-page, .ring-pct, #streak-count, #hijri-day, #greg-day {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+}
+
+/* ---- ٥) ردّ فعل اللمس للعناصر التي كانت بلا تغذية راجعة ---- */
+.khatma-item, .prem-feat, .prem-plan, .gd-sec { transition: transform var(--dur-fast) var(--ease), background var(--dur-fast) ease, border-color var(--dur-fast) ease; }
+.khatma-item:active, .prem-feat:active, .gd-sec:active { transform: scale(0.985); }
+.prem-plan:active { transform: scale(0.97); }   /* أهم زر: ضغطة محسوسة */
+
+/* ---- ٦) حبس الارتداد داخل الطبقات (يمنع اهتزاز الصفحة خلف النوافذ) ---- */
+.content-area, .qibla-modal, .prem-modal, .zk-modal,
+.hifz-overlay, .ps-scroll, #keys-grid, .am-sheet {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ---- ٧) لفّ نصّي أرقى: يمنع الكلمة اليتيمة في العناوين والفقرات ---- */
+.section-header h3, .greeting, .es-title, .zk-title,
+.prem-hero h2, .qibla-modal h2 { text-wrap: balance; }
+.es-desc, .zk-sub, .zk-hint, .prem-hero p, .pf-txt span { text-wrap: pretty; }
+
+/* ---- ٨) حلقة تركيز للوصولية (كانت غائبة) ---- */
+:focus-visible {
+    outline: 2px solid var(--accent-color, #C9A227);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offset: 0; }
+
+/* ---- ٩) منع تحديد النص العابر على العناصر التفاعلية (إحساس أصلي) ---- */
+.key-tile, .prayer-card, .ps-chip, .ring-item, .prem-plan,
+.setting-item, .khatma-item, .tasbeeh-pill, .icon-btn, .zk-check {
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* ---- ١٠) احترام تعطيل الحركة في النظام ---- */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    .npr-arc { transition: none; }
+}

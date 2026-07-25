@@ -1,10 +1,27 @@
 // Update Version 5
-const CACHE_NAME = 'anwar-cache-v132';
+const CACHE_NAME = 'anwar-cache-v134';
 
 const urlsToCache = [
   './',
   './index.html',
-  './style.css?v=83',
+  './fa.css?v=1',
+  './fonts.css?v=1',
+  './f-amiri-arabic-400.woff2',
+  './f-amiri-arabic-700.woff2',
+  './f-cairo-arabic-400900.woff2',
+  './f-cairo-latin-400900.woff2',
+  './f-fa-brands-400.woff2',
+  './f-fa-regular-400.woff2',
+  './f-fa-solid-900.woff2',
+  './f-tajawal-arabic-400.woff2',
+  './f-tajawal-arabic-500.woff2',
+  './f-tajawal-arabic-700.woff2',
+  './f-tajawal-arabic-800.woff2',
+  './f-tajawal-latin-400.woff2',
+  './f-tajawal-latin-500.woff2',
+  './f-tajawal-latin-700.woff2',
+  './f-tajawal-latin-800.woff2',
+  './style.css?v=85',
   './persist.js?v=2',
   './quran-data.js?v=1',
   './firebase.js?v=3',
@@ -18,7 +35,7 @@ const urlsToCache = [
   './keys.js?v=7',
   './premium.js?v=19',
   './hajj.js?v=3',
-  './loved.js?v=4',
+  './loved.js?v=5',
   './kids.js?v=3',
   './recitations.js?v=1',
   './premium-features.js?v=6',

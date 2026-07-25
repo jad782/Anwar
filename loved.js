@@ -242,7 +242,6 @@ window.AnwarLoved = {
         const html=`<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8">
             <title>${esc(p.name)}</title>
             <style>
-              @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;700&display=swap');
               body{font-family:'Tajawal',sans-serif;background:#0f0d08;color:#f3ecd9;margin:0;padding:40px 28px;}
               .head{text-align:center;border-bottom:2px solid #d4a843;padding-bottom:18px;margin-bottom:26px;}
               .head h1{font-family:'Amiri',serif;color:#e9c877;font-size:30px;margin:0 0 6px;}
