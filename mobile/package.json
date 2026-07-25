@@ -16,6 +16,7 @@
     "@capacitor/ios": "^6.1.2",
     "@capacitor/local-notifications": "^6.1.0",
     "@capacitor/preferences": "^6.0.2",
+    "cordova-plugin-device-orientation": "^3.0.0",
     "cordova-plugin-purchase": "^13.11.1"
   },
   "devDependencies": {

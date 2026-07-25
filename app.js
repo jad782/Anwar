@@ -537,18 +537,30 @@ window.openQibla = function() {
             qiblaBearing = computeQiblaBearing(pos.coords.latitude, pos.coords.longitude);
             document.getElementById('qibla-degree').innerText = Math.round(qiblaBearing) + '°';
             renderQiblaRoute(pos.coords.latitude, pos.coords.longitude, qiblaBearing);
-            startCompass();
+            // قرب الكعبة: الاتجاه حسّاس جداً (إحداثيات متقاربة) والبوصلة تتأثّر بحديد الحرم والزحام
+            const _km = distanceToKaaba(pos.coords.latitude, pos.coords.longitude);
+            const _hint = document.getElementById('qibla-hint');
+            if (_km <= 15 && _hint) {
+                _hint.innerHTML = currentLang==='en'
+                    ? '🕋 You are in Makkah, right by the Kaaba — face it directly in front of you. Compasses are unreliable inside the Grand Mosque (steel & crowds).'
+                    : '🕋 أنت في مكة قرب الكعبة — استقبِلها مباشرةً أمامك. البوصلة غير دقيقة داخل الحرم بسبب الحديد والزحام.';
+                _hint.style.display = 'block';
+            }
+            // الاتجاه (الرقم) والخريطة صحيحان دائماً حتى لو تعذّرت البوصلة الحيّة
         }, () => {
             // بدون موقع: استخدم إسطنبول كافتراضي
             qiblaBearing = computeQiblaBearing(41.0082, 28.9784);
             document.getElementById('qibla-degree').innerText = Math.round(qiblaBearing) + (currentLang==='en'?'° (approx)':'° (تقريبي)');
             renderQiblaRoute(41.0082, 28.9784, qiblaBearing);
-            startCompass();
         }, { timeout: 8000, maximumAge: 600000, enableHighAccuracy: false });
     } else { qiblaBearing = computeQiblaBearing(41.0082, 28.9784); document.getElementById('qibla-degree').innerText = Math.round(qiblaBearing) + '°'; renderQiblaRoute(41.0082, 28.9784, qiblaBearing); }
 
-    // 2) إذن البوصلة على iOS 13+
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    // 2) تشغيل البوصلة:
+    //    - لو توفّرت بوصلة أصليّة (إضافة الجهاز) نشغّلها مباشرة بلا زر إذن (تستعمل إذن الموقع الممنوح أصلاً).
+    //    - وإلا على iOS 13+ نطلب إذن DeviceOrientation عبر الزر (ولا نشغّل قبل الموافقة).
+    if (navigator.compass && typeof navigator.compass.watchHeading === 'function') {
+        startCompass();
+    } else if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         permBtn.style.display = 'block';
     } else { startCompass(); }
 }
@@ -562,37 +574,73 @@ window.requestCompassPermission = function() {
     }
 }
 
+let _absCompass = false;   // هل مصدر بوصلة الويب منسوب للشمال فعلاً (absolute)؟
+let _compassWatch = null;  // معرّف مراقبة البوصلة الأصليّة (cordova-plugin-device-orientation)
+let _webCompassBound = false;
 function startCompass() {
     _smoothHeading = null;
     if (_orientationBound) return;
-    if ('ondeviceorientationabsolute' in window) window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-    else window.addEventListener('deviceorientation', handleOrientation, true);
     _orientationBound = true;
+    // (1) الأفضل: بوصلة أصليّة (نفس مصدر التطبيقات النظاميّة) — trueHeading من CoreLocation مباشرة.
+    //     تعمل داخل WKWebView حيث قد لا يتوفّر webkitCompassHeading، ولا تحتاج إذن DeviceOrientation.
+    if (navigator.compass && typeof navigator.compass.watchHeading === 'function') {
+        try {
+            _compassWatch = navigator.compass.watchHeading(function(h){
+                const deg = (h && typeof h.trueHeading === 'number' && h.trueHeading >= 0) ? h.trueHeading
+                          : (h && typeof h.magneticHeading === 'number' ? h.magneticHeading : null);
+                if (deg !== null) applyHeading(deg, h.headingAccuracy);
+            }, function(){ startWebCompass(); }, { frequency: 80 });
+            return;
+        } catch(e){}
+    }
+    // (2) احتياط: بوصلة الويب (DeviceOrientation)
+    startWebCompass();
+}
+function startWebCompass() {
+    if (_webCompassBound) return; _webCompassBound = true;
+    if ('ondeviceorientationabsolute' in window) { _absCompass = true; window.addEventListener('deviceorientationabsolute', handleOrientation, true); }
+    else { _absCompass = false; window.addEventListener('deviceorientation', handleOrientation, true); }
 }
 
 window.closeQibla = function() {
     document.getElementById('qibla-overlay').classList.remove('active');
     window.removeEventListener('deviceorientationabsolute', handleOrientation, true);
     window.removeEventListener('deviceorientation', handleOrientation, true);
-    _orientationBound = false;
+    if (_compassWatch !== null && navigator.compass && navigator.compass.clearWatch) { try{ navigator.compass.clearWatch(_compassWatch); }catch(e){} }
+    _compassWatch = null; _webCompassBound = false; _orientationBound = false;
 }
 
 let _smoothHeading = null, _headVel = 0, _wasAligned = false, _lastPulse = 0; // حركة نابضة + توجيه لمسي
 function handleOrientation(e) {
-    // اتجاه أعلى الهاتف بالنسبة للشمال الحقيقي
+    // اتجاه أعلى الهاتف بالنسبة للشمال الحقيقي (من DeviceOrientation)
     let heading;
-    if (typeof e.webkitCompassHeading === 'number') {
+    if (typeof e.webkitCompassHeading === 'number' && !isNaN(e.webkitCompassHeading)) {
         heading = e.webkitCompassHeading;            // iOS: شمال حقيقي جاهز
-    } else if (typeof e.alpha === 'number') {
-        // أندرويد/غيره: عوّض دوران الشاشة
+    } else if (typeof e.alpha === 'number' && _absCompass) {
+        // مصدر مطلق (deviceorientationabsolute على أندرويد): منسوب للشمال — عوّض دوران الشاشة
         const so = (screen.orientation && typeof screen.orientation.angle === 'number')
                    ? screen.orientation.angle : (window.orientation || 0);
         heading = (360 - e.alpha + so) % 360;
-    } else return;
+    } else {
+        // لا يوجد اتجاه منسوب للشمال (WKWebView بلا webkitCompassHeading، أو alpha نسبيّة فقط):
+        // لا نعرض إبرة خاطئة — نُبقي الرقم والخريطة (وهما صحيحان) ونطلب استعمال الرقم.
+        const hint = document.getElementById('qibla-hint');
+        if (hint && !hint._noCompass){ hint._noCompass = true;
+            hint.innerHTML = (currentLang==='en')
+                ? '🧭 Live compass unavailable on this device. Use the number above: face the Qibla at that many degrees from North.'
+                : '🧭 البوصلة الحيّة غير متاحة على هذا الجهاز. استعمل الرقم بالأعلى: وجّه نفسك نحو هذه الدرجة من الشمال.';
+            hint.style.display = 'block';
+        }
+        return;
+    }
+    applyHeading(heading, e.webkitCompassAccuracy);
+}
+
+// يطبّق اتجاه البوصلة (من أي مصدر: أصليّ أو ويب) على الإبرة والقرص — القلب المشترك
+function applyHeading(heading, acc) {
     if (qiblaBearing === null) return;
 
-    // كاشف التشويش المغناطيسي (iOS): دقّة سالبة أو عالية = تداخل
-    const acc = e.webkitCompassAccuracy;
+    // كاشف التشويش المغناطيسي: دقّة سالبة أو عالية = تداخل
     const magWarn = document.getElementById('qibla-magwarn');
     if (magWarn && typeof acc === 'number') magWarn.style.display = (acc < 0 || acc > 25) ? 'flex' : 'none';
 
@@ -738,7 +786,7 @@ const I18N = {
   surahs:"السور",juzs:"الأجزاء",athkar_morning:"أذكار الصباح",athkar_evening:"أذكار المساء",athkar_post:"أذكار بعد الصلاة",athkar_sleep:"أذكار النوم",
   language:"اللغة",reading_bg:"خلفية القراءة",notif_athan:"تنبيهات الأذان",gps_auto:"تحديد الموقع تلقائياً (GPS)",keep_awake:"إبقاء الشاشة مضاءة",night_mode:"الوضع النهاري (فاتح)",font_size:"حجم خط القراءة",factory_reset:"تصفير بيانات التطبيق",
   grp_general:"التخصيص",grp_reading:"القراءة",grp_alerts:"التنبيهات والموقع",grp_data:"البيانات",athan_sound:"صوت الأذان عند الوقت",pre_athan:"تنبيه قبل الأذان (دقائق)",my_stats:"إحصائياتي الروحية",
-  qibla_dir:"اتجاه القبلة",qibla_hint:"امسك الهاتف بشكل مسطح ووجّهه حتى تنطبق الكعبة على السهم.",qibla_enable:"تفعيل البوصلة",qibla_denied:"لم يتم السماح باستخدام البوصلة.",
+  qibla_dir:"اتجاه القبلة",qibla_hint:"امسك الهاتف بشكل مسطح ووجّهه حتى تنطبق الكعبة على السهم.",qibla_enable:"تفعيل البوصلة",qibla_denied:"لم يتم السماح باستخدام البوصلة.",qibla_from_north:"درجة من الشمال",
   add_task_title:"إضافة مهمة",add_surah_task:"إضافة سورة للقراءة اليومية",add_custom_task:"مهمة مخصّصة (ذكر/عبادة)",add_munjiyat:"المنجّيات السبع",pick_surah:"اختر سورة",open_full:"فتح كاملة",mark_done:"تمّت القراءة",
   greeting:"وقت مبارك",tasbeeh_cta:"لِنُسبّح الله",tasks_empty:"لا توجد مهام، أضف وردك اليومي.",all_done:"أتممت ورد اليوم 🌿",of:"من",done_count:"مهمة",custom_prompt:"اكتب اسم المهمة:",munjiyat_note:"السجدة، يس، الدخان، الواقعة، الحشر، المُلك، الإنسان — (صيغة شائعة، عدّلها حسب مصدرك الموثّق)" },
  en:{ nav_home:"Home",nav_quran:"Quran",nav_athkar:"Athkar",nav_settings:"Settings",nav_donate:"Support",donate_title:"Support the Developer",
@@ -746,7 +794,7 @@ const I18N = {
   surahs:"Surahs",juzs:"Juz",athkar_morning:"Morning Athkar",athkar_evening:"Evening Athkar",athkar_post:"After-Prayer Athkar",athkar_sleep:"Sleep Athkar",
   language:"Language",reading_bg:"Reading Background",notif_athan:"Athan Notifications",gps_auto:"Auto Location (GPS)",keep_awake:"Keep Screen On",night_mode:"Day Mode (light)",font_size:"Reading Font Size",factory_reset:"Reset App Data",
   grp_general:"General",grp_reading:"Reading",grp_alerts:"Alerts & Location",grp_data:"Data",athan_sound:"Play Athan sound",pre_athan:"Pre-Athan reminder (min)",my_stats:"My Spiritual Stats",
-  qibla_dir:"Qibla Direction",qibla_hint:"Hold the phone flat and turn it until the Kaaba aligns with the arrow.",qibla_enable:"Enable Compass",qibla_denied:"Compass permission was denied.",
+  qibla_dir:"Qibla Direction",qibla_hint:"Hold the phone flat and turn it until the Kaaba aligns with the arrow.",qibla_enable:"Enable Compass",qibla_denied:"Compass permission was denied.",qibla_from_north:"degrees from North",
   add_task_title:"Add Task",add_surah_task:"Add a Surah to daily reading",add_custom_task:"Custom task (dhikr/worship)",add_munjiyat:"The Seven Protective Surahs",pick_surah:"Choose a Surah",open_full:"Open full",mark_done:"Mark as read",
   greeting:"A Blessed Time",tasbeeh_cta:"Let's glorify Allah",tasks_empty:"No tasks yet, add your daily wird.",all_done:"Daily wird complete 🌿",of:"of",done_count:"tasks",custom_prompt:"Enter task name:",munjiyat_note:"As-Sajdah, Ya-Sin, Ad-Dukhan, Al-Waqi'ah, Al-Hashr, Al-Mulk, Al-Insan — (common set, edit per your verified source)" }
 };

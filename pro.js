@@ -535,9 +535,19 @@ PRO.enforceOwnership = function(){
         if(!_receiptsSeen) return; // لم تُحمّل الإيصالات — لا تُقفل (أمان للأوفلاين)
         if(localStorage.getItem('anwar_premium')!=='true') return; // ليس مميّزاً أصلاً
         const C=window.CdvPurchase; if(!C||!C.store) return;
-        const ids=[LIFETIME_ID].concat(SUB_IDS); let owned=false;
-        for(let i=0;i<ids.length;i++){ try{ const p=C.store.get(ids[i], C.Platform.APPLE_APPSTORE); if(p&&p.owned){ owned=true; break; } }catch(e){} }
-        if(!owned){ localStorage.setItem('anwar_premium','false'); if(window.AnwarPremium&&AnwarPremium.onLocked) AnwarPremium.onLocked(); }
+        const ids=[LIFETIME_ID].concat(SUB_IDS); let owned=false, loaded=false;
+        for(let i=0;i<ids.length;i++){
+            try{
+                const p=C.store.get(ids[i], C.Platform.APPLE_APPSTORE);
+                if(!p) continue;
+                if(p.owned){ owned=true; break; }
+                // اعتبر المتجر "محمّلاً" فقط إذا وصلت بيانات المنتج فعلاً (عروض/سعر/قابل للشراء)
+                if((p.offers&&p.offers.length) || p.pricing || p.canPurchase) loaded=true;
+            }catch(e){}
+        }
+        if(owned) return;
+        if(!loaded) return; // المتجر لم يُحمّل المنتجات بعد (شبكة/سلة App Store) — لا تُقفل مشتركاً فعلياً بالخطأ
+        localStorage.setItem('anwar_premium','false'); if(window.AnwarPremium&&AnwarPremium.onLocked) AnwarPremium.onLocked();
     }catch(e){}
 };
 // يتحقّق من ملكية أي منتج مميّز (اشتراك فعّال أو مدى الحياة) ويفتح البريميوم — يُستدعى عند كل تشغيل

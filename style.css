@@ -1488,6 +1488,30 @@ body.light-mode .nc-name { color:#9a6f12; }
 .qibla-modal::-webkit-scrollbar { width:5px; }
 .qibla-modal::-webkit-scrollbar-thumb { background:rgba(212,168,67,0.3); border-radius:3px; }
 
+/* ====== قراءة الدرجة (البطل) + تحسينات شكل القبلة ====== */
+.qibla-degwrap { margin-top:18px; display:flex; flex-direction:column; align-items:center; gap:2px; }
+.qibla-degree {
+    font-size:2.3rem; font-weight:800; line-height:1; letter-spacing:-1px; margin:0;
+    background:linear-gradient(135deg, var(--accent-light,#F2D27A) 0%, var(--accent-color,#C9A227) 60%, #9C7517 100%);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:var(--accent-color);
+    text-shadow:0 1px 10px rgba(212,168,67,0.18); font-variant-numeric:tabular-nums;
+}
+.qibla-degcap { font-size:0.72rem; font-weight:600; color:var(--text-muted); letter-spacing:0.4px; opacity:0.9; }
+/* في الوضع الفاتح: تدرّج ذهبي أغمق ليبقى واضحاً على الخلفية البيضاء */
+body.light-mode .qibla-degree { background:linear-gradient(135deg,#B8860B 0%, #8A6410 100%); -webkit-background-clip:text; background-clip:text; }
+
+/* حلقة توهّج فاخرة حول البوصلة في الوضع الداكن/البريميوم */
+body:not(.light-mode) .compass-circle {
+    box-shadow: inset 0 6px 22px rgba(0,0,0,0.55), 0 0 0 1px rgba(212,168,67,0.28), 0 12px 44px var(--glow);
+}
+body.theme-oled .compass-circle {
+    box-shadow: inset 0 6px 22px rgba(0,0,0,0.65), 0 0 0 1px rgba(212,168,67,0.4), 0 0 55px rgba(212,168,67,0.16);
+}
+/* في الوضع الفاتح: إطار ذهبي رقيق يفصل قرص البوصلة الداكن عن البطاقة البيضاء */
+body.light-mode .compass-circle {
+    box-shadow: inset 0 6px 22px rgba(0,0,0,0.5), 0 0 0 2px rgba(184,134,11,0.35), 0 12px 30px rgba(184,134,11,0.22);
+}
+
 /* التاريخ في الهيرو أوضح */
 .date-card-emerald .day { text-shadow:0 1px 8px rgba(0,0,0,0.3); }
 

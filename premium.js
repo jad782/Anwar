@@ -11,7 +11,7 @@ function isPrem(){ return localStorage.getItem('anwar_premium')==='true'; }
 
 window.AnwarPremium = window.AnwarPremium || {};
 AnwarPremium.is = isPrem;
-AnwarPremium.setForTesting = function(v){ localStorage.setItem('anwar_premium', v?'true':'false'); AnwarPremium.onUnlocked(); };
+// ملاحظة: أُزيلت setForTesting (كانت تفتح البريميوم بلا دفع لو استُدعيت من Web Inspector) — أمان.
 
 // الميزات المميّزة (شرح مبسّط لكل واحدة)
 const FEATURES = [
@@ -129,7 +129,20 @@ function renderSection(){
     const sc=$('ps-scroll');
     if(sc && !sc._b){ sc._b=1;
         sc.addEventListener('wheel',e=>{ if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){ sc.scrollLeft+=e.deltaY; e.preventDefault(); } },{passive:false});
-        if(!('ontouchstart' in window)){ // سطح المكتب فقط
+        if('ontouchstart' in window){
+            // اللمس: iOS يلغي حدث click داخل شريط التمرير عند أي حركة إصبع بسيطة، فكانت
+            // البطاقات (مثل وضع الحفظ) "لا تفتح ولا شي". نكشف النقرة الحقيقيّة يدوياً ونُطلقها.
+            let tsx=0, tsy=0, tst=0, moved=false;
+            sc.addEventListener('touchstart', e=>{ const t=e.touches[0]; tsx=t.clientX; tsy=t.clientY; tst=Date.now(); moved=false; }, {passive:true});
+            sc.addEventListener('touchmove', e=>{ const t=e.touches[0]; if(Math.abs(t.clientX-tsx)>10 || Math.abs(t.clientY-tsy)>10) moved=true; }, {passive:true});
+            sc.addEventListener('touchend', e=>{
+                if(moved || (Date.now()-tst)>600) return;           // كان تمريراً، مو نقرة
+                const chip = e.target && e.target.closest ? e.target.closest('.ps-chip') : null;
+                if(!chip) return;
+                const idx = Array.prototype.indexOf.call(sc.querySelectorAll('.ps-chip'), chip);
+                if(idx>=0){ e.preventDefault(); AnwarPremium.tapFeature(idx); }  // preventDefault يمنع نقرة مكرّرة
+            }, {passive:false});
+        } else { // سطح المكتب فقط: سحب بالماوس
             let d=false,sx=0,sl=0,mv=false;
             sc.addEventListener('mousedown',e=>{ d=true;mv=false;sx=e.pageX;sl=sc.scrollLeft; });
             window.addEventListener('mousemove',e=>{ if(!d)return; const dx=e.pageX-sx; if(Math.abs(dx)>3)mv=true; sc.scrollLeft=sl-dx; });
