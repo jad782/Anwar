@@ -17,6 +17,50 @@ function isNative(){
         && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications);
 }
 function lang(){ return (typeof currentLang !== 'undefined') ? currentLang : 'ar'; }
+
+// ---------------------------------------------------------------------------
+//  تذكير السنن الرواتب والأذكار عند كل أذان — كل نصّ مُسند إلى مصدره.
+//  عدد الرواتب اثنتا عشرة ركعة: «مَن صلّى في يومٍ وليلةٍ ثنتي عشرة ركعةً بُني له
+//  بيتٌ في الجنّة» رواه مسلم (٧٢٨)، وبيانها عند الترمذي (٤١٥): أربعٌ قبل الظهر
+//  وركعتان بعدها، وركعتان بعد المغرب، وركعتان بعد العشاء، وركعتان قبل الفجر.
+// ---------------------------------------------------------------------------
+const SUNNAH = {
+    Fajr: {
+        ar: 'ركعتا الفجر قبل الفريضة، وأذكار الصباح.',
+        src_ar: '«ركعتا الفجر خيرٌ من الدنيا وما فيها» — مسلم',
+        en: 'Two rak\'ahs before Fajr, then the morning adhkar.',
+        src_en: '"The two rak\'ahs of Fajr are better than the world and all it contains" — Muslim'
+    },
+    Dhuhr: {
+        ar: 'أربع ركعات قبل الظهر وأربع بعدها.',
+        src_ar: '«مَن حافظ على أربع ركعاتٍ قبل الظهر وأربعٍ بعدها حرّمه الله على النار» — أبو داود والترمذي، حسن',
+        en: 'Four rak\'ahs before Dhuhr and four after.',
+        src_en: '"Whoever keeps four rak\'ahs before Dhuhr and four after, Allah will shield him from the Fire" — Abu Dawud & Tirmidhi (hasan)'
+    },
+    Asr: {
+        ar: 'أربع ركعات قبل العصر — وهي الصلاة الوسطى.',
+        src_ar: '«رحم الله امرأً صلّى قبل العصر أربعاً» — أبو داود والترمذي، حسن',
+        en: 'Four rak\'ahs before Asr — the middle prayer.',
+        src_en: '"May Allah have mercy on one who prays four before Asr" — Abu Dawud & Tirmidhi (hasan)'
+    },
+    Maghrib: {
+        ar: 'ركعتان بعد المغرب، وابدأ أذكار المساء.',
+        src_ar: 'من السنن الرواتب — مسلم والترمذي',
+        en: 'Two rak\'ahs after Maghrib, then the evening adhkar.',
+        src_en: 'Among the regular sunnah prayers — Muslim & Tirmidhi'
+    },
+    Isha: {
+        ar: 'ركعتان بعد العشاء، ولا تنسَ الوتر ولو بركعة.',
+        src_ar: '«اجعلوا آخر صلاتكم بالليل وتراً» — البخاري ومسلم',
+        en: 'Two rak\'ahs after Isha, and don\'t miss Witr — even one rak\'ah.',
+        src_en: '"Make the last of your night prayer Witr" — Bukhari & Muslim'
+    }
+};
+// نصّ جسم التنبيه: السنّة + المصدر (مختصر ليظهر كاملاً في الإشعار)
+function sunnahBody(k){
+    const s = SUNNAH[k]; if(!s) return lang()==='en' ? "Don't forget your prayer" : 'لا تنسَ الصلاة';
+    return lang()==='en' ? (s.en + ' ' + s.src_en) : (s.ar + ' ' + s.src_ar);
+}
 // اسم ملف صوت الأذان بحسب المنصّة: iOS يطلب .caf (≤30ث) مضمّناً بالحزمة، وأندرويد raw .mp3
 function athanSoundFile(){
     try{ if (window.Capacitor && Capacitor.getPlatform && Capacitor.getPlatform() === 'ios') return 'athan.caf'; }catch(e){}
@@ -62,7 +106,7 @@ window.scheduleNativeAthan = async function(){
             notifs.push({
                 id: 1000 + i,
                 title: (lang()==='en' ? 'Time for ' : 'حان وقت ') + lbl(k),
-                body: lang()==='en' ? "Don't forget your prayer" : 'لا تنسَ الصلاة',
+                body: sunnahBody(k),
                 schedule: { on: { hour: h, minute: m }, allowWhileIdle: true, repeats: true },
                 sound: athanSoundFile(),
                 channelId: 'athan'
