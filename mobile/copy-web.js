@@ -27,6 +27,7 @@ const INCLUDE = [
   'kids.js',
   'recitations.js',
   'premium-features.js',
+  'audio-quran.js',
   'qibla-ar.js',
   'salah-track.js',
   'onboarding.js',
