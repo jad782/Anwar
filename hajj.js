@@ -6,7 +6,7 @@
 'use strict';
 function $(id){ return document.getElementById(id); }
 function L(){ return (window.currentLang) || localStorage.getItem('lang') || 'ar'; }
-function tr(a,e){ return L()==='en' ? e : a; }
+function tr(a,e){ var l=L(); if(l==='ar') return a; if(l==='tr' && window.TR && TR[e]) return TR[e]; return e; }
 
 const UMRAH = [
     { t:'الإحرام من الميقات', d:'الاغتسال والتطيّب، لبس الإحرام، ونيّة العمرة مع التلبية: «لبّيك اللهم عمرة».' },

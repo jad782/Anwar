@@ -5,7 +5,7 @@
 (function(){
 'use strict';
 const L = () => (typeof currentLang !== 'undefined' ? currentLang : 'ar');
-const tr = (ar, en) => (L() === 'en' ? en : ar);
+const tr = (ar, en) => { const l=L(); if(l==='ar') return ar; if(l==='tr' && window.TR && TR[en]) return TR[en]; return en; };
 const $ = id => document.getElementById(id);
 
 // =======================================================

@@ -5,7 +5,7 @@
 'use strict';
 function $(id){ return document.getElementById(id); }
 function L(){ return (window.currentLang)||localStorage.getItem('lang')||'ar'; }
-function tr(a,e){ return L()==='en'?e:a; }
+function tr(a,e){ var l=L(); if(l==='ar') return a; if(l==='tr' && window.TR && TR[e]) return TR[e]; return e; }
 const STORE_REVIEW = 'https://apps.apple.com/app/id6782741099?action=write-review';
 
 window.AnwarBackup = {

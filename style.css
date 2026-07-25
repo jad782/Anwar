@@ -1787,3 +1787,39 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offs
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
     .npr-arc { transition: none; }
 }
+
+/* ====== أوقات الكراهة: بطاقة قابلة للطيّ (لا تشغل مساحة إلا عند الطلب) ====== */
+.makruh-card { padding:0; overflow:hidden; }
+.mk-head {
+    width:100%; display:flex; align-items:center; gap:10px; cursor:pointer;
+    background:none; border:0; padding:14px 16px; font-family:inherit; text-align:inherit;
+    color:#e77c3a; font-weight:800; font-size:0.92rem;
+    transition:background var(--dur-fast,.16s) ease;
+}
+.mk-head:active { background:rgba(231,124,58,0.08); }
+.mk-head-ic {
+    width:30px; height:30px; flex:0 0 30px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-size:0.8rem;
+    background:radial-gradient(circle at 40% 35%, rgba(231,124,58,0.30), rgba(231,124,58,0.10));
+    border:1px solid rgba(231,124,58,0.35);
+}
+.mk-head-t { flex:1; min-width:0; letter-spacing:normal; }
+/* نقطة نابضة: تبقى ظاهرة والبطاقة مطويّة فلا يضيع التنبيه */
+.mk-dot { width:9px; height:9px; border-radius:50%; background:#e77c3a; flex:0 0 9px; box-shadow:0 0 0 0 rgba(231,124,58,0.6); animation:mkDot 1.6s ease-out infinite; }
+@keyframes mkDot { 70%{ box-shadow:0 0 0 8px rgba(231,124,58,0); } 100%{ box-shadow:0 0 0 0 rgba(231,124,58,0); } }
+.mk-chev { font-size:0.78rem; opacity:0.75; transition:transform var(--dur-mid,.26s) var(--ease, ease); }
+.makruh-card.open .mk-chev { transform:rotate(180deg); }
+/* حين نكون داخل وقت كراهة والبطاقة مطويّة: إطار أوضح */
+.makruh-card.is-now { border-color:rgba(231,124,58,0.55); }
+
+/* الانسدال الناعم */
+.mk-wrap { display:none; }
+.makruh-card.open .mk-wrap { display:block; animation:mkOpen .34s var(--ease, ease) both; }
+@keyframes mkOpen { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+.mk-inner { padding:0 16px 16px; }
+/* فاصل زخرفي إسلامي أعلى المحتوى */
+.makruh-card.open .mk-inner::before {
+    content:'۞'; display:block; text-align:center; color:rgba(231,124,58,0.5);
+    font-size:0.85rem; line-height:1; margin:0 0 12px;
+}
+@media (prefers-reduced-motion: reduce) { .mk-wrap { transition:none; } .mk-dot { animation:none; } }

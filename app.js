@@ -255,8 +255,6 @@ window.setPrayerTimings = function(t, label){
 };
 
 let _countdownStarted = false;
-// أسماء الصلوات بالإنجليزية لحلقة الصلاة القادمة
-const LABELS_EN_NEXT = { Fajr:'Fajr', Sunrise:'Sunrise', Dhuhr:'Dhuhr', Asr:'Asr', Maghrib:'Maghrib', Isha:'Isha' };
 function startCountdown() {
     if (_countdownStarted) return; // لا تشغّل أكثر من مؤقّت
     _countdownStarted = true;
@@ -289,9 +287,8 @@ function startCountdown() {
         const rem = document.getElementById('remain-'+next.id); if(rem) rem.innerText = `${pad(h)}:${pad(m)}:${pad(s)}`;
 
         // ===== حلقة الصلاة القادمة: اسم + عدّ تنازلي + قوس تقدّم بين الأذانين =====
-        const en = (typeof currentLang!=='undefined' && currentLang==='en');
         const nameEl = document.getElementById('npr-name');
-        if(nameEl) nameEl.innerText = en ? (LABELS_EN_NEXT[next.id]||next.id) : next.name;
+        if(nameEl) nameEl.innerText = t('p_' + next.id.toLowerCase()) || next.name;
         const pill = document.getElementById('pill-countdown');
         if(pill) pill.innerText = `${pad(h)}:${pad(m)}:${pad(s)}`;
         // الصلاة السابقة (حدّ بداية الفترة) — مع التعامل مع الالتفاف حول منتصف الليل
@@ -815,7 +812,7 @@ const I18N = {
   surahs:"السور",juzs:"الأجزاء",athkar_morning:"أذكار الصباح",athkar_evening:"أذكار المساء",athkar_post:"أذكار بعد الصلاة",athkar_sleep:"أذكار النوم",
   language:"اللغة",reading_bg:"خلفية القراءة",notif_athan:"تنبيهات الأذان",gps_auto:"تحديد الموقع تلقائياً (GPS)",keep_awake:"إبقاء الشاشة مضاءة",night_mode:"الوضع النهاري (فاتح)",font_size:"حجم خط القراءة",factory_reset:"تصفير بيانات التطبيق",
   grp_general:"التخصيص",grp_reading:"القراءة",grp_alerts:"التنبيهات والموقع",grp_data:"البيانات",athan_sound:"صوت الأذان عند الوقت",pre_athan:"تنبيه قبل الأذان (دقائق)",my_stats:"إحصائياتي الروحية",
-  qibla_dir:"اتجاه القبلة",qibla_hint:"امسك الهاتف بشكل مسطح ووجّهه حتى تنطبق الكعبة على السهم.",qibla_enable:"تفعيل البوصلة",qibla_denied:"لم يتم السماح باستخدام البوصلة.",qibla_from_north:"درجة من الشمال",next_prayer:"الصلاة القادمة",
+  qibla_dir:"اتجاه القبلة",qibla_hint:"امسك الهاتف بشكل مسطح ووجّهه حتى تنطبق الكعبة على السهم.",qibla_enable:"تفعيل البوصلة",qibla_denied:"لم يتم السماح باستخدام البوصلة.",qibla_from_north:"درجة من الشمال",next_prayer:"الصلاة القادمة",p_fajr:"الفجر",p_sunrise:"الشروق",p_dhuhr:"الظهر",p_asr:"العصر",p_maghrib:"المغرب",p_isha:"العشاء",makruh_title:"أوقات الكراهة",
   add_task_title:"إضافة مهمة",add_surah_task:"إضافة سورة للقراءة اليومية",add_custom_task:"مهمة مخصّصة (ذكر/عبادة)",add_munjiyat:"المنجّيات السبع",pick_surah:"اختر سورة",open_full:"فتح كاملة",mark_done:"تمّت القراءة",
   greeting:"وقت مبارك",tasbeeh_cta:"لِنُسبّح الله",tasks_empty:"لا توجد مهام، أضف وردك اليومي.",all_done:"أتممت ورد اليوم 🌿",of:"من",done_count:"مهمة",custom_prompt:"اكتب اسم المهمة:",munjiyat_note:"السجدة، يس، الدخان، الواقعة، الحشر، المُلك، الإنسان — (صيغة شائعة، عدّلها حسب مصدرك الموثّق)" },
  en:{ nav_home:"Home",nav_quran:"Quran",nav_athkar:"Athkar",nav_settings:"Settings",nav_donate:"Support",donate_title:"Support the Developer",
@@ -823,9 +820,17 @@ const I18N = {
   surahs:"Surahs",juzs:"Juz",athkar_morning:"Morning Athkar",athkar_evening:"Evening Athkar",athkar_post:"After-Prayer Athkar",athkar_sleep:"Sleep Athkar",
   language:"Language",reading_bg:"Reading Background",notif_athan:"Athan Notifications",gps_auto:"Auto Location (GPS)",keep_awake:"Keep Screen On",night_mode:"Day Mode (light)",font_size:"Reading Font Size",factory_reset:"Reset App Data",
   grp_general:"General",grp_reading:"Reading",grp_alerts:"Alerts & Location",grp_data:"Data",athan_sound:"Play Athan sound",pre_athan:"Pre-Athan reminder (min)",my_stats:"My Spiritual Stats",
-  qibla_dir:"Qibla Direction",qibla_hint:"Hold the phone flat and turn it until the Kaaba aligns with the arrow.",qibla_enable:"Enable Compass",qibla_denied:"Compass permission was denied.",qibla_from_north:"degrees from North",next_prayer:"Next prayer",
+  qibla_dir:"Qibla Direction",qibla_hint:"Hold the phone flat and turn it until the Kaaba aligns with the arrow.",qibla_enable:"Enable Compass",qibla_denied:"Compass permission was denied.",qibla_from_north:"degrees from North",next_prayer:"Next prayer",p_fajr:"Fajr",p_sunrise:"Sunrise",p_dhuhr:"Dhuhr",p_asr:"Asr",p_maghrib:"Maghrib",p_isha:"Isha",makruh_title:"Disliked prayer times",
   add_task_title:"Add Task",add_surah_task:"Add a Surah to daily reading",add_custom_task:"Custom task (dhikr/worship)",add_munjiyat:"The Seven Protective Surahs",pick_surah:"Choose a Surah",open_full:"Open full",mark_done:"Mark as read",
-  greeting:"A Blessed Time",tasbeeh_cta:"Let's glorify Allah",tasks_empty:"No tasks yet, add your daily wird.",all_done:"Daily wird complete 🌿",of:"of",done_count:"tasks",custom_prompt:"Enter task name:",munjiyat_note:"As-Sajdah, Ya-Sin, Ad-Dukhan, Al-Waqi'ah, Al-Hashr, Al-Mulk, Al-Insan — (common set, edit per your verified source)" }
+  greeting:"A Blessed Time",tasbeeh_cta:"Let's glorify Allah",tasks_empty:"No tasks yet, add your daily wird.",all_done:"Daily wird complete 🌿",of:"of",done_count:"tasks",custom_prompt:"Enter task name:",munjiyat_note:"As-Sajdah, Ya-Sin, Ad-Dukhan, Al-Waqi'ah, Al-Hashr, Al-Mulk, Al-Insan — (common set, edit per your verified source)" },
+ tr:{ nav_home:"Ana sayfa",nav_quran:"Kur'an",nav_athkar:"Zikirler",nav_settings:"Ayarlar",nav_donate:"Geliştiriciye destek",donate_title:"Geliştiriciye destek ol",
+  daily_tasks:"Günlük görevlerim",add_task:"Ekle",customize:"Özelleştir",your_apps:"Günün anahtarları",prayer_times:"Namaz vakitleri",today_achievements:"Bugünün kazanımları",my_khatmas:"Hatimlerim",new_khatma:"Yeni hatim",
+  surahs:"Sureler",juzs:"Cüzler",athkar_morning:"Sabah zikirleri",athkar_evening:"Akşam zikirleri",athkar_post:"Namaz sonrası zikirler",athkar_sleep:"Uyku zikirleri",
+  language:"Dil",reading_bg:"Okuma arka planı",notif_athan:"Ezan bildirimleri",gps_auto:"Otomatik konum (GPS)",keep_awake:"Ekranı açık tut",night_mode:"Gündüz modu (açık)",font_size:"Okuma yazı boyutu",factory_reset:"Uygulama verilerini sıfırla",
+  grp_general:"Genel",grp_reading:"Okuma",grp_alerts:"Bildirimler ve konum",grp_data:"Veriler",athan_sound:"Vakit girince ezan sesi",pre_athan:"Ezandan önce hatırlatma (dk)",my_stats:"Manevi istatistiklerim",
+  qibla_dir:"Kıble yönü",qibla_hint:"Telefonu düz tutun ve Kâbe işareti okla çakışana dek çevirin.",qibla_enable:"Pusulayı etkinleştir",qibla_denied:"Pusula izni verilmedi.",qibla_from_north:"derece (kuzeyden)",next_prayer:"Sonraki namaz",p_fajr:"İmsak",p_sunrise:"Güneş",p_dhuhr:"Öğle",p_asr:"İkindi",p_maghrib:"Akşam",p_isha:"Yatsı",makruh_title:"Mekruh vakitler",
+  add_task_title:"Görev ekle",add_surah_task:"Günlük okumaya sure ekle",add_custom_task:"Özel görev (zikir/ibadet)",add_munjiyat:"Yedi münciyat suresi",pick_surah:"Bir sure seçin",open_full:"Tamamını aç",mark_done:"Okundu olarak işaretle",
+  greeting:"Mübarek bir vakit",tasbeeh_cta:"Allah'ı tesbih edelim",tasks_empty:"Henüz görev yok, günlük virdinizi ekleyin.",all_done:"Günlük vird tamamlandı 🌿",of:"/",done_count:"görev",custom_prompt:"Görev adını yazın:",munjiyat_note:"Secde, Yâsîn, Duhân, Vâkıa, Haşr, Mülk, İnsân — (yaygın liste; güvendiğiniz kaynağa göre düzenleyin)" }
 };
 let currentLang = localStorage.getItem('lang') || 'ar';
 function t(key){ return (I18N[currentLang] && I18N[currentLang][key]) || (I18N.ar[key]) || key; }
@@ -836,7 +841,7 @@ window.setLang = function(lang){
     document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
     applyTranslations();
     renderDailyTasks();
-    document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+    document.querySelectorAll('.lang-btn[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
     pageTitle.innerText = titles[[...tabSections].findIndex(s => s.style.display === 'block')] || t('nav_home');
 };
 function applyTranslations(){
@@ -1011,7 +1016,7 @@ function applyReadingBg(){
 document.documentElement.lang = currentLang;
 document.documentElement.dir = (currentLang === 'ar') ? 'rtl' : 'ltr';
 applyTranslations();
-document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === currentLang));
+document.querySelectorAll('.lang-btn[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === currentLang));
 loadTasks();
 applyReadingBg();
 

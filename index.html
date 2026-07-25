@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Al-Anwar">
     <title>تطبيق الأنوار الإسلامي</title>
-    <link rel="stylesheet" href="style.css?v=85">
+    <link rel="stylesheet" href="style.css?v=89">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="fa.css?v=1">
     <link rel="stylesheet" href="fonts.css?v=1">
@@ -71,12 +71,12 @@
                 <span class="location" id="location-text"><i class="fa-solid fa-location-dot"></i> إسطنبول</span>
             </div>
             <div class="prayer-grid">
-                <div class="prayer-card" id="p-Fajr"><i class="fa-solid fa-cloud-moon"></i><span>الفجر</span><strong id="fajr-time">--:--</strong><span class="prayer-remain" id="remain-Fajr"></span></div>
-                <div class="prayer-card" id="p-Sunrise"><i class="fa-solid fa-sun"></i><span>الشروق</span><strong id="sunrise-time">--:--</strong><span class="prayer-remain" id="remain-Sunrise"></span></div>
-                <div class="prayer-card" id="p-Dhuhr"><i class="fa-solid fa-sun"></i><span>الظهر</span><strong id="dhuhr-time">--:--</strong><span class="prayer-remain" id="remain-Dhuhr"></span></div>
-                <div class="prayer-card" id="p-Asr"><i class="fa-regular fa-sun"></i><span>العصر</span><strong id="asr-time">--:--</strong><span class="prayer-remain" id="remain-Asr"></span></div>
-                <div class="prayer-card" id="p-Maghrib"><i class="fa-solid fa-cloud-sun"></i><span>المغرب</span><strong id="maghrib-time">--:--</strong><span class="prayer-remain" id="remain-Maghrib"></span></div>
-                <div class="prayer-card" id="p-Isha"><i class="fa-solid fa-moon"></i><span>العشاء</span><strong id="isha-time">--:--</strong><span class="prayer-remain" id="remain-Isha"></span></div>
+                <div class="prayer-card" id="p-Fajr"><i class="fa-solid fa-cloud-moon"></i><span data-i18n="p_fajr">الفجر</span><strong id="fajr-time">--:--</strong><span class="prayer-remain" id="remain-Fajr"></span></div>
+                <div class="prayer-card" id="p-Sunrise"><i class="fa-solid fa-sun"></i><span data-i18n="p_sunrise">الشروق</span><strong id="sunrise-time">--:--</strong><span class="prayer-remain" id="remain-Sunrise"></span></div>
+                <div class="prayer-card" id="p-Dhuhr"><i class="fa-solid fa-sun"></i><span data-i18n="p_dhuhr">الظهر</span><strong id="dhuhr-time">--:--</strong><span class="prayer-remain" id="remain-Dhuhr"></span></div>
+                <div class="prayer-card" id="p-Asr"><i class="fa-regular fa-sun"></i><span data-i18n="p_asr">العصر</span><strong id="asr-time">--:--</strong><span class="prayer-remain" id="remain-Asr"></span></div>
+                <div class="prayer-card" id="p-Maghrib"><i class="fa-solid fa-cloud-sun"></i><span data-i18n="p_maghrib">المغرب</span><strong id="maghrib-time">--:--</strong><span class="prayer-remain" id="remain-Maghrib"></span></div>
+                <div class="prayer-card" id="p-Isha"><i class="fa-solid fa-moon"></i><span data-i18n="p_isha">العشاء</span><strong id="isha-time">--:--</strong><span class="prayer-remain" id="remain-Isha"></span></div>
             </div>
 
             <div class="ayah-of-day-card" id="ayah-of-day-card">
@@ -235,6 +235,7 @@
                     <span class="set-label" data-i18n="language">اللغة</span>
                     <div class="lang-switch">
                         <button class="lang-btn" data-lang="ar" onclick="setLang('ar')">عربي</button>
+                        <button class="lang-btn" data-lang="tr" onclick="setLang('tr')">TR</button>
                         <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
                     </div>
                 </div>
@@ -449,20 +450,21 @@
         </div>
     </div>
 
+    <script src="i18n-tr.js?v=1"></script>
     <script src="persist.js?v=2"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
     <script src="firebase.js?v=3"></script>
     <script src="quran-data.js?v=1"></script>
-    <script src="prayers.js?v=8"></script>
+    <script src="prayers.js?v=14"></script>
     <script src="haptics.js?v=1"></script>
-    <script src="app.js?v=28"></script>
-    <script src="features.js?v=24"></script>
-    <script src="pro.js?v=30"></script>
-    <script src="pro2.js?v=20"></script>
+    <script src="app.js?v=31"></script>
+    <script src="features.js?v=25"></script>
+    <script src="pro.js?v=31"></script>
+    <script src="pro2.js?v=21"></script>
     <script src="points.js?v=16"></script>
-    <script src="keys.js?v=7"></script>
-    <script src="premium.js?v=19"></script>
+    <script src="keys.js?v=8"></script>
+    <script src="premium.js?v=20"></script>
     <script src="hajj.js?v=3"></script>
     <script src="loved.js?v=5"></script>
     <script src="kids.js?v=3"></script>
@@ -474,10 +476,10 @@
     <script src="backup-rate.js?v=2"></script>
     <script src="update.js?v=8"></script>
     <script src="sunan.js?v=1"></script>
-    <script src="zakat.js?v=1"></script>
+    <script src="zakat.js?v=2"></script>
     <script src="mushaf.js?v=14"></script>
     <script src="daily.js?v=2"></script>
-    <script src="guide.js?v=1"></script>
+    <script src="guide.js?v=2"></script>
     <script src="audio-quran.js?v=1"></script>
     <script src="ambient.js?v=1"></script>
     <script src="live-activity.js?v=1"></script>

@@ -214,7 +214,7 @@ function injectSettings(){
     w.innerHTML = `<div class="set-group-title">${L()==='en'?'Prayer times & location':'أوقات الصلاة والموقع'}</div>
       <div id="pl-preview" class="pl-preview"></div>
       <div class="setting-item"><span class="set-ico"><i class="fa-solid fa-location-crosshairs"></i></span><span class="set-label">${L()==='en'?'Location':'تحديد الموقع'}</span>
-        <div class="lang-switch"><button class="lang-btn ${cfg.mode==='auto'?'active':''}" id="pl-mode-auto">${L()==='en'?'Auto':'تلقائي'}</button><button class="lang-btn ${cfg.mode==='manual'?'active':''}" id="pl-mode-manual">${L()==='en'?'Manual':'يدوي'}</button></div></div>
+        <div class="lang-switch"><button class="lang-btn ${cfg.mode==='auto'?'active':''}" id="pl-mode-auto">${L()==='tr'?'Otomatik':(L()==='en'?'Auto':'تلقائي')}</button><button class="lang-btn ${cfg.mode==='manual'?'active':''}" id="pl-mode-manual">${L()==='tr'?'Manuel':(L()==='en'?'Manual':'يدوي')}</button></div></div>
       <div class="setting-item" id="pl-city-row" style="${cfg.mode==='manual'?'':'display:none'}"><span class="set-ico"><i class="fa-solid fa-city"></i></span><span class="set-label">${L()==='en'?'City':'المدينة'}</span><select id="pl-city" class="rt-reciter">${cityOpts}</select></div>
       <div class="setting-item"><span class="set-ico"><i class="fa-solid fa-calculator"></i></span><span class="set-label">${L()==='en'?'Method':'طريقة الحساب'}</span><select id="pl-method" class="rt-reciter">${methOpts}</select></div>
       <div class="setting-item" style="justify-content:space-between;"><span class="set-ico"><i class="fa-solid fa-plane"></i></span><span class="set-label">${L()==='en'?'Travel mode':'وضع السفر (تلقائي)'}</span>
@@ -255,27 +255,49 @@ PRAYERS.renderMakruh = function(){
     const box=$('makruh-body'); if(!box) return;
     let pt; try{ pt=(typeof prayerTimings!=='undefined')?prayerTimings:null; }catch(e){ pt=null; }
     if(!pt||!pt.Sunrise){ box.innerHTML=''; return; }
+    const l=L();
+    const nm=(ar,en,tk)=> l==='tr'?tk : (l==='en'?en:ar);
     const rows=[
-        [L()==='en'?'After sunrise':'بعد الشروق', pt.Sunrise, timeAdd(pt.Sunrise,15), 'fa-sun', toMins(pt.Sunrise), toMins(pt.Sunrise)+15],
-        [L()==='en'?'Zenith':'الزوال', timeAdd(pt.Dhuhr,-6), pt.Dhuhr, 'fa-circle-half-stroke', toMins(pt.Dhuhr)-6, toMins(pt.Dhuhr)],
-        [L()==='en'?'Before sunset':'قبيل الغروب', timeAdd(pt.Maghrib,-15), pt.Maghrib, 'fa-cloud-sun', toMins(pt.Maghrib)-15, toMins(pt.Maghrib)]
+        [nm('بعد الشروق','After sunrise','Güneş doğduktan sonra'), pt.Sunrise, timeAdd(pt.Sunrise,15), 'fa-sun', toMins(pt.Sunrise), toMins(pt.Sunrise)+15],
+        [nm('الزوال','Zenith','Zeval (istiva)'), timeAdd(pt.Dhuhr,-6), pt.Dhuhr, 'fa-circle-half-stroke', toMins(pt.Dhuhr)-6, toMins(pt.Dhuhr)],
+        [nm('قبيل الغروب','Before sunset','Güneş batmadan önce'), timeAdd(pt.Maghrib,-15), pt.Maghrib, 'fa-cloud-sun', toMins(pt.Maghrib)-15, toMins(pt.Maghrib)]
     ];
     const now=new Date(); const cur=now.getHours()*60+now.getMinutes();
     let activeIdx=-1;
     rows.forEach((r,i)=>{ if(r[4]!=null && cur>=r[4] && cur<r[5]) activeIdx=i; });
+    // مؤشّر نابض على رأس البطاقة يبقى ظاهراً حتى وهي مطويّة (لا يضيع التنبيه)
+    const dot=$('mk-dot'); if(dot) dot.hidden = !(activeIdx>=0);
+    const card=$('makruh-card'); if(card) card.classList.toggle('is-now', activeIdx>=0);
     const banner = activeIdx>=0
-        ? `<div class="mk-now"><i class="fa-solid fa-triangle-exclamation"></i> ${L()==='en'?'Now is a disliked time — avoid voluntary prayer':'الوقت الحالي وقت كراهة — تُكره النافلة الآن'}</div>`
+        ? `<div class="mk-now"><i class="fa-solid fa-triangle-exclamation"></i> ${nm('الوقت الحالي وقت كراهة — تُكره النافلة الآن','Now is a disliked time — avoid voluntary prayer','Şu an mekruh vakit — nafile namaz kılmayın')}</div>`
         : '';
     box.innerHTML = banner + `<div class="mk-grid">` + rows.map((r,i)=>`<div class="mk-item${i===activeIdx?' active':''}">
         <span class="mk-ic"><i class="fa-solid ${r[3]}"></i></span>
         <span class="mk-name">${r[0]}</span>
         <span class="mk-time">${r[1]} - ${r[2]}</span></div>`).join('') + `</div>`;
 };
+// طيّ/فتح البطاقة — تبقى مطويّة افتراضياً كي لا تشغل مساحة من الشاشة
+PRAYERS.toggleMakruh = function(){
+    const c=$('makruh-card'); if(!c) return;
+    const open = c.classList.toggle('open');
+    const h=c.querySelector('.mk-head'); if(h) h.setAttribute('aria-expanded', open?'true':'false');
+    try{ localStorage.setItem('makruh_open', open?'1':'0'); }catch(e){}
+    if(window.HAP) HAP.light();
+};
 function initMakruh(){
     const grid=document.querySelector('#tab-home .prayer-grid'); if(!grid || $('makruh-card')) return;
     const c=document.createElement('div'); c.id='makruh-card'; c.className='makruh-card';
-    c.innerHTML=`<div class="mk-title"><i class="fa-solid fa-ban"></i> ${L()==='en'?'Disliked prayer times':'أوقات الكراهة'}</div><div id="makruh-body"></div>`;
+    const ttl = L()==='tr' ? 'Mekruh vakitler' : (L()==='en' ? 'Disliked prayer times' : 'أوقات الكراهة');
+    c.innerHTML=`
+        <button class="mk-head" type="button" onclick="PRAYERS.toggleMakruh()" aria-expanded="false" aria-controls="makruh-body">
+            <span class="mk-head-ic"><i class="fa-solid fa-ban"></i></span>
+            <span class="mk-head-t" data-i18n="makruh_title">${ttl}</span>
+            <span class="mk-dot" id="mk-dot" hidden></span>
+            <i class="fa-solid fa-chevron-down mk-chev"></i>
+        </button>
+        <div class="mk-wrap"><div class="mk-inner" id="makruh-body"></div></div>`;
     grid.insertAdjacentElement('afterend', c);
+    try{ if(localStorage.getItem('makruh_open')==='1'){ c.classList.add('open'); c.querySelector('.mk-head').setAttribute('aria-expanded','true'); } }catch(e){}
     const _sp=window.setPrayerTimings;
     window.setPrayerTimings=function(){ const r=(typeof _sp==='function')?_sp.apply(this,arguments):undefined; try{PRAYERS.renderMakruh();}catch(e){} return r; };
     setTimeout(()=>{ try{PRAYERS.renderMakruh();}catch(e){} }, 600);

@@ -12,7 +12,7 @@
 var APP_VERSION = '1.8.7';
 var STORE_URL   = 'https://apps.apple.com/app/id6782741099';
 function L(){ return (window.currentLang)||localStorage.getItem('lang')||'ar'; }
-function tr(a,e){ return L()==='en'?e:a; }
+function tr(a,e){ var l=L(); if(l==='ar') return a; if(l==='tr' && window.TR && TR[e]) return TR[e]; return e; }
 function cmp(a,b){ a=(''+ (a||'0')).split('.').map(function(n){return parseInt(n)||0;}); b=(''+ (b||'0')).split('.').map(function(n){return parseInt(n)||0;}); for(var i=0;i<Math.max(a.length,b.length);i++){ var x=a[i]||0,y=b[i]||0; if(x>y)return 1; if(x<y)return -1; } return 0; }
 
 function dialog(force, latest, url, note){
