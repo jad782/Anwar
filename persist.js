@@ -8,12 +8,15 @@
 (function(){
 'use strict';
 var KEY = 'ls_full_backup_v1';
+// أمان: حالة البريميوم لا تُنسخ ولا تُستعاد أبداً — مصدرها الوحيد إيصال آبل عند كل تشغيل
+// (كانت تنتقل من نسخ TestFlight القديمة إلى نسخة App Store وتفتح الميزات بلا شراء)
+var EXCLUDE = { 'anwar_premium': 1 };
 function prefs(){ return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Preferences) || null; }
 
-// اجمع كامل localStorage ككائن
+// اجمع كامل localStorage ككائن (عدا المفاتيح الحسّاسة)
 function dumpLS(){
     var o = {};
-    try { for (var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); o[k]=localStorage.getItem(k); } } catch(e){}
+    try { for (var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(EXCLUDE[k]) continue; o[k]=localStorage.getItem(k); } } catch(e){}
     return o;
 }
 
@@ -35,6 +38,7 @@ function restore(){
         var obj; try { obj = JSON.parse(res.value); } catch(e){ return 0; }
         var restored = 0;
         Object.keys(obj).forEach(function(k){
+            if (EXCLUDE[k]) return; // النسخ القديمة قد تحوي حالة البريميوم — لا تُستعاد أبداً
             // لا نطمس قيمة موجودة (الأحدث أولى) — نملأ المفقود فقط
             if (localStorage.getItem(k) === null) { try { localStorage.setItem(k, obj[k]); restored++; } catch(e){} }
         });

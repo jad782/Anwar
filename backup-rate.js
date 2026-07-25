@@ -11,7 +11,8 @@ const STORE_REVIEW = 'https://apps.apple.com/app/id6782741099?action=write-revie
 window.AnwarBackup = {
     export:function(){
         try{
-            const data={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k==='ls_full_backup_v1') continue; data[k]=localStorage.getItem(k); }
+            // أمان: حالة البريميوم لا تُصدَّر أبداً (ملف النسخة نصّي قابل للتعديل — كان يمكن حقن anwar_premium فيه)
+            const data={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k==='ls_full_backup_v1'||k==='anwar_premium') continue; data[k]=localStorage.getItem(k); }
             const payload=JSON.stringify({app:'AlAnwar', v:1, ts:Date.now(), data:data});
             const blob=new Blob([payload],{type:'application/json'});
             const f=new File([blob],'anwar-backup.json',{type:'application/json'});
@@ -26,7 +27,8 @@ window.AnwarBackup = {
             rd.onload=function(){ try{ const obj=JSON.parse(rd.result); const data=(obj&&obj.data)?obj.data:obj;
                 if(!data||typeof data!=='object'){ alert(tr('ملف غير صالح.','Invalid file.')); return; }
                 if(!confirm(tr('سيُستبدل محتوى التطبيق بالنسخة الاحتياطية. متابعة؟','This will replace app data with the backup. Continue?'))) return;
-                Object.keys(data).forEach(k=>{ try{ localStorage.setItem(k, data[k]); }catch(e){} });
+                // أمان: تجاهُل أي حالة بريميوم داخل الملف — تُمنح فقط من إيصال آبل الفعلي
+                Object.keys(data).forEach(k=>{ if(k==='anwar_premium'||k==='ls_full_backup_v1') return; try{ localStorage.setItem(k, data[k]); }catch(e){} });
                 if(window.HAP)HAP.success(); alert(tr('تم الاستيراد بنجاح. سيُعاد تشغيل التطبيق.','Imported. The app will reload.'));
                 setTimeout(()=>location.reload(),600);
             }catch(e){ alert(tr('تعذّر قراءة الملف.','Could not read file.')); } };

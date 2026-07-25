@@ -505,6 +505,9 @@ function initIAP(){
         store.when().productUpdated(()=>{ try{ PRO._refreshDonatePrices && PRO._refreshDonatePrices(); if(window.AnwarPremium&&AnwarPremium.refreshPrices) AnwarPremium.refreshPrices(); }catch(e){} PRO.syncPremium(); });
         if (store.when().receiptUpdated) { try{ store.when().receiptUpdated(()=>{ _receiptsSeen = true; PRO.syncPremium(); }); }catch(e){} }
         try{ if(store.when().receiptsReady) store.when().receiptsReady(()=>{ _receiptsSeen = true; PRO.syncPremium(); }); }catch(e){}
+        // مهم: عند مستخدم بلا أي إيصالات قد لا يُطلق أيٌّ ممّا سبق أبداً — فلا يُقفل المتسلّل.
+        // store.ready يُطلق دائماً بعد اكتمال تهيئة المتجر وتحميل المنتجات، فنعتمده كإشارة جاهزية أيضاً.
+        try{ if(typeof store.ready==='function') store.ready(()=>{ _receiptsSeen = true; PRO.syncPremium(); }); }catch(e){}
         if (typeof store.error === 'function') store.error(e => { _iapState.err = (e && ((e.code||'')+' '+(e.message||''))) || String(e); try{ PRO._refreshDonatePrices && PRO._refreshDonatePrices(); }catch(x){} });
         store.initialize([Platform.APPLE_APPSTORE]);
         _iapState.initialized = true;
@@ -526,7 +529,8 @@ function initIAP(){
         // إنفاذ الملكية (لمرة واحدة، متأخّر): بعد تأكّد تحميل إيصال آبل والاستعادة، إن لم يوجد اشتراك
         // فعّال/مدى حياة، أقفل البريميوم — لسدّ من فتحه بثغرة قديمة. متأخّر 16 ثانية بعد الاستعادة
         // كي لا يُقفل مشترك فعلي (يُعاد فتحه تلقائياً في التشغيل التالي عبر الاستعادة الصامتة).
-        setTimeout(function(){ try{ PRO.enforceOwnership(); }catch(e){} }, 16000);
+        // فحصان: 16ث ثم 30ث (فرصة ثانية لو تأخّرت الشبكة بتحميل المنتجات)
+        [16000, 30000].forEach(function(ms){ setTimeout(function(){ try{ PRO.enforceOwnership(); }catch(e){} }, ms); });
     } catch(e){ _iapState.err = 'init: ' + (e && e.message || e); }
 }
 // يقفل البريميوم مرة واحدة إن ثبت عدم وجود اشتراك فعّال (بعد تحميل الإيصالات) — يمنع الاستفادة بثغرة سابقة
