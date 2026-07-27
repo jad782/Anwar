@@ -12,7 +12,7 @@ window.AnwarBackup = {
     export:function(){
         try{
             // أمان: حالة البريميوم لا تُصدَّر أبداً (ملف النسخة نصّي قابل للتعديل — كان يمكن حقن anwar_premium فيه)
-            const data={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k==='ls_full_backup_v1'||k==='anwar_premium') continue; data[k]=localStorage.getItem(k); }
+            const data={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k==='ls_full_backup_v1'||k==='anwar_premium'||k==='anwar_premium_exp') continue; data[k]=localStorage.getItem(k); }
             const payload=JSON.stringify({app:'AlAnwar', v:1, ts:Date.now(), data:data});
             const blob=new Blob([payload],{type:'application/json'});
             const f=new File([blob],'anwar-backup.json',{type:'application/json'});
@@ -28,7 +28,7 @@ window.AnwarBackup = {
                 if(!data||typeof data!=='object'){ alert(tr('ملف غير صالح.','Invalid file.')); return; }
                 if(!confirm(tr('سيُستبدل محتوى التطبيق بالنسخة الاحتياطية. متابعة؟','This will replace app data with the backup. Continue?'))) return;
                 // أمان: تجاهُل أي حالة بريميوم داخل الملف — تُمنح فقط من إيصال آبل الفعلي
-                Object.keys(data).forEach(k=>{ if(k==='anwar_premium'||k==='ls_full_backup_v1') return; try{ localStorage.setItem(k, data[k]); }catch(e){} });
+                Object.keys(data).forEach(k=>{ if(k==='anwar_premium'||k==='anwar_premium_exp'||k==='ls_full_backup_v1') return; try{ localStorage.setItem(k, data[k]); }catch(e){} });
                 if(window.HAP)HAP.success(); alert(tr('تم الاستيراد بنجاح. سيُعاد تشغيل التطبيق.','Imported. The app will reload.'));
                 setTimeout(()=>location.reload(),600);
             }catch(e){ alert(tr('تعذّر قراءة الملف.','Could not read file.')); } };
@@ -41,6 +41,8 @@ window.AnwarBackup = {
 window.AnwarRate = {
     open:function(){ window.open(STORE_REVIEW,'_blank'); },
     maybePrompt:function(){
+        return; // مُعطَّلة نهائياً بطلب العميل — لا تظهر نافذة التقييم أبداً (بقي زر "قيّم التطبيق" اليدوي في الإعدادات)
+        /* eslint-disable no-unreachable */
         if(localStorage.getItem('rated')==='1' || localStorage.getItem('rate_asked')==='1') return;
         let n=parseInt(localStorage.getItem('launch_count')||'0'); // يُزاد في app boot أدناه
         if(n < 5) return;

@@ -1,5 +1,5 @@
 // Update Version 5
-const CACHE_NAME = 'anwar-cache-v141';
+const CACHE_NAME = 'anwar-cache-v142';
 
 const urlsToCache = [
   './',
@@ -23,14 +23,14 @@ const urlsToCache = [
   './f-tajawal-latin-800.woff2',
   './style.css?v=89',
   './i18n-tr.js?v=1',
-  './persist.js?v=2',
+  './persist.js?v=3',
   './quran-data.js?v=1',
   './firebase.js?v=3',
   './prayers.js?v=14',
   './haptics.js?v=1',
   './app.js?v=31',
   './features.js?v=25',
-  './pro.js?v=31',
+  './pro.js?v=32',
   './pro2.js?v=21',
   './points.js?v=16',
   './keys.js?v=8',
@@ -44,7 +44,7 @@ const urlsToCache = [
   './audio-quran.js?v=1',
   './salah-track.js?v=1',
   './onboarding.js?v=1',
-  './backup-rate.js?v=2',
+  './backup-rate.js?v=3',
   './update.js?v=8',
   './sunan.js?v=1',
   './zakat.js?v=2',

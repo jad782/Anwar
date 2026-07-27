@@ -10,7 +10,7 @@
 var KEY = 'ls_full_backup_v1';
 // أمان: حالة البريميوم لا تُنسخ ولا تُستعاد أبداً — مصدرها الوحيد إيصال آبل عند كل تشغيل
 // (كانت تنتقل من نسخ TestFlight القديمة إلى نسخة App Store وتفتح الميزات بلا شراء)
-var EXCLUDE = { 'anwar_premium': 1 };
+var EXCLUDE = { 'anwar_premium': 1, 'anwar_premium_exp': 1 };
 function prefs(){ return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Preferences) || null; }
 
 // اجمع كامل localStorage ككائن (عدا المفاتيح الحسّاسة)
