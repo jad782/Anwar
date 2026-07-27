@@ -10,7 +10,9 @@
 var KEY = 'ls_full_backup_v1';
 // أمان: حالة البريميوم لا تُنسخ ولا تُستعاد أبداً — مصدرها الوحيد إيصال آبل عند كل تشغيل
 // (كانت تنتقل من نسخ TestFlight القديمة إلى نسخة App Store وتفتح الميزات بلا شراء)
-var EXCLUDE = { 'anwar_premium': 1, 'anwar_premium_exp': 1 };
+// 'ls_restored_once' مستثنى بالضرورة: لو نُسخ واستُعيد لعاد بقيمة '1' مع البيانات نفسها
+// فيُظنّ أن إعادة التحميل جرت وما جرت — يجب أن يعيش في localStorage الحيّة فقط.
+var EXCLUDE = { 'anwar_premium': 1, 'anwar_premium_exp': 1, 'ls_restored_once': 1 };
 function prefs(){ return (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Preferences) || null; }
 
 // اجمع كامل localStorage ككائن (عدا المفاتيح الحسّاسة)
@@ -59,15 +61,22 @@ try {
 window.addEventListener('pagehide', backup);
 document.addEventListener('visibilitychange', function(){ if(document.hidden) backup(); });
 
-// عند الإقلاع على iOS: استعد فوراً، وإن استُعيدت بيانات أعد تحميل الصفحة مرة واحدة
-// كي يقرأ بقية التطبيق البيانات المستعادة (حارس جلسة يمنع التكرار).
+// عند الإقلاع على iOS: استعد البيانات المفقودة، وإن استُعيد شيء أعد التحميل مرة واحدة
+// كي يقرأ بقية التطبيق البيانات المستعادة.
+// مهم: الحارس في localStorage لا sessionStorage — لأن sessionStorage تُمسح عند كل إغلاق
+// للتطبيق، فكان التطبيق يعيد التحميل عند كل فتح (يظهر كـ"ريفريش" ثم يبدأ). وبقاء الحارس
+// في localStorage يعني: إعادة تحميل واحدة فقط بعد فقدان فعلي للبيانات (تحديث/إخلاء ذاكرة)،
+// ولو مُسحت localStorage لاحقاً يُمسح الحارس معها فتعمل إعادة التحميل مرة أخرى عند الحاجة.
 function boot(){
     if(!prefs()) return; // ويب: لا شيء
     restore().then(function(n){
-        if (n > 0 && !sessionStorage.getItem('ls_restored_once')) {
-            sessionStorage.setItem('ls_restored_once','1');
+        var already = false;
+        try{ already = localStorage.getItem('ls_restored_once') === '1'; }catch(e){}
+        if (n > 0 && !already) {
+            try{ localStorage.setItem('ls_restored_once','1'); }catch(e){}
             location.reload();
         } else {
+            try{ if(!already) localStorage.setItem('ls_restored_once','1'); }catch(e){}
             backup(); // تأكد من وجود نسخة محدّثة
         }
     });

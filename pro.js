@@ -482,6 +482,34 @@ window.PREMIUM_PRODUCTS = { subs: SUB_IDS, lifetime: LIFETIME_ID };
 let _iapReady = false;
 let _receiptsSeen = false; // صارت الإيصالات محمّلة؟ (يُسمح بسحب البريميوم عند الانتهاء بعدها فقط)
 let _iapState = { plugin:false, initialized:false, err:'' };
+// شكر التبرّع مرة واحدة لكل معاملة: نحفظ معرّفات المعاملات التي شُكرت،
+// ونعرض الشكر فقط لتبرّع حديث (خلال 10 دقائق) كي لا يظهر عند إعادة التحقّق من إيصال قديم.
+function _thankIfNewDonation(rc){
+    const TIP_IDS = SUPPORT_TIERS.map(t=>t.id);
+    let seen = [];
+    try{ seen = JSON.parse(localStorage.getItem('anwar_thanked_tx')||'[]') || []; }catch(e){}
+    const txs = (rc && rc.transactions) || [];
+    let shown = false;
+    for(let i=0;i<txs.length;i++){
+        const t = txs[i]; if(!t) continue;
+        const st = String(t.state||'').toLowerCase();
+        if(st!=='approved' && st!=='finished') continue;
+        const prods = t.products || [];
+        let isTip = false;
+        for(let j=0;j<prods.length;j++){ if(prods[j] && TIP_IDS.indexOf(prods[j].id)>=0){ isTip=true; break; } }
+        if(!isTip) continue;                                  // ليس تبرّعاً (اشتراك/مدى حياة/إيصال تطبيق)
+        const id = t.transactionId || (t.purchaseDate ? String(+new Date(t.purchaseDate)) : '');
+        if(!id || seen.indexOf(id) >= 0) continue;             // شُكر سابقاً
+        const at = t.purchaseDate ? (+new Date(t.purchaseDate)) : 0;
+        seen.push(id);
+        if(at && (Date.now() - at) < 600000 && !shown){        // تبرّع حديث فعلاً
+            shown = true;
+            if(typeof showBadgeToast==='function') showBadgeToast({emoji:'🤍', name:tr('جزاك الله خيراً','JazakAllah khayr'), desc:tr('شكراً لدعمك التطبيق','Thank you for your support')});
+        }
+    }
+    if(seen.length > 40) seen = seen.slice(-40);
+    try{ localStorage.setItem('anwar_thanked_tx', JSON.stringify(seen)); }catch(e){}
+}
 function initIAP(){
     try {
         const CdvPurchase = window.CdvPurchase;
@@ -495,11 +523,12 @@ function initIAP(){
         store.when().verified(rc => {
             rc.finish();
             _receiptsSeen = true;
-            const isSubOrLife = rc.id && (SUB_IDS.includes(rc.id) || rc.id===LIFETIME_ID);
-            // شكر التبرّع (منتج استهلاكي غير اشتراك)
-            if (!isSubOrLife && typeof showBadgeToast==='function') showBadgeToast({emoji:'🤍', name:tr('جزاك الله خيراً','JazakAllah khayr'), desc:tr('شكراً لدعمك التطبيق','Thank you for your support')});
-            // مهم (أمان): لا نفتح البريميوم لمجرّد وجود إيصال — نتركه لـ syncPremium الذي يتحقّق من
-            // الملكية الفعلية (p.owned = اشتراك فعّال/غير منتهٍ)، فلا يُفتح لمعاملة ملغاة أو منتهية.
+            // شكر التبرّع: يُعرض مرة واحدة لكل تبرّع فعليّ جديد فقط.
+            // كان يظهر عند كل إقلاع لأن آبل تُعيد التحقّق من الإيصال في كل مرة، و rc.id
+            // هو معرّف الإيصال/التطبيق لا معرّف المنتج، فشرط "ليس اشتراكاً" يتحقّق دائماً.
+            try{ _thankIfNewDonation(rc); }catch(e){}
+            // مهم (أمان): لا نفتح البريميوم لمجرّد وجود إيصال — نتركه لـ syncPremium الذي يتحقّق
+            // من دفعٍ مكتمل فعليّ، فلا يُفتح لمعاملة قيد الشراء أو ملغاة أو منتهية.
             PRO.syncPremium();
         });
         store.when().productUpdated(()=>{ try{ PRO._refreshDonatePrices && PRO._refreshDonatePrices(); if(window.AnwarPremium&&AnwarPremium.refreshPrices) AnwarPremium.refreshPrices(); }catch(e){} PRO.syncPremium(); });
@@ -659,7 +688,20 @@ PRO.subscribe = function(id){
         const CdvPurchase = window.CdvPurchase;
         if (CdvPurchase && _iapReady){
             const p = CdvPurchase.store.get(id, CdvPurchase.Platform.APPLE_APPSTORE);
-            if (p && p.getOffer){ CdvPurchase.store.order(p.getOffer()); return; }
+            if (p && p.getOffer){
+                CdvPurchase.store.order(p.getOffer());
+                // إن كان مشتركاً فعلاً تعرض آبل "You are currently subscribed to this" ولا تُنشئ
+                // معاملة جديدة — فنستعيد صامتاً ونُزامن كي يُفتح البريميوم تلقائياً بلا تدخّل.
+                [2000, 5000].forEach(ms => setTimeout(()=>{ try{ PRO.syncPremium(); }catch(e){} }, ms));
+                setTimeout(function(){
+                    try{
+                        if(localStorage.getItem('anwar_premium')==='true') return;
+                        if(CdvPurchase.store.restorePurchases) CdvPurchase.store.restorePurchases();
+                        [2500, 6000, 10000].forEach(ms => setTimeout(()=>{ try{ PRO.syncPremium(); }catch(e){} }, ms));
+                    }catch(e){}
+                }, 7000);
+                return;
+            }
         }
     } catch(e){}
     alert(tr('يُفعّل الاشتراك داخل نسخة App Store بعد اعتماد المنتجات.','Subscription activates in the App Store build after products are approved.'));
