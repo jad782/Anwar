@@ -330,46 +330,102 @@ window.AnwarCards = {
         PRO2.openStory();
     }
 };
+// ---- حالة الاستوديو (مصدر واحد للحقيقة: المعاينة والحفظ يقرآن منها) ----
+const STORY_FONTS = [['Amiri','أميري','Amiri'],['Tajawal','تجوال','Tajawal'],['Cairo','القاهرة','Cairo']];
+const _ST_DEF = { c1:STORY_COLORS[0][0], c2:STORY_COLORS[0][1], orn:0, font:0, fmt:'story', img:null };
+let _ST = Object.assign({}, _ST_DEF);
+function _stLoad(){
+    try{ const s=JSON.parse(localStorage.getItem('story_state')||'null'); if(s) _ST=Object.assign({}, _ST_DEF, s); }catch(e){}
+}
+function _stSave(){ try{ localStorage.setItem('story_state', JSON.stringify(_ST)); }catch(e){} }
+function _stApply(){
+    const card=$('story-card'); if(!card) return;
+    card.style.background = _ST.img
+        ? `linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.55)), url("${_ST.img}") center/cover no-repeat`
+        : `radial-gradient(circle at 50% 30%, ${_ST.c1}, ${_ST.c2} 78%)`;
+    for(let k=0;k<9;k++) card.classList.remove('orn-'+k);
+    card.classList.add('orn-'+_ST.orn);
+    card.classList.toggle('fmt-square', _ST.fmt==='square');
+    const fam = STORY_FONTS[_ST.font] ? STORY_FONTS[_ST.font][0] : 'Amiri';
+    const t=$('story-text'), r=$('story-ref');
+    if(t) t.style.fontFamily = `'${fam}', serif`;
+    if(r) r.style.fontFamily = `'${fam}', serif`;
+    const d=$('story-modal'); if(!d) return;
+    d.querySelectorAll('.story-orn-btn').forEach((b,bi)=>b.classList.toggle('on', bi===_ST.orn));
+    d.querySelectorAll('.story-font-btn').forEach((b,bi)=>b.classList.toggle('on', bi===_ST.font));
+    d.querySelectorAll('.story-fmt-btn').forEach(b=>b.classList.toggle('on', b.dataset.fmt===_ST.fmt));
+    d.querySelectorAll('.story-sw').forEach(b=>b.classList.toggle('on', !_ST.img && b.dataset.c1===_ST.c1 && b.dataset.c2===_ST.c2));
+    const i1=$('story-c1'), i2=$('story-c2');
+    if(i1) i1.value=_ST.c1; if(i2) i2.value=_ST.c2;
+    const rm=$('story-imgrm'); if(rm) rm.style.display = _ST.img ? 'inline-flex' : 'none';
+    _stSave();
+}
 function ensureStory(){
     if ($('story-modal')) return;
+    _stLoad();
     const d=document.createElement('div'); d.id='story-modal'; d.className='story-overlay';
-    const bgs = STORY_COLORS.map(([a,b])=>`radial-gradient(circle at 50% 30%, ${a}, ${b} 78%)`);
-    const swatches = bgs.map((b,i)=>`<button class="story-sw" style="background:${b}" onclick="PRO2.setStoryBg(${i})"></button>`).join('');
+    const swatches = STORY_COLORS.map(([a,b])=>`<button class="story-sw" data-c1="${a}" data-c2="${b}" style="background:radial-gradient(circle at 50% 30%, ${a}, ${b} 78%)" onclick="PRO2.setStoryBg('${a}','${b}')"></button>`).join('');
     const orns = STORY_ORN_NAMES.map((n,i)=>`<button class="story-orn-btn" onclick="PRO2.setStoryOrn(${i})">${L()==='en'?STORY_ORN_EN[i]:n}</button>`).join('');
+    const fonts = STORY_FONTS.map((f,i)=>`<button class="story-font-btn" style="font-family:'${f[0]}',serif" onclick="PRO2.setStoryFont(${i})">${L()==='en'?f[2]:f[1]}</button>`).join('');
     d.innerHTML = `<button class="story-close" onclick="PRO2.closeStory()"><i class="fa-solid fa-xmark"></i></button>
         <div id="story-card" class="story-card">
             <div class="story-bismillah">﷽</div>
-            <div id="story-text" class="story-text"></div>
+            <div id="story-text" class="story-text" onclick="PRO2.focusStoryText()"></div>
             <div id="story-ref" class="story-ref"></div>
             <div class="story-brand">anwar</div>
         </div>
         <div class="story-editrow">
-            <textarea id="story-edit" class="story-edit" rows="2" placeholder="${tr('اكتب نصّك هنا أو عدّل...','Type your text here...')}"></textarea>
+            <textarea id="story-edit" class="story-edit" rows="2" placeholder="${tr('اضغط على النص لتحريره، أو اكتب هنا...','Tap the text to edit, or type here...')}"></textarea>
             <input id="story-refedit" class="story-refedit" placeholder="${tr('المصدر (اختياري): سورة الشرح ٥ · رواه مسلم','Source (optional)')}">
         </div>
-        <div class="story-swatches">${swatches}</div>
-        <div class="story-orns">${orns}</div>
-        <button class="story-save" onclick="PRO2.saveStoryImage()"><i class="fa-solid fa-download"></i> ${tr('حفظ الصورة بدقة عالية','Save HD image')}</button>
-        <p class="story-hint">${tr('اكتب نصّك، اختر اللون والزخرفة، ثم احفظ','Type text, pick color & frame, then save')}</p>`;
+
+        <div class="story-toolbar">
+            <button class="story-tool" onclick="PRO2.openStoryPick()"><i class="fa-solid fa-list-ul"></i><span>${tr('ذكر جاهز','Insert')}</span></button>
+            <label class="story-tool" for="story-imgin"><i class="fa-solid fa-image"></i><span>${tr('صورة','Photo')}</span></label>
+            <input id="story-imgin" type="file" accept="image/*" hidden onchange="PRO2.pickStoryImage(this)">
+            <button id="story-imgrm" class="story-tool danger" style="display:none" onclick="PRO2.clearStoryImage()"><i class="fa-solid fa-xmark"></i><span>${tr('إزالة الصورة','Remove')}</span></button>
+            <div class="story-fmts">
+                <button class="story-fmt-btn" data-fmt="story" onclick="PRO2.setStoryFmt('story')" title="9:16"><i class="fa-solid fa-mobile-screen"></i></button>
+                <button class="story-fmt-btn" data-fmt="square" onclick="PRO2.setStoryFmt('square')" title="1:1"><i class="fa-regular fa-square"></i></button>
+            </div>
+        </div>
+
+        <div class="story-grp"><span class="story-grp-t">${tr('الخط','Font')}</span><div class="story-fonts">${fonts}</div></div>
+
+        <div class="story-grp">
+            <span class="story-grp-t">${tr('اللون','Color')}</span>
+            <div class="story-customrow">
+                <label class="story-cc"><input id="story-c1" type="color" value="${_ST.c1}" oninput="PRO2.setStoryColor(1,this.value)"><span>${tr('الأعلى','Inner')}</span></label>
+                <label class="story-cc"><input id="story-c2" type="color" value="${_ST.c2}" oninput="PRO2.setStoryColor(2,this.value)"><span>${tr('الأسفل','Outer')}</span></label>
+                <span class="story-cc-hint">${tr('أي لون تريده','Any color')}</span>
+            </div>
+            <div class="story-swatches">${swatches}</div>
+        </div>
+
+        <div class="story-grp"><span class="story-grp-t">${tr('الزخرفة','Frame')}</span><div class="story-orns">${orns}</div></div>
+
+        <button class="story-save" onclick="PRO2.saveStoryImage()"><i class="fa-solid fa-download"></i> ${tr('حفظ / مشاركة بدقة عالية','Save / share in HD')}</button>
+        <p class="story-hint">${tr('اضغط النص لتحريره · اختر لوناً أو صورة · مربّع أو ستوري','Tap text to edit · pick color or photo · square or story')}</p>`;
     document.body.appendChild(d);
-    d._bgs = bgs;
     // محرّر النص والمصدر — تحديث حيّ للمعاينة
     $('story-edit').addEventListener('input', e=>{ const v=e.target.value; $('story-text').innerText=v; if(window._lastAyah) window._lastAyah.text=v; });
     $('story-refedit').addEventListener('input', e=>{ const v=e.target.value.trim(); if(window._lastAyah){ window._lastAyah.refText=v; window._lastAyah._customRef=true; } $('story-ref').innerText = v || _defRef(window._lastAyah); });
-    const sb = localStorage.getItem('story_bg'); PRO2.setStoryBg(sb!=null&&+sb<STORY_COLORS.length?+sb:0);
-    const so = localStorage.getItem('story_orn'); PRO2.setStoryOrn(so!=null?+so:0);
+    _stApply();
 }
 function _defRef(a){ if(!a) return ''; if(a.refText) return a.refText; if(a.surah) return '﴿ '+tr('سورة','')+' '+sN(a.surah)+' : '+a.ayah+' ﴾'; return ''; }
-PRO2.setStoryBg = function(i){
-    const d=$('story-modal'); const card=$('story-card'); if(!d||!card||!d._bgs[i]) return;
-    card.style.background = d._bgs[i]; localStorage.setItem('story_bg', i);
-    d.querySelectorAll('.story-sw').forEach((b,bi)=>b.classList.toggle('on', bi===i));
-};
-PRO2.setStoryOrn = function(i){
-    const card=$('story-card'); const d=$('story-modal'); if(!card) return;
-    for(let k=0;k<9;k++) card.classList.remove('orn-'+k);
-    card.classList.add('orn-'+i); localStorage.setItem('story_orn', i);
-    if(d) d.querySelectorAll('.story-orn-btn').forEach((b,bi)=>b.classList.toggle('on', bi===i));
+PRO2.focusStoryText = function(){ const e=$('story-edit'); if(e){ e.focus(); try{ e.setSelectionRange(e.value.length,e.value.length); }catch(x){} } };
+PRO2.setStoryBg = function(c1,c2){ _ST.c1=c1; _ST.c2=c2; _ST.img=null; _stApply(); };
+PRO2.setStoryColor = function(which,val){ if(which===1) _ST.c1=val; else _ST.c2=val; _ST.img=null; _stApply(); };
+PRO2.setStoryOrn = function(i){ _ST.orn=i; _stApply(); };
+PRO2.setStoryFont = function(i){ _ST.font=i; _stApply(); };
+PRO2.setStoryFmt = function(f){ _ST.fmt=f; _stApply(); };
+PRO2.clearStoryImage = function(){ _ST.img=null; _stApply(); };
+PRO2.pickStoryImage = function(input){
+    const f=input && input.files && input.files[0]; if(!f) return;
+    const rd=new FileReader();
+    rd.onload=function(){ _ST.img = rd.result; _stApply(); };
+    rd.readAsDataURL(f);
+    input.value='';
 };
 // لفّ نص عربي على أسطر بعرض محدّد
 function _wrapText(ctx, text, maxW){
@@ -377,16 +433,95 @@ function _wrapText(ctx, text, maxW){
     words.forEach(w=>{ const test=line?line+' '+w:w; if(ctx.measureText(test).width>maxW && line){ lines.push(line); line=w; } else line=test; });
     if(line) lines.push(line); return lines;
 }
-// حفظ القصة كصورة PNG بدقة عالية (1080×1920) — ليست لقطة شاشة
+// ---- منتقي نصّ جاهز: أذكار/أحاديث المعرض + بحث في كامل المصحف (٦٢٣٦ آية) ----
+function _normAr(s){
+    return String(s||'')
+        .replace(/[ً-ْٰٓ-ٕـ]/g,'')  // تشكيل وتطويل
+        .replace(/[إأآا]/g,'ا').replace(/ى/g,'ي').replace(/ؤ/g,'و').replace(/ئ/g,'ي').replace(/ة/g,'ه')
+        .replace(/\s+/g,' ').trim();
+}
+PRO2.openStoryPick = function(){
+    let s=$('story-pick');
+    if(!s){
+        s=document.createElement('div'); s.id='story-pick'; s.className='story-pick';
+        s.innerHTML=`<div class="sp-sheet">
+            <div class="sp-grab"></div>
+            <h3 class="sp-title">${tr('اختر نصّاً جاهزاً','Pick a ready text')}</h3>
+            <p class="sp-sub">${tr('لمسة واحدة للإدراج — أو ابحث في كامل المصحف','One tap to insert — or search the whole Quran')}</p>
+            <div class="sp-searchrow">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="sp-q" class="sp-q" placeholder="${tr('ابحث عن آية أو ذكر...','Search an ayah or dhikr...')}" oninput="PRO2.pickSearch(this.value)">
+            </div>
+            <div id="sp-list" class="sp-list"></div>
+            <button class="sp-close" onclick="document.getElementById('story-pick').classList.remove('active')">${tr('إغلاق','Close')}</button>
+        </div>`;
+        document.body.appendChild(s);
+        s.addEventListener('click', e=>{ if(e.target===s) s.classList.remove('active'); });
+    }
+    PRO2.pickSearch('');
+    s.classList.add('active');
+};
+PRO2._pickRows = [];
+PRO2.pickSearch = function(q){
+    const box=$('sp-list'); if(!box) return;
+    const nq=_normAr(q);
+    let rows=[];
+    // ١) نصوص المعرض (آيات قصيرة وأحاديث بمصادرها)
+    CARDS.forEach(c=>{
+        if(nq && _normAr(c.t).indexOf(nq)<0) return;
+        rows.push({ t:c.t, ref:(c.r ? c.r : ('﴿ '+sN(c.s)+' : '+c.a+' ﴾')) });
+    });
+    // ٢) بحث في كامل المصحف عند كتابة حرفين أو أكثر
+    if(nq.length>=2 && window.QURAN_DATA && QURAN_DATA.ayahs){
+        const ay=QURAN_DATA.ayahs;
+        for(let i=0;i<ay.length && rows.length<60;i++){
+            const a=ay[i]; if(_normAr(a.t).indexOf(nq)<0) continue;
+            rows.push({ t:a.t, ref:'﴿ '+sN(a.s)+' : '+a.a+' ﴾' });
+        }
+    }
+    rows = rows.slice(0,60);
+    PRO2._pickRows = rows;
+    box.innerHTML = rows.length
+        ? rows.map((r,i)=>`<button class="sp-row" onclick="PRO2.pickInsert(${i})">
+              <span class="sp-plus"><i class="fa-solid fa-plus"></i></span>
+              <span class="sp-txt"><b>${r.t}</b><small>${r.ref}</small></span></button>`).join('')
+        : `<p class="sp-empty">${tr('لا نتائج','No results')}</p>`;
+};
+PRO2.pickInsert = function(i){
+    const r=PRO2._pickRows[i]; if(!r) return;
+    window._lastAyah = { text:r.t, refText:r.ref, _customRef:true };
+    const e=$('story-edit'); if(e) e.value=r.t;
+    const re=$('story-refedit'); if(re) re.value=r.ref;
+    const t=$('story-text'); if(t) t.innerText=r.t;
+    const rf=$('story-ref'); if(rf) rf.innerText=r.ref;
+    const s=$('story-pick'); if(s) s.classList.remove('active');
+    if(window.HAP) HAP.light();
+};
+// تحميل صورة من data-URL (للخلفية المخصّصة)
+function _loadImg(src){ return new Promise(function(res,rej){ const im=new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=src; }); }
+// حفظ القصة كصورة PNG بدقة عالية (1080×1920 ستوري أو 1080×1080 مربّع) — ليست لقطة شاشة
 PRO2.saveStoryImage = async function(){
     const a=window._lastAyah; if(!a){ return; }
-    const idx=+(localStorage.getItem('story_bg')||0);
-    const orn=+(localStorage.getItem('story_orn')||0);
-    const [c1,c2]=STORY_COLORS[idx]||STORY_COLORS[0];
-    const W=1080,H=1920; const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const ctx=cv.getContext('2d');
-    try{ await document.fonts.load('64px Amiri'); await document.fonts.load('120px Amiri'); }catch(e){}
-    const g=ctx.createRadialGradient(W/2,H*0.30,60,W/2,H*0.30,H); g.addColorStop(0,c1); g.addColorStop(1,c2);
-    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    const orn=_ST.orn|0;
+    const c1=_ST.c1, c2=_ST.c2;
+    const square = _ST.fmt==='square';
+    const FAM = (STORY_FONTS[_ST.font] ? STORY_FONTS[_ST.font][0] : 'Amiri');
+    const W=1080, H=square?1080:1920;
+    const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const ctx=cv.getContext('2d');
+    try{ await document.fonts.load('64px '+FAM); await document.fonts.load('120px '+FAM); }catch(e){}
+    if(_ST.img){
+        // صورة المستخدم: تغطية كاملة مع الحفاظ على النسبة + تعتيم لوضوح النص
+        try{
+            const im=await _loadImg(_ST.img);
+            const s=Math.max(W/im.width, H/im.height), dw=im.width*s, dh=im.height*s;
+            ctx.drawImage(im, (W-dw)/2, (H-dh)/2, dw, dh);
+            const ov=ctx.createLinearGradient(0,0,0,H); ov.addColorStop(0,'rgba(0,0,0,0.45)'); ov.addColorStop(1,'rgba(0,0,0,0.58)');
+            ctx.fillStyle=ov; ctx.fillRect(0,0,W,H);
+        }catch(e){ ctx.fillStyle=c2; ctx.fillRect(0,0,W,H); }
+    } else {
+        const g=ctx.createRadialGradient(W/2,H*0.30,60,W/2,H*0.30,H); g.addColorStop(0,c1); g.addColorStop(1,c2);
+        ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    }
     // الزخرفة (الإطار)
     const GD='rgba(242,210,122,0.75)', GD2='rgba(212,168,67,0.4)';
     if(orn===0){ ctx.strokeStyle=GD2; ctx.lineWidth=5; ctx.strokeRect(46,46,W-92,H-92); }
@@ -399,13 +534,15 @@ PRO2.saveStoryImage = async function(){
     else if(orn===7){ ctx.strokeStyle=GD; ctx.lineWidth=5; ctx.beginPath(); ctx.moveTo(90,220); ctx.lineTo(W-90,220); ctx.moveTo(90,H-220); ctx.lineTo(W-90,H-220); ctx.stroke(); ctx.fillStyle=GD; ctx.font='54px Amiri, serif'; ctx.textAlign='center'; ctx.fillText('۞',W/2,205); ctx.fillText('۞',W/2,H-180); }
     else if(orn===8){ ctx.strokeStyle=GD2; ctx.lineWidth=4; ctx.strokeRect(48,48,W-96,H-96); ctx.strokeStyle=GD; ctx.lineWidth=2; ctx.strokeRect(70,70,W-140,H-140); ctx.fillStyle=GD; ctx.font='90px Amiri, serif'; ctx.textAlign='center'; ctx.fillText('﴾',150,H/2+30); ctx.fillText('﴿',W-150,H/2+30); }
     ctx.textAlign='center'; try{ctx.direction='rtl';}catch(e){}
-    ctx.fillStyle='rgba(212,168,67,0.6)'; ctx.font='150px Amiri, serif'; ctx.fillText('﷽', W/2, 360);
-    ctx.fillStyle='#FAF6EE'; ctx.font='66px Amiri, serif';
+    const bismY = square ? 250 : 360, bismSz = square ? 108 : 150;
+    ctx.fillStyle='rgba(212,168,67,0.6)'; ctx.font=bismSz+'px '+FAM+', serif'; ctx.fillText('﷽', W/2, bismY);
+    const txtSz = square ? 60 : 66, lh = square ? 112 : 124;
+    ctx.fillStyle='#FAF6EE'; ctx.font=txtSz+'px '+FAM+', serif';
     const lines=_wrapText(ctx, a.text, W-300);
-    let y=H/2 - (lines.length-1)*62; lines.forEach(l=>{ ctx.fillText(l, W/2, y); y+=124; });
-    const _rf=_defRef(a); if(_rf){ ctx.fillStyle='#D4A843'; ctx.font='46px Amiri, serif'; ctx.fillText(_rf, W/2, y+30); }
+    let y=H/2 - (lines.length-1)*(lh/2); lines.forEach(l=>{ ctx.fillText(l, W/2, y); y+=lh; });
+    const _rf=_defRef(a); if(_rf){ ctx.fillStyle='#D4A843'; ctx.font=(square?42:46)+'px '+FAM+', serif'; ctx.fillText(_rf, W/2, y+30); }
     ctx.fillStyle='rgba(250,246,238,0.5)'; ctx.font='32px Tajawal, sans-serif';
-    ctx.fillText('anwar', W/2, H-110);
+    ctx.fillText('anwar', W/2, H-(square?64:110));
     cv.toBlob(async (blob)=>{
         if(!blob){ return; }
         const file=new File([blob], 'anwar-ayah.png', {type:'image/png'});
