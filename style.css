@@ -1923,3 +1923,78 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offs
     color:#FAF6EE; border-radius:20px; padding:11px; font-weight:700; cursor:pointer;
     font-family:'Tajawal','Cairo',sans-serif; font-size:0.88rem; }
 .sp-close:active { transform:scale(0.97); }
+
+/* ====== حاسبة الزكاة — تصميم مبسّط بخطوات ====== */
+.zk-lead { color:var(--text-soft,#cbbfa6); font-size:0.86rem; line-height:1.85; margin-bottom:16px; }
+.zk-lead b { color:var(--accent-color); }
+
+.zk-step { background:rgba(0,0,0,0.14); border:1px solid var(--border-color); border-radius:16px; padding:14px; margin-bottom:12px; }
+body.light-mode .zk-step { background:rgba(0,0,0,0.03); }
+.zk-step-h { display:flex; align-items:center; gap:9px; font-size:0.92rem; font-weight:800; color:var(--accent-color); margin-bottom:12px; letter-spacing:normal; }
+.zk-num { width:24px; height:24px; flex:0 0 24px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg,var(--accent-color),var(--accent-light)); color:#14110B; font-size:0.76rem; font-weight:800; }
+
+.zk-f { display:flex; flex-direction:column; gap:5px; text-align:right; margin-bottom:12px; }
+.zk-f:last-child { margin-bottom:0; }
+.zk-f label { font-size:0.82rem; font-weight:700; color:var(--text-soft,#cbbfa6); }
+.zk-f input, .zk-f select {
+    background:var(--pill-bg); border:1px solid var(--border-color); color:var(--text-main);
+    border-radius:12px; padding:11px 13px; font-family:inherit; font-size:0.95rem; font-weight:700;
+    width:100%; box-sizing:border-box; -webkit-appearance:none; appearance:none;
+}
+.zk-f input:focus, .zk-f select:focus { outline:none; border-color:var(--accent-color); }
+.zk-f small { font-size:0.72rem; line-height:1.6; color:var(--text-muted); }
+body.light-mode .zk-f input, body.light-mode .zk-f select { background:#fff; }
+
+.zk-pairwrap { margin-top:12px; padding-top:12px; border-top:1px dashed var(--border-color); }
+.zk-pair-t { display:flex; align-items:center; gap:7px; font-size:0.84rem; font-weight:800; color:var(--text-main); margin-bottom:9px; }
+.zk-pair-t i { color:var(--accent-color); font-size:0.8rem; }
+.zk-pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.zk-pair .zk-f { margin-bottom:0; }
+.zk-skip { display:block; margin-top:7px; font-size:0.72rem; line-height:1.6; color:var(--text-muted); }
+
+.zk-more, .zk-srcbtn {
+    width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px; cursor:pointer;
+    background:rgba(255,255,255,0.05); border:1px solid var(--border-color); color:var(--accent-color);
+    border-radius:14px; padding:12px 14px; font-family:inherit; font-size:0.84rem; font-weight:700; margin-bottom:12px;
+    transition:transform var(--dur-fast,.16s) var(--ease, ease);
+}
+.zk-more:active, .zk-srcbtn:active { transform:scale(0.985); }
+body.light-mode .zk-more, body.light-mode .zk-srcbtn { background:rgba(0,0,0,0.03); }
+.zk-more-ch, .zk-src-ch { font-size:0.75rem; opacity:0.7; transition:transform var(--dur-mid,.26s) var(--ease, ease); }
+.zk-more.open .zk-more-ch { transform:rotate(180deg); }
+.zk-morebox { display:none; background:rgba(0,0,0,0.14); border:1px solid var(--border-color); border-radius:16px; padding:14px; margin-bottom:12px; }
+.zk-morebox.open { display:block; animation:mkOpen .3s var(--ease, ease) both; }
+body.light-mode .zk-morebox { background:rgba(0,0,0,0.03); }
+
+.zk-result { margin-top:4px; margin-bottom:12px; background:none; border:none; padding:0; }
+.zk-guide { display:flex; gap:11px; align-items:flex-start; background:rgba(231,124,58,0.12);
+    border:1px solid rgba(231,124,58,0.45); border-radius:16px; padding:14px; }
+.zk-guide-ic { color:#e77c3a; font-size:1.05rem; flex:0 0 auto; margin-top:2px; }
+.zk-guide b { display:block; color:#e77c3a; font-size:0.9rem; margin-bottom:4px; }
+.zk-guide p { margin:0; font-size:0.8rem; line-height:1.75; color:var(--text-soft,#cbbfa6); }
+
+.zk-due { display:flex; flex-direction:column; align-items:center; gap:3px; text-align:center;
+    background:linear-gradient(180deg, rgba(212,168,67,0.18), rgba(212,168,67,0.06));
+    border:1px solid rgba(212,168,67,0.5); border-radius:18px; padding:18px 14px; }
+.zk-due span { font-size:0.82rem; font-weight:700; color:var(--text-soft,#cbbfa6); }
+.zk-due strong { font-size:2.1rem; font-weight:800; color:var(--accent-color); letter-spacing:-0.5px; line-height:1.15; font-variant-numeric:tabular-nums; }
+.zk-due em { font-size:0.72rem; font-style:normal; color:var(--text-muted); }
+
+.zk-nodue { display:flex; flex-direction:column; align-items:center; gap:5px; text-align:center;
+    background:rgba(34,197,94,0.10); border:1px solid rgba(34,197,94,0.4); border-radius:18px; padding:16px 14px; }
+.zk-nodue-ic { color:#22c55e; font-size:1.4rem; }
+.zk-nodue b { color:#22c55e; font-size:0.95rem; }
+.zk-nodue p { margin:0; font-size:0.79rem; line-height:1.75; color:var(--text-soft,#cbbfa6); max-width:290px; }
+
+.zk-lines { margin-top:10px; background:rgba(0,0,0,0.14); border:1px solid var(--border-color); border-radius:14px; padding:11px 13px; }
+body.light-mode .zk-lines { background:rgba(0,0,0,0.03); }
+.zk-line { display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:0.84rem; padding:4px 0; color:var(--text-soft,#cbbfa6); }
+.zk-line b { color:var(--text-main); font-variant-numeric:tabular-nums; }
+.zk-hint { display:flex; align-items:flex-start; gap:7px; margin-top:9px; font-size:0.76rem; line-height:1.7; color:var(--text-muted); }
+.zk-hint i { color:var(--accent-color); margin-top:3px; }
+
+.zk-note { display:none; flex-direction:column; gap:6px; background:rgba(0,0,0,0.16);
+    border:1px solid var(--border-color); border-radius:14px; padding:12px 13px; }
+.zk-note.open { display:flex; animation:mkOpen .3s var(--ease, ease) both; }
+body.light-mode .zk-note { background:rgba(0,0,0,0.03); }

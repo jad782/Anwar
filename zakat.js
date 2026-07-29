@@ -36,6 +36,16 @@ const FIELDS = [
     { id:'lent',      ar:'ديون لك مرجوّة السداد',   en:'Debts owed to you (expected)' },
     { id:'owed',      ar:'ديون حالّة عليك',          en:'Your immediate debts' }
 ];
+// حقل واحد: تسمية + تلميح قصير أسفلها (يشرح المقصود بلا حشو)
+function fld(id, labAr, labEn, hintAr, hintEn, saved, ph){
+    const lab = L()==='en'?labEn:labAr, hint = L()==='en'?hintEn:hintAr;
+    return `<div class="zk-f">
+        <label for="zk-${id}">${lab}</label>
+        <input id="zk-${id}" type="number" inputmode="decimal" min="0" step="any"
+               placeholder="${ph||'0'}" value="${saved[id]?saved[id]:''}" oninput="AnwarZakat.calc()">
+        ${hint?`<small>${hint}</small>`:''}
+    </div>`;
+}
 
 function num(id){ const el=$('zk-'+id); if(!el) return 0; const v=parseFloat(String(el.value).replace(/,/g,'')); return isFinite(v)&&v>0 ? v : 0; }
 function fmt(n){
@@ -59,37 +69,73 @@ window.AnwarZakat = {
     close:function(){ const o=$('zakat-overlay'); if(o) o.classList.remove('active'); },
     _build:function(){
         if($('zakat-overlay')) return;
-        const saved = loadInputs();
-        const rows = FIELDS.map(f=>`<div class="zk-row">
-            <label for="zk-${f.id}">${L()==='en'?f.en:f.ar}</label>
-            <input id="zk-${f.id}" type="number" inputmode="decimal" min="0" step="any"
-                   placeholder="0" value="${saved[f.id]?saved[f.id]:''}" oninput="AnwarZakat.calc()">
-        </div>`).join('');
+        const s = loadInputs();
         const o=document.createElement('div');
         o.id='zakat-overlay'; o.className='qibla-overlay';
         o.innerHTML=`<div class="qibla-modal zk-modal">
             <button class="close-qibla" onclick="AnwarZakat.close()"><i class="fa-solid fa-xmark"></i></button>
             <h2 class="zk-title"><i class="fa-solid fa-hand-holding-heart"></i> ${tr('حاسبة الزكاة','Zakat Calculator')}</h2>
-            <p class="zk-sub">${tr('زكاة المال: ربع العشر (٢.٥٪) عند بلوغ النصاب ومرور الحول.','Zakat on wealth: 2.5% once the nisab is reached and a lunar year has passed.')}</p>
+            <p class="zk-lead">${tr('الزكاة <b>٢.٥٪</b> ممّا تملك، إذا بلغ مالك حدّاً معيّناً (النصاب) ومرّ عليه <b>عام هجري</b>.','Zakat is <b>2.5%</b> of what you own, once your wealth reaches the nisab and a <b>lunar year</b> passes.')}</p>
 
-            <div class="zk-fields">${rows}</div>
+            <!-- ١ -->
+            <div class="zk-step">
+                <div class="zk-step-h"><span class="zk-num">١</span> ${tr('كم تملك الآن؟','What do you own?')}</div>
+                ${fld('cash', tr('النقد والحسابات البنكية','Cash & bank'), 'Cash & bank',
+                      tr('كل ما معك نقداً وفي حساباتك','All your cash and bank balances'), 'All your cash and bank balances', s)}
 
-            <div class="zk-row zk-sel">
-                <label for="zk-basis">${tr('النصاب محسوب بـ','Nisab based on')}</label>
-                <select id="zk-basis" onchange="AnwarZakat.calc()">
-                    <option value="silver" ${saved.basis!=='gold'?'selected':''}>${tr('الفضة (٥٩٥غ) — الأحوط','Silver (595g) — safer')}</option>
-                    <option value="gold" ${saved.basis==='gold'?'selected':''}>${tr('الذهب (٨٥غ)','Gold (85g)')}</option>
-                </select>
+                <div class="zk-pairwrap">
+                    <span class="zk-pair-t"><i class="fa-solid fa-coins"></i> ${tr('الذهب','Gold')}</span>
+                    <div class="zk-pair">
+                        ${fld('gold_g', tr('الوزن (غرام)','Weight (g)'), 'Weight (g)', '', '', s)}
+                        ${fld('gold_p', tr('سعر الغرام','Price / gram'), 'Price / gram', '', '', s)}
+                    </div>
+                    <small class="zk-skip">${tr('اتركهما فارغين إن لم يكن لديك ذهب','Leave empty if you have no gold')}</small>
+                </div>
+
+                <div class="zk-pairwrap">
+                    <span class="zk-pair-t"><i class="fa-solid fa-ring"></i> ${tr('الفضة','Silver')}</span>
+                    <div class="zk-pair">
+                        ${fld('silver_g', tr('الوزن (غرام)','Weight (g)'), 'Weight (g)', '', '', s)}
+                        ${fld('silver_p', tr('سعر الغرام','Price / gram'), 'Price / gram', '', '', s)}
+                    </div>
+                    <small class="zk-skip">${tr('سعر غرام الفضة مطلوب لتحديد النصاب — حتى لو لا تملك فضة','The silver price per gram is needed for the nisab — even if you own no silver')}</small>
+                </div>
             </div>
-            <div class="zk-check" onclick="AnwarZakat.toggleDeduct()">
-                <input id="zk-deduct" type="checkbox" ${saved.deduct?'checked':''} onclick="event.stopPropagation();AnwarZakat.calc()">
-                <span>${tr('خصم الديون الحالّة عليّ','Deduct my immediate debts')}</span>
+
+            <!-- ٢ اختياري -->
+            <button class="zk-more" id="zk-more-btn" onclick="AnwarZakat.toggleMore()">
+                <span><i class="fa-solid fa-plus"></i> ${tr('تفاصيل إضافية (تجارة وديون)','More (trade & debts)')}</span>
+                <i class="fa-solid fa-chevron-down zk-more-ch"></i>
+            </button>
+            <div class="zk-morebox" id="zk-morebox">
+                ${fld('trade', tr('عروض التجارة','Trade goods'), 'Trade goods',
+                      tr('بضاعة تنوي بيعها — بقيمتها اليوم','Goods you intend to sell — at current value'), 'Goods for sale at current value', s)}
+                ${fld('lent', tr('ديون لك','Money owed to you'), 'Money owed to you',
+                      tr('مال أقرضته وتتوقّع رجوعه','Money you lent and expect back'), 'Money you lent and expect back', s)}
+                ${fld('owed', tr('ديون عليك','Debts you owe'), 'Debts you owe',
+                      tr('ديون حالّة مستحقّة الآن','Debts due now'), 'Debts due now', s)}
+                <div class="zk-check" onclick="AnwarZakat.toggleDeduct()">
+                    <input id="zk-deduct" type="checkbox" ${s.deduct?'checked':''} onclick="event.stopPropagation();AnwarZakat.calc()">
+                    <span>${tr('اخصم ديوني من المال الزكوي','Deduct my debts from zakatable wealth')}</span>
+                </div>
+                <div class="zk-f zk-sel">
+                    <label for="zk-basis">${tr('احسب النصاب بـ','Base the nisab on')}</label>
+                    <select id="zk-basis" onchange="AnwarZakat.calc()">
+                        <option value="silver" ${s.basis!=='gold'?'selected':''}>${tr('الفضة ٥٩٥غ — الأحوط','Silver 595g — safer')}</option>
+                        <option value="gold" ${s.basis==='gold'?'selected':''}>${tr('الذهب ٨٥غ','Gold 85g')}</option>
+                    </select>
+                    <small>${tr('الفضة أقلّ قيمة فتجب الزكاة في مالٍ أقل — وهو أنفع للفقراء','Silver is lower, so zakat becomes due on less — better for the poor')}</small>
+                </div>
             </div>
 
+            <!-- ٣ النتيجة -->
             <div class="zk-result" id="zk-result"></div>
 
-            <div class="zk-note">
-                <b>${tr('المصادر','Sources')}</b>
+            <button class="zk-srcbtn" onclick="AnwarZakat.toggleSrc()">
+                <span><i class="fa-solid fa-book"></i> ${tr('المصادر والضوابط الفقهية','Sources & fiqh basis')}</span>
+                <i class="fa-solid fa-chevron-down zk-src-ch"></i>
+            </button>
+            <div class="zk-note" id="zk-note">
                 <span>${tr('• المقدار ربع العشر: «وفي الرِّقَةِ رُبعُ العُشْرِ» — البخاري (١٤٥٤).','• The rate: "On silver, a quarter of a tenth" — Bukhari (1454).')}</span>
                 <span>${tr('• نصاب الفضة مئتا درهم = ٥٩٥غ: «ليس فيما دون خمسِ أواقٍ صدقة» — مسلم.','• Silver nisab = 595g: "No zakat on less than five awaq" — Muslim.')}</span>
                 <span>${tr('• نصاب الذهب عشرون ديناراً = ٨٥غ على الراجح.','• Gold nisab = 20 dinars ≈ 85g (predominant view).')}</span>
@@ -99,6 +145,17 @@ window.AnwarZakat = {
             </div>
         </div>`;
         document.body.appendChild(o);
+        // افتح "تفاصيل إضافية" تلقائياً إن كان المستخدم قد أدخل فيها شيئاً سابقاً
+        if(s.trade||s.lent||s.owed||s.deduct) AnwarZakat.toggleMore();
+    },
+    toggleMore:function(){
+        const b=$('zk-morebox'), t=$('zk-more-btn'); if(!b||!t) return;
+        const open=b.classList.toggle('open'); t.classList.toggle('open', open);
+    },
+    toggleSrc:function(){
+        const n=$('zk-note'); if(!n) return;
+        const open=n.classList.toggle('open');
+        const c=document.querySelector('.zk-src-ch'); if(c) c.style.transform = open?'rotate(180deg)':'';
     },
     toggleDeduct:function(){ const c=$('zk-deduct'); if(c){ c.checked=!c.checked; this.calc(); } },
     calc:function(){
@@ -118,26 +175,39 @@ window.AnwarZakat = {
         const nisab = gram * nisabG;
         const needPrice = gram <= 0;
 
+        const metalAr = basis==='gold' ? 'الذهب' : 'الفضة';
         if(needPrice){
-            box.className='zk-result warn';
-            box.innerHTML=`<i class="fa-solid fa-circle-info"></i> <span>${tr(
-                'أدخل سعر غرام '+(basis==='gold'?'الذهب':'الفضة')+' لتحديد قيمة النصاب.',
-                'Enter the '+(basis==='gold'?'gold':'silver')+' price per gram to determine the nisab.')}</span>`;
+            box.className='zk-result guide';
+            box.innerHTML=`<div class="zk-guide">
+                <span class="zk-guide-ic"><i class="fa-solid fa-circle-info"></i></span>
+                <div>
+                    <b>${tr('ناقص خطوة واحدة','One step left')}</b>
+                    <p>${tr('اكتب سعر غرام '+metalAr+' اليوم بعملتك في الأعلى — نحتاجه لنعرف هل بلغ مالك النصاب.',
+                            'Enter today\'s '+(basis==='gold'?'gold':'silver')+' price per gram above — we need it to know if you reached the nisab.')}</p>
+                </div></div>`;
             saveInputs(); return;
         }
 
         const due = total * RATE;
         const reached = total >= nisab;
+        const remain = nisab - total;
         box.className = 'zk-result ' + (reached ? 'due' : 'below');
         box.innerHTML = `
-            <div class="zk-line"><span>${tr('إجمالي المال الزكوي','Total zakatable wealth')}</span><b>${fmt(total)}</b></div>
-            <div class="zk-line"><span>${tr('قيمة النصاب','Nisab value')}</span><b>${fmt(nisab)}</b></div>
             ${reached ? `<div class="zk-due">
-                    <span>${tr('الزكاة الواجبة (٢.٥٪)','Zakat due (2.5%)')}</span>
+                    <span>${tr('زكاتك الواجبة','Your zakat')}</span>
                     <strong>${fmt(due)}</strong>
-                 </div>
-                 <p class="zk-hint">${tr('بلغ مالك النصاب — تجب الزكاة إن حال عليه الحول.','Your wealth reached the nisab — zakat is due if a lunar year has passed.')}</p>`
-              : `<p class="zk-hint">${tr('مالك أقلّ من النصاب، فلا تجب الزكاة — والصدقة خير.','Your wealth is below the nisab, so zakat is not due — voluntary charity is still good.')}</p>`}`;
+                    <em>${tr('٢.٥٪ من مالك','2.5% of your wealth')}</em>
+                 </div>` : `<div class="zk-nodue">
+                    <span class="zk-nodue-ic"><i class="fa-solid fa-circle-check"></i></span>
+                    <b>${tr('لا زكاة عليك الآن','No zakat due right now')}</b>
+                    <p>${tr('مالك لم يبلغ النصاب بعد — يبقى '+fmt(remain)+' للوصول إليه. والصدقة خيرٌ على كل حال.',
+                            'You have not reached the nisab yet — '+fmt(remain)+' remaining. Voluntary charity is always good.')}</p>
+                 </div>`}
+            <div class="zk-lines">
+                <div class="zk-line"><span>${tr('مجموع مالك','Your total wealth')}</span><b>${fmt(total)}</b></div>
+                <div class="zk-line"><span>${tr('النصاب (أقلّ مبلغ تجب فيه الزكاة)','Nisab (minimum for zakat)')}</span><b>${fmt(nisab)}</b></div>
+            </div>
+            ${reached ? `<p class="zk-hint"><i class="fa-solid fa-circle-exclamation"></i> ${tr('تجب إن مرّ على هذا المال عامٌ هجري كامل.','Due if a full lunar year has passed over this wealth.')}</p>` : ''}`;
         saveInputs();
     }
 };
