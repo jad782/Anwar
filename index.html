@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Al-Anwar">
     <title>تطبيق الأنوار الإسلامي</title>
-    <link rel="stylesheet" href="style.css?v=93">
+    <link rel="stylesheet" href="style.css?v=94">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="fa.css?v=1">
     <link rel="stylesheet" href="fonts.css?v=1">
@@ -333,61 +333,49 @@
         <div><strong id="badge-toast-title">تنبيه!</strong><p id="badge-toast-desc"></p></div>
     </div>
 
-    <div id="qibla-overlay" class="qibla-overlay">
-        <div class="qibla-modal">
-            <button class="close-qibla" onclick="closeQibla()"><i class="fa-solid fa-xmark"></i></button>
-            <h2 style="color:var(--primary-color); margin-bottom:16px;" data-i18n="qibla_dir">اتجاه القبلة</h2>
-            <div class="qibla-banner" id="qibla-banner"><i class="fa-solid fa-location-arrow"></i> <span>وجّه السهم نحو الأعلى ☝</span></div>
-            <div class="compass-circle">
-                <div class="qibla-top-pointer" id="qibla-top-pointer"></div>
-                <svg class="compass-rose" id="compass-rose" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
-                            <stop offset="0%" stop-color="#FBE7A6"/><stop offset="35%" stop-color="#D4A843"/><stop offset="70%" stop-color="#9C7517"/><stop offset="100%" stop-color="#F2D27A"/>
-                        </linearGradient>
-                        <radialGradient id="cf" cx="50%" cy="38%" r="65%">
-                            <stop offset="0%" stop-color="#2A2008"/><stop offset="55%" stop-color="#17120A"/><stop offset="100%" stop-color="#0E0A05"/>
-                        </radialGradient>
-                        <radialGradient id="sheen" cx="42%" cy="30%" r="45%">
-                            <stop offset="0%" stop-color="rgba(255,240,200,0.16)"/><stop offset="100%" stop-color="rgba(255,240,200,0)"/>
-                        </radialGradient>
-                    </defs>
-                    <!-- الوجه الداخلي -->
-                    <circle cx="120" cy="120" r="112" fill="url(#cf)"/>
-                    <circle cx="120" cy="120" r="112" fill="url(#sheen)"/>
-                    <!-- الحافة الفخمة -->
-                    <circle cx="120" cy="120" r="116" fill="none" stroke="url(#cg)" stroke-width="6"/>
-                    <circle cx="120" cy="120" r="107" fill="none" stroke="rgba(212,168,67,0.25)" stroke-width="1"/>
-                    <!-- تدريج دقيق -->
-                    <circle cx="120" cy="120" r="99" fill="none" stroke="rgba(212,168,67,0.5)" stroke-width="5" stroke-dasharray="1.2 6.3"/>
-                    <!-- نقاط زخرفية داخلية -->
-                    <circle cx="120" cy="120" r="62" fill="none" stroke="rgba(212,168,67,0.18)" stroke-width="3" stroke-dasharray="0.8 9.6" stroke-linecap="round"/>
-                    <!-- علامات الجهات الأربع (أطول) -->
-                    <g stroke="url(#cg)" stroke-width="2.5">
-                        <line x1="120" y1="14" x2="120" y2="30"/><line x1="120" y1="210" x2="120" y2="226"/>
-                        <line x1="14" y1="120" x2="30" y2="120"/><line x1="210" y1="120" x2="226" y2="120"/>
-                    </g>
-                    <text x="120" y="46" class="cr-card cr-n">N</text>
-                    <text x="200" y="126" class="cr-card">E</text>
-                    <text x="120" y="202" class="cr-card">S</text>
-                    <text x="40" y="126" class="cr-card">W</text>
-                </svg>
-                <svg class="q-needle" id="compass-arrow" viewBox="0 0 40 160" xmlns="http://www.w3.org/2000/svg">
-                    <defs><linearGradient id="ng" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FBE7A6"/><stop offset="100%" stop-color="#C9A227"/></linearGradient></defs>
-                    <polygon points="20,8 31,82 20,73 9,82" fill="currentColor"/>
-                    <polygon points="20,152 31,82 20,91 9,82" fill="#4A3A1C"/>
-                </svg>
-                <div class="compass-kaaba" id="compass-kaaba">🕋</div>
-                <div class="compass-hub"></div>
+    <div id="qibla-overlay" class="qibla-overlay qb-pro">
+        <div class="qb-screen" id="qb-screen">
+            <button class="qb-close" onclick="closeQibla()"><i class="fa-solid fa-xmark"></i></button>
+
+            <div class="qb-place">
+                <!-- يُملأ باسم أقرب مدينة؛ بلا data-i18n كي لا تمسحه applyTranslations عند تبديل اللغة
+                     (طبقة i18n-ui تترجم اسم المدينة نفسه) -->
+                <h2 id="qb-city">اتجاه القبلة</h2>
+                <span id="qb-region"></span>
             </div>
-            <div class="qibla-degwrap">
-                <p id="qibla-degree" class="qibla-degree">--°</p>
-                <span class="qibla-degcap" data-i18n="qibla_from_north">درجة من الشمال</span>
+
+            <div class="qb-stage">
+                <!-- الكعبة: علامة الهدف أعلى الحلقة -->
+                <div class="qb-kaaba" id="qibla-top-pointer"><i class="fa-solid fa-kaaba"></i></div>
+
+                <svg class="qb-ring" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+                    <circle class="qb-track" cx="130" cy="130" r="120"/>
+                    <circle class="qb-arc" id="qb-arc" cx="130" cy="130" r="120"/>
+                </svg>
+
+                <!-- نقطة اتجاهك الحالي على الحلقة -->
+                <div class="qb-dot" id="qb-dot"></div>
+
+                <!-- المؤشّر: يدور ليشير للقبلة -->
+                <div class="qb-pointer" id="compass-arrow">
+                    <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                        <polygon points="30,6 52,50 30,39 8,50"/>
+                    </svg>
+                </div>
+
+                <span class="qb-side qb-left"  id="qb-dist"></span>
+                <span class="qb-side qb-right" id="qb-alt"></span>
+                <span class="qb-turn" id="qb-turn"></span>
             </div>
-            <p id="qibla-hint" style="margin-top:8px; color:var(--text-muted); font-size:0.85rem; line-height:1.6;" data-i18n="qibla_hint">امسك الهاتف بشكل مسطح ووجّهه حتى تنطبق الكعبة على السهم.</p>
+
+            <div class="qb-readout">
+                <p id="qibla-degree" class="qb-deg">--°</p>
+                <span class="qb-degcap" data-i18n="qibla_from_north">درجة من الشمال</span>
+            </div>
+
+            <p id="qibla-hint" class="qb-hint" data-i18n="qibla_hint">امسك الهاتف بشكل مسطح ووجّهه حتى تنطبق الكعبة على السهم.</p>
             <div id="qibla-magwarn" class="qibla-magwarn" style="display:none;"><i class="fa-solid fa-triangle-exclamation"></i> <span>توجد أجهزة مغناطيسية قريبة تؤثّر على الدقّة. حرّك الهاتف على شكل الرقم 8 للمعايرة.</span></div>
-            <div id="qibla-route" class="qibla-route"></div>
-            <button id="qibla-permission-btn" onclick="requestCompassPermission()" class="tasbeeh-pill" style="margin-top:15px; display:none;" data-i18n="qibla_enable">تفعيل البوصلة</button>
+            <button id="qibla-permission-btn" onclick="requestCompassPermission()" class="qb-enable" style="display:none;" data-i18n="qibla_enable">تفعيل البوصلة</button>
         </div>
     </div>
 
@@ -449,7 +437,7 @@
 
     <script src="i18n-tr.js?v=1"></script>
     <script src="i18n-auto.js?v=1"></script>
-    <script src="i18n-ui.js?v=13"></script>
+    <script src="i18n-ui.js?v=14"></script>
     <script src="persist.js?v=4"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -457,7 +445,7 @@
     <script src="quran-data.js?v=1"></script>
     <script src="prayers.js?v=14"></script>
     <script src="haptics.js?v=1"></script>
-    <script src="app.js?v=34"></script>
+    <script src="app.js?v=37"></script>
     <script src="features.js?v=26"></script>
     <script src="pro.js?v=33"></script>
     <script src="pro2.js?v=24"></script>

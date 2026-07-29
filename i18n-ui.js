@@ -417,7 +417,7 @@ const UIT = {
   'لم يتم السماح باستخدام البوصلة.':['Compass permission was denied.','Pusula izni verilmedi.'],
   'درجة من الشمال':['degrees from North','derece (kuzeyden)'],
   'الصلاة القادمة':['Next prayer','Sonraki namaz'],
-  'الدليل':['Guide','Rehber'], 'الحساب':['Account','Hesap'], 'المزيد':['More','Daha fazla'],
+  'الدليل':['Guide','Rehber'], 'اتجاه القبلة':['Qibla Direction','Kıble yönü'], 'موقعك الحالي':['Your current location','Mevcut konumun'], 'أقرب مدينة':['Nearest city','En yakın şehir'], 'الحساب':['Account','Hesap'], 'المزيد':['More','Daha fazla'],
   'إعدادات':['Settings','Ayarlar'], 'تم النسخ':['Copied','Kopyalandı'],
   'جاري التحميل...':['Loading…','Yükleniyor…'], 'جاري الحساب...':['Calculating…','Hesaplanıyor…'],
 

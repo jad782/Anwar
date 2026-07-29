@@ -572,6 +572,7 @@ window.openQibla = function() {
                     : '🕋 أنت في مكة قرب الكعبة — استقبِلها مباشرةً أمامك. البوصلة غير دقيقة داخل الحرم بسبب الحديد والزحام.';
                 _hint.style.display = 'block';
             }
+            _fillQiblaPlace(pos.coords.latitude, pos.coords.longitude, pos.coords.altitude);
             // الاتجاه (الرقم) والخريطة صحيحان دائماً حتى لو تعذّرت البوصلة الحيّة
         }, () => {
             // بدون موقع: استخدم إسطنبول كافتراضي
@@ -589,6 +590,57 @@ window.openQibla = function() {
     } else if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         permBtn.style.display = 'block';
     } else { startCompass(); }
+}
+
+// يملأ رأس شاشة القبلة: أقرب مدينة (أوفلاين من قائمة prayers.js)، المسافة للكعبة، والارتفاع إن توفّر
+// يُحفظ آخر موقع ليُعاد بناء النصوص باللغة الجديدة عند التبديل (نصوص مركّبة: رقم + وحدة + وصف)
+let _lastQiblaPos = null;
+window.refreshQiblaPlace = function(){
+    if(_lastQiblaPos) _fillQiblaPlace(_lastQiblaPos[0], _lastQiblaPos[1], _lastQiblaPos[2]);
+};
+function _fillQiblaPlace(lat, lng, altitude){
+    _lastQiblaPos = [lat, lng, altitude];
+    const en = (currentLang==='en'), tk = (currentLang==='tr');
+    // أقرب مدينة معروفة — بلا أي خدمة خارجية
+    try{
+        const cities = (window.PRAYERS && PRAYERS.CITIES) || [];
+        let best=null, bestD=Infinity;
+        for(let i=0;i<cities.length;i++){
+            const c=cities[i], dLat=(c.lat-lat), dLng=(c.lng-lng)*Math.cos(lat*Math.PI/180);
+            const d=dLat*dLat+dLng*dLng;
+            if(d<bestD){ bestD=d; best=c; }
+        }
+        const cityEl=document.getElementById('qb-city'), regEl=document.getElementById('qb-region');
+        if(best && cityEl){
+            const near = Math.sqrt(bestD) * 111;                     // تقريب بالكيلومتر
+            cityEl.innerText = (near <= 120) ? (en||tk ? (best.en||best.ar) : best.ar)
+                                             : (en ? 'Qibla Direction' : tk ? 'Kıble yönü' : 'اتجاه القبلة');
+            if(regEl) regEl.innerText = (near <= 120)
+                ? (en ? 'Nearest city' : tk ? 'En yakın şehir' : 'أقرب مدينة')
+                : (en ? 'Your current location' : tk ? 'Mevcut konumun' : 'موقعك الحالي');
+        }
+    }catch(e){}
+    // المسافة إلى الكعبة
+    try{
+        const km = distanceToKaaba(lat, lng);
+        const el = document.getElementById('qb-dist');
+        if(el){
+            const n = window.fmtDigits ? fmtDigits(km.toLocaleString('en-US')) : km.toLocaleString('en-US');
+            el.innerText = n + (en ? ' km to the Kaaba' : tk ? ' km Kâbe’ye' : ' كم إلى الكعبة');
+        }
+    }catch(e){}
+    // الارتفاع عن سطح البحر (قد لا يوفّره الجهاز)
+    try{
+        const el = document.getElementById('qb-alt');
+        if(el){
+            if(typeof altitude === 'number' && isFinite(altitude)){
+                const m = Math.round(altitude);
+                const n = window.fmtDigits ? fmtDigits(String(m)) : String(m);
+                el.innerText = n + (en ? ' m above sea level' : tk ? ' m deniz seviyesinden' : ' م فوق سطح البحر');
+                el.style.display = '';
+            } else { el.style.display = 'none'; }
+        }
+    }catch(e){}
 }
 
 window.requestCompassPermission = function() {
@@ -683,17 +735,40 @@ function applyHeading(heading, acc) {
     const target = (qiblaBearing - h + 360) % 360;
     const aligned = (target < 6 || target > 354);
 
-    // القرص يدور ليُظهر الشمال الحقيقي (بوصلة حقيقية)
-    const rose = document.getElementById('compass-rose');
-    if (rose) rose.style.transform = `rotate(${-h}deg)`;
-    // الكعبة تدور على حافة القرص عند اتجاه القبلة وتبقى منتصبة
-    const kaaba = document.getElementById('compass-kaaba');
-    if (kaaba) kaaba.style.transform = `translate(-50%, -50%) rotate(${target}deg) translateY(-92px) rotate(${-target}deg)`;
-    // المؤشّر الثابت بالأعلى يتوهّج أخضر عند المحاذاة
+    // المؤشّر المركزي يدور ليشير نحو القبلة (الكعبة ثابتة أعلى الحلقة كهدف)
     const arrow = document.getElementById('compass-arrow');
     if (arrow){ arrow.style.transform = `translate(-50%, -50%) rotate(${target}deg)`; arrow.classList.toggle('al', aligned); }
     const topPtr = document.getElementById('qibla-top-pointer');
     if (topPtr) topPtr.classList.toggle('al', aligned);
+    const screen_ = document.getElementById('qb-screen');
+    if (screen_) screen_.classList.toggle('aligned', aligned);
+
+    // نقطة موضعك الحالي على الحلقة: تتحرّك حتى تلتقي بالكعبة في الأعلى
+    const dot = document.getElementById('qb-dot');
+    if (dot){
+        dot.style.transform = `translate(-50%, -50%) rotate(${target}deg) translateY(-120px)`;
+        dot.classList.toggle('al', aligned);
+        // اللون مضبوط هنا لا في CSS: بعض المحرّكات لا تطبّق قاعدة .qb-dot.al رغم صحّتها
+        dot.style.background = aligned ? '#16a34a' : '#E0930F';
+    }
+    // قوس يمتدّ من الأعلى إلى النقطة (كم بقي من الدوران)
+    const arc = document.getElementById('qb-arc');
+    if (arc){
+        const C = 2 * Math.PI * 120;                 // محيط الحلقة (r=120)
+        const span = Math.min(target, 360 - target); // أقصر مسار
+        arc.style.strokeDasharray = C;
+        arc.style.strokeDashoffset = C - (C * span / 360);
+        arc.style.transform = (target <= 180) ? 'rotate(-90deg)' : `rotate(${-90 - span}deg)`;
+    }
+    // إرشاد الالتفاف
+    const turn = document.getElementById('qb-turn');
+    if (turn){
+        const en = (currentLang === 'en'), tk = (currentLang === 'tr');
+        if (aligned) turn.innerText = en ? 'You are facing the Qibla ✓' : tk ? 'Kıbleye dönüksün ✓' : 'أنت تواجه القبلة ✓';
+        else if (target <= 180) turn.innerText = en ? 'Turn right' : tk ? 'Sağa dön' : 'انعطف يميناً';
+        else turn.innerText = en ? 'Turn left' : tk ? 'Sola dön' : 'انعطف يساراً';
+        turn.classList.toggle('al', aligned);
+    }
 
     // توجيه بالاهتزاز اللمسي: نبضات تتسارع كلما اقتربت، ونبضة قوية عند المحاذاة
     if (window.HAP){
@@ -709,8 +784,6 @@ function applyHeading(heading, acc) {
 
     const deg = document.getElementById('qibla-degree');
     if (deg) deg.innerText = Math.round(qiblaBearing) + '°' + (aligned ? ' ✓' : '');
-    const banner = document.getElementById('qibla-banner');
-    if (banner){ banner.classList.toggle('aligned', aligned); banner.querySelector('span').innerText = aligned ? (currentLang==='en'?'You are facing the Qibla ✓':'أنت تواجه القبلة ✓') : (currentLang==='en'?'Turn until the Kaaba reaches the top ☝':'أدِر الهاتف حتى تصل الكعبة للمؤشّر ☝'); }
     // بوصلة الكاميرا (AR): السهم يشير لاتجاه القبلة
     const arArrow = document.getElementById('ar-arrow');
     if (arArrow){ arArrow.style.transform = `rotate(${target}deg)`; arArrow.style.filter = aligned ? 'drop-shadow(0 0 12px #22c55e)' : 'none'; }
@@ -864,6 +937,7 @@ window.setLang = function(lang){
     document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
     applyTranslations();
     renderDailyTasks();
+    try{ refreshQiblaPlace(); }catch(e){}   // نصوص القبلة المركّبة تُبنى بالجافاسكربت
     document.querySelectorAll('.lang-btn[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
     pageTitle.innerText = titles[[...tabSections].findIndex(s => s.style.display === 'block')] || t('nav_home');
 };
