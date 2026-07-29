@@ -108,7 +108,7 @@
                             <svg class="ring-svg" viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="32"/><circle class="ring-progress" id="ring-morning" cx="40" cy="40" r="32" style="--pct:0"/></svg>
                             <div class="ring-icon"><i class="fa-solid fa-sun"></i></div>
                         </div>
-                        <span class="ring-label">الصباح</span>
+                        <span class="ring-label" data-i18n="p_morning">الصباح</span>
                         <span class="ring-pct" id="pct-morning">0%</span>
                     </div>
                     <div class="ring-item" onclick="startNewKhatma()">
@@ -116,7 +116,7 @@
                             <svg class="ring-svg" viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="32"/><circle class="ring-progress" id="ring-quran" cx="40" cy="40" r="32" style="--pct:0"/></svg>
                             <div class="ring-icon"><i class="fa-solid fa-book-quran"></i></div>
                         </div>
-                        <span class="ring-label">المصحف</span>
+                        <span class="ring-label" data-i18n="r_quran">المصحف</span>
                         <span class="ring-pct" id="pct-quran">0%</span>
                     </div>
                     <div class="ring-item" onclick="goToTab(2)">
@@ -124,7 +124,7 @@
                             <svg class="ring-svg" viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="32"/><circle class="ring-progress" id="ring-tasbeeh" cx="40" cy="40" r="32" style="--pct:0"/></svg>
                             <div class="ring-icon"><i class="fa-solid fa-ring"></i></div>
                         </div>
-                        <span class="ring-label">التسبيح</span>
+                        <span class="ring-label" data-i18n="r_tasbeeh">التسبيح</span>
                         <span class="ring-pct" id="pct-tasbeeh">0%</span>
                     </div>
                     <div class="ring-item" onclick="goToTab(2)">
@@ -132,7 +132,7 @@
                             <svg class="ring-svg" viewBox="0 0 80 80"><circle class="ring-bg" cx="40" cy="40" r="32"/><circle class="ring-progress" id="ring-evening" cx="40" cy="40" r="32" style="--pct:0"/></svg>
                             <div class="ring-icon"><i class="fa-solid fa-moon"></i></div>
                         </div>
-                        <span class="ring-label">المساء</span>
+                        <span class="ring-label" data-i18n="p_evening">المساء</span>
                         <span class="ring-pct" id="pct-evening">0%</span>
                     </div>
                 </div>
@@ -288,7 +288,7 @@
 
                 <div class="settings-footer">
                     <i class="fa-solid fa-book-quran"></i>
-                    <span>تطبيق الأنوار · الإصدار 1.0</span>
+                    <span id="settings-version">تطبيق الأنوار · الإصدار 1.8.9</span>
                 </div>
             </div>
         </div>
@@ -448,7 +448,8 @@
     </div>
 
     <script src="i18n-tr.js?v=1"></script>
-    <script src="i18n-ui.js?v=3"></script>
+    <script src="i18n-auto.js?v=1"></script>
+    <script src="i18n-ui.js?v=13"></script>
     <script src="persist.js?v=4"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -456,10 +457,10 @@
     <script src="quran-data.js?v=1"></script>
     <script src="prayers.js?v=14"></script>
     <script src="haptics.js?v=1"></script>
-    <script src="app.js?v=32"></script>
+    <script src="app.js?v=34"></script>
     <script src="features.js?v=26"></script>
     <script src="pro.js?v=33"></script>
-    <script src="pro2.js?v=23"></script>
+    <script src="pro2.js?v=24"></script>
     <script src="points.js?v=16"></script>
     <script src="keys.js?v=8"></script>
     <script src="premium.js?v=20"></script>
@@ -474,7 +475,7 @@
     <script src="backup-rate.js?v=3"></script>
     <script src="update.js?v=9"></script>
     <script src="sunan.js?v=1"></script>
-    <script src="zakat.js?v=3"></script>
+    <script src="zakat.js?v=4"></script>
     <script src="mushaf.js?v=14"></script>
     <script src="daily.js?v=2"></script>
     <script src="guide.js?v=2"></script>

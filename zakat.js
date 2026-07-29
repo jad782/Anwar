@@ -26,15 +26,10 @@ const NISAB_GOLD_G = 85;       // غرام
 const NISAB_SILVER_G = 595;    // غرام
 const KEY = 'zakat_inputs';
 
+// معرّفات الحقول فقط (تُستعمل للحفظ والقراءة) — التسميات تُبنى مترجَمةً في _build عبر fld()
 const FIELDS = [
-    { id:'gold_g',    ar:'وزن الذهب (غرام)',        en:'Gold weight (g)' },
-    { id:'gold_p',    ar:'سعر غرام الذهب',          en:'Gold price / gram' },
-    { id:'silver_g',  ar:'وزن الفضة (غرام)',        en:'Silver weight (g)' },
-    { id:'silver_p',  ar:'سعر غرام الفضة',          en:'Silver price / gram' },
-    { id:'cash',      ar:'النقد والحسابات البنكية', en:'Cash & bank balances' },
-    { id:'trade',     ar:'عروض التجارة (قيمة البيع)', en:'Trade goods (sale value)' },
-    { id:'lent',      ar:'ديون لك مرجوّة السداد',   en:'Debts owed to you (expected)' },
-    { id:'owed',      ar:'ديون حالّة عليك',          en:'Your immediate debts' }
+    { id:'gold_g' }, { id:'gold_p' }, { id:'silver_g' }, { id:'silver_p' },
+    { id:'cash' },   { id:'trade' },  { id:'lent' },     { id:'owed' }
 ];
 // حقل واحد: تسمية + تلميح قصير أسفلها (يشرح المقصود بلا حشو)
 function fld(id, labAr, labEn, hintAr, hintEn, saved, ph){

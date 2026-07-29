@@ -342,7 +342,120 @@ const UIT = {
   'بلا':['None','Yok'], 'وميض':['Flash','Yanıp sönme'], 'اردو':['Urdu','Urduca'],
   'صباح':['Morning','Sabah'], 'مساء':['Evening','Akşam'],
   'اكتب اسم المهمة':['Enter the task name','Görev adını yaz'],
-  'لا تفتح ولا شي':['Nothing opens','Hiçbir şey açılmıyor']
+  'لا تفتح ولا شي':['Nothing opens','Hiçbir şey açılmıyor'],
+
+  // ——— الدفعة الأخيرة: نقاط ومتجر ومهام ورسائل ———
+  'قراءة أذكار الصباح':['Read the morning adhkar','Sabah zikirlerini oku'],
+  'قراءة أذكار المساء':['Read the evening adhkar','Akşam zikirlerini oku'],
+  'قراءة صفحة من المصحف':['Read a page of the Quran','Kur’an’dan bir sayfa oku'],
+  'قراءة جزء كامل':['Read a full juz','Tam bir cüz oku'],
+  'مئة تسبيحة':['A hundred tasbeeh','Yüz tesbih'], 'صلاة نافلة':['A voluntary prayer','Nafile namaz'],
+  'خط مصحف: نسخ':['Mushaf font: Naskh','Mushaf yazı tipi: Nesih'],
+  'خط مصحف: عثماني فخم':['Mushaf font: Uthmani','Mushaf yazı tipi: Osmânî'],
+  'ثيم ذهبي ملكي':['Royal Gold theme','Kraliyet altını teması'],
+  'ثيم أخضر زمردي':['Emerald Green theme','Zümrüt yeşili teması'],
+  'ثيم أزرق ليلي':['Midnight Blue theme','Gece mavisi teması'],
+  'ثيم وردي هادئ':['Soft Rose theme','Yumuşak gül teması'],
+  'خلفية قراءة: ورق ملكي':['Reading background: Royal Paper','Okuma arka planı: Kraliyet kâğıdı'],
+  'نقطة، تحتاج':['points, you need','puan, gerekli'], 'نقطة.':['points.','puan.'],
+  'نقطة. متابعة؟':['points. Continue?','puan. Devam edilsin mi?'],
+  'ريفريش':['Refresh','Yenile'], 'صحيح':['Authentic','Sahih'],
+  'كم':['km','km'], 'من 604 ·':['of 604 ·','/ 604 ·'],
+  '° (تقريبي)':['° (approx.)','° (yaklaşık)'],
+  '«من قرأ سورة الكهف يوم الجمعة أضاء له من النور ما بين الجمعتين»':['“Whoever recites Al-Kahf on Friday is lit with light between the two Fridays”','“Cuma günü Kehf’i okuyana iki cuma arası nur olur”'],
+  'للمتابعة.':['to continue.','devam etmek için.'],
+  ') بمزايا وتحسينات.':[') with new features and improvements.',') yeni özellikler ve iyileştirmelerle.'],
+  'نص اختياري':['Optional text','İsteğe bağlı metin'], 'نص للإجباري':['Text for forced update','Zorunlu güncelleme metni'],
+  'تنبيهات المناسبات الإسلامية':['Islamic Occasion Alerts','İslâmî özel gün bildirimleri'],
+
+  // ——— أوصاف ميزات البريميوم ———
+  'اكتب أدعية لمن تحبّ (والديك/أبنائك/من فقدت) + تذكير يومي + شاركها كبطاقة أو PDF. دعاؤك لهم صدقة جارية.':['Write duas for those you love (parents, children, the departed) + a daily reminder + share as a card or PDF. Your dua for them is an ongoing charity.','Sevdiklerin için dua yaz (anne baban, çocukların, kaybettiklerin) + günlük hatırlatma + kart veya PDF olarak paylaş. Onlara duan sadaka-i câriyedir.'],
+  'أذكار المواقف اليومية لطفلك بتصميم ملوّن مرح وبلغة يفهمها — علّمه ذكر كل موقف بمتعة.':['Everyday adhkar for your child in a colorful, playful design and language they understand.','Çocuğun için günlük durumların zikirleri; renkli, eğlenceli ve anlayacağı bir dille.'],
+  'أدلة المناسك خطوة بخطوة + عدّاد أشواط + شروط ومواقيت ومحظورات + أدعية كل موقف.':['Step-by-step rites guide + circuit counter + conditions, meeqats and prohibitions + duas for each stage.','Adım adım menâsik rehberi + şavt sayacı + şartlar, mîkatlar ve yasaklar + her durum için dualar.'],
+  'تنبيهات تلقائية قبل كل مناسبة (رمضان/العشر/عاشوراء/الأيام البيض) لئلّا تفوتك.':['Automatic alerts before every occasion (Ramadan, the ten days, Ashura, the white days) so you never miss one.','Her özel günden önce otomatik bildirim (Ramazan, on gün, Aşure, eyyâm-ı bîd) — kaçırma.'],
+  'تحميل سور كاملة بأصوات كبار القرّاء للاستماع أوفلاين وبالخلفية.':['Download full surahs by leading reciters for offline and background listening.','Büyük kârîlerin sesiyle tam sûreleri indir; çevrimdışı ve arka planda dinle.'],
+  'خطوط مصحف وثيمات فاخرة وخلفيات قراءة حصرية — لا تتوفّر مجاناً.':['Mushaf fonts, luxurious themes and exclusive reading backgrounds — not available for free.','Mushaf yazı tipleri, lüks temalar ve özel okuma arka planları — ücretsiz sürümde yok.'],
+  'صمّم الآيات والأحاديث بتأثيرات متحرّكة واحفظها/انشرها بجودة عالية.':['Design ayahs and hadiths with animated effects and save or share them in high quality.','Âyet ve hadisleri hareketli efektlerle tasarla, yüksek kalitede kaydet veya paylaş.'],
+  'أجواء ليلية هادئة للقيام والتهجّد: تنفّس، أذكار، ورد ليلي، وعدّاد صلاة.':['A calm night atmosphere for night prayer: breathing, adhkar, a night wird and a prayer counter.','Teheccüd için sakin gece ortamı: nefes, zikirler, gece virdi ve namaz sayacı.'],
+  'خلفيات جوّال فنية بالخط العربي تُحفظ في جهازك.':['Artistic phone wallpapers in Arabic calligraphy, saved to your device.','Arap hattıyla sanatsal telefon duvar kâğıtları, cihazına kaydedilir.'],
+  'كاميرا حيّة: الكعبة تطفو فوق الواقع وتتوسّط عند مواجهة القبلة + توجيه بالاهتزاز.':['Live camera: the Kaaba floats over reality and centers when you face the Qibla + haptic guidance.','Canlı kamera: Kâbe gerçekliğin üzerinde belirir ve kıbleye dönünce ortalanır + titreşimli yönlendirme.'],
+  'الـ99 اسماً بتصميم فخم مع المعاني وبطاقات مشاركة.':['All 99 names in a luxurious design with meanings and shareable cards.','99 ismin tamamı; lüks tasarım, anlamlar ve paylaşılabilir kartlar.'],
+  'إمساكية وعدّاد صيام وأعمال رمضان — يعتمد على أوقات صلاتك.':['Imsakiyah, a fasting counter and Ramadan deeds — based on your prayer times.','İmsakiye, oruç sayacı ve Ramazan amelleri — namaz vakitlerine göre.'],
+  'صمّم ثيمك الخاص باختيار لونين ويتناسق التطبيق كله معك.':['Design your own theme by picking two colors and the whole app matches you.','İki renk seçerek kendi temanı tasarla; tüm uygulama sana uyum sağlar.'],
+  'كرّر الآية صوتياً بعدد تحدّده وأخفِ النص للتسميع — للحُفّاظ وطلبة القرآن.':['Repeat an ayah aloud as many times as you choose and hide the text to test yourself — for memorizers and students of the Quran.','Âyeti istediğin sayıda sesli tekrarla ve metni gizleyip kendini sına — hâfızlar ve Kur’an talebeleri için.'],
+
+  // ——— كلمات وعبارات شائعة ———
+  'يوم':['day','gün'], 'اليوم':['today','bugün'], 'مرات':['×','kez'],
+  'الصباح':['Morning','Sabah'], 'المساء':['Evening','Akşam'], 'التسبيح':['Tasbeeh','Tesbih'],
+  'رجوع':['Back','Geri'], 'إغلاق':['Close','Kapat'], 'حفظ':['Save','Kaydet'],
+  'مشاركة':['Share','Paylaş'], 'نسخ':['Copy','Kopyala'], 'بحث':['Search','Ara'],
+  'لا توجد ختمة حالية':['No active khatma','Etkin hatim yok'],
+  'ابدأ ختمة وتابع وردك اليومي صفحةً صفحة.':['Start a khatma and track your daily wird page by page.','Bir hatme başla ve günlük virdini sayfa sayfa takip et.'],
+  'التزامي بالصلاة':['My prayer commitment','Namaz istikrarım'],
+  'نُسخت الآية':['Ayah copied','Âyet kopyalandı'], 'نُسخت للمشاركة':['Copied to share','Paylaşmak için kopyalandı'],
+  'صفحة من':['page of','/ sayfa'], 'المصحف':['Quran','Kur’an'],
+  'ختمة جديدة':['New Khatma','Yeni hatim'], 'ابدأ الختمة':['Start the khatma','Hatme başla'],
+  'تنبيه!':['Notice!','Uyarı!'], 'قائمة السنن':['Sunnah List','Sünnet listesi'],
+  'سنن المصطفى ﷺ — اغتنمها لرفع الدرجات':['The Sunnahs of the Prophet ﷺ — seize them to raise your ranks','Peygamber ﷺ sünnetleri — dereceleri yükseltmek için değerlendir'],
+  'إضافة':['Add','Ekle'], 'تخصيص':['Customize','Özelleştir'],
+  'اختر سورة':['Choose a Surah','Bir sûre seç'], 'فتح كاملة':['Open full','Tamamını aç'],
+  'إضافة مهمة':['Add a task','Görev ekle'],
+  'إضافة سورة للقراءة اليومية':['Add a surah to daily reading','Günlük okumaya sûre ekle'],
+  'لا توجد مهام، أضف وردك اليومي.':['No tasks yet — add your daily wird.','Henüz görev yok — günlük virdini ekle.'],
+  'أتممت ورد اليوم 🌿':['Today’s wird complete 🌿','Bugünün virdi tamam 🌿'],
+  'مهمة':['task','görev'], 'وقت مبارك':['A Blessed Time','Mübarek bir vakit'],
+  'اللغة':['Language','Dil'], 'خلفية القراءة':['Reading background','Okuma arka planı'],
+  'إبقاء الشاشة مضاءة':['Keep screen on','Ekranı açık tut'],
+  'الوضع النهاري (فاتح)':['Day mode (light)','Gündüz modu (açık)'],
+  'حجم خط القراءة':['Reading font size','Okuma yazı boyutu'],
+  'تصفير بيانات التطبيق':['Reset app data','Uygulama verilerini sıfırla'],
+  'التخصيص':['Customization','Özelleştirme'], 'التنبيهات والموقع':['Alerts & location','Bildirimler ve konum'],
+  'صوت الأذان عند الوقت':['Athan sound at prayer time','Vakit girince ezan sesi'],
+  'تنبيه قبل الأذان (دقائق)':['Pre-athan reminder (min)','Ezandan önce hatırlatma (dk)'],
+  'إحصائياتي الروحية':['My Spiritual Stats','Manevi istatistiklerim'],
+  'تفعيل البوصلة':['Enable compass','Pusulayı etkinleştir'],
+  'لم يتم السماح باستخدام البوصلة.':['Compass permission was denied.','Pusula izni verilmedi.'],
+  'درجة من الشمال':['degrees from North','derece (kuzeyden)'],
+  'الصلاة القادمة':['Next prayer','Sonraki namaz'],
+  'الدليل':['Guide','Rehber'], 'الحساب':['Account','Hesap'], 'المزيد':['More','Daha fazla'],
+  'إعدادات':['Settings','Ayarlar'], 'تم النسخ':['Copied','Kopyalandı'],
+  'جاري التحميل...':['Loading…','Yükleniyor…'], 'جاري الحساب...':['Calculating…','Hesaplanıyor…'],
+
+  // ——— الدفعة الختامية ———
+  'المسبحة الإلكترونية':['Digital Tasbeeh','Dijital tesbih'],
+  'تغيير الذكر':['Change dhikr','Zikri değiştir'], 'تسبيح':['tasbeeh','tesbih'],
+  'تخصيص عرض الواجهة':['Customize the layout','Arayüz düzenini özelleştir'],
+  'عربي':['Arabic','Arapça'],
+  'أوقات الصلاة والموقع':['Prayer times & location','Namaz vakitleri ve konum'],
+  'تحديد الموقع':['Location','Konum belirleme'],
+  'تلقائي':['Automatic','Otomatik'], 'يدوي':['Manual','Manuel'],
+  'طريقة الحساب':['Calculation method','Hesaplama yöntemi'],
+  'وضع السفر (تلقائي)':['Travel mode (automatic)','Yolculuk modu (otomatik)'],
+  'شكل الأرقام':['Numeral style','Rakam biçimi'],
+  'الاهتزاز اللمسي':['Haptic feedback','Dokunsal titreşim'],
+  'تعديل يدوي للأوقات (دقائق)':['Manual time adjustment (minutes)','Vakitleri elle ayarla (dakika)'],
+  'استعادة الإعدادات الافتراضية':['Restore default settings','Varsayılan ayarları geri yükle'],
+  'تطبيق الأنوار · الإصدار 1.8.9':['Al-Anwar · Version 1.8.9','El-Envar · Sürüm 1.8.9'],
+  'تذكير بسورة الكهف، والصلاة على النبي ﷺ، وسنن الجمعة.':['A reminder for Surah Al-Kahf, salah upon the Prophet ﷺ, and the Friday sunnahs.','Kehf sûresi, Peygamber’e ﷺ salât ve cuma sünnetleri için hatırlatma.'],
+
+  // ——— قائمة السنن ———
+  'السنن الرواتب':['The Regular Sunnah Prayers','Revâtib sünnetler'],
+  'الرواتب المؤكدة اثنتا عشرة ركعة في اليوم والليلة':['The confirmed sunnah prayers are twelve rak’ahs a day and night','Müekked revâtib günde ve gecede on iki rekâttır'],
+  'سنن مستحبة (غير الرواتب)':['Recommended Sunnahs (beyond the regular ones)','Müstehap sünnetler (revâtib dışı)'],
+  'نوافل عظيمة الأجر':['Voluntary acts of great reward','Sevabı büyük nafileler'],
+  'سنن الصلاة (الهيئات)':['Sunnahs of the Prayer (its forms)','Namazın sünnetleri (heyetler)'],
+  'هيئات تكمل بها الصلاة':['Forms by which the prayer is perfected','Namazı tamamlayan heyetler'],
+  'سنن الطريق والخروج':['Sunnahs of Going Out & the Road','Yol ve dışarı çıkma sünnetleri'],
+  'آداب وسنن عند الخروج والمشي':['Etiquette and sunnahs when going out and walking','Çıkarken ve yürürken âdâb ve sünnetler'],
+  'سنن الفطرة':['Sunnahs of the Fitrah','Fıtrat sünnetleri'],
+  'خصال النظافة والطهارة':['Traits of cleanliness and purity','Temizlik ve tahâret hasletleri'],
+  'سنن النوم والاستيقاظ':['Sunnahs of Sleeping & Waking','Uyku ve uyanma sünnetleri'],
+  'آداب قبل النوم وعند القيام':['Etiquette before sleeping and on waking','Uyumadan önce ve kalkınca âdâb'],
+  'سنن الطعام والشراب':['Sunnahs of Food & Drink','Yeme içme sünnetleri'],
+  'آداب الأكل والشرب':['Etiquette of eating and drinking','Yeme ve içme âdâbı'],
+  'سنن يوم الجمعة':['Sunnahs of Friday','Cuma günü sünnetleri'],
+  'خير يوم طلعت فيه الشمس':['The best day upon which the sun has risen','Güneşin doğduğu en hayırlı gün'],
+  '/شهر':['/month','/ay'], '/سنة':['/year','/yıl']
 };
 
 // ——— إسناد الحديث: يُترجَم بقاعدة لا بقائمة (رواه فلان عن فلان / متفق عليه) ———
@@ -358,7 +471,20 @@ const NARR = {
   'خولة بنت حكيم':['Khawlah bint Hakim','Havle bnt. Hakîm'], 'سعد بن أبي وقاص':['Sa’d ibn Abi Waqqas','Sa’d b. Ebî Vakkâs'],
   'عبادة بن الصامت':['Ubadah ibn as-Samit','Ubâde b. Sâmit'], 'أبي سعيد الخدري':['Abu Sa’id al-Khudri','Ebû Saîd el-Hudrî'],
   'علي بن أبي طالب':['Ali ibn Abi Talib','Ali b. Ebî Tâlib'], 'أبي مالك الأشعري':['Abu Malik al-Ash’ari','Ebû Mâlik el-Eş’arî'],
-  'ابن عباس':['Ibn Abbas','İbn Abbâs'], 'ابن عمر':['Ibn Umar','İbn Ömer'], 'أبي بكرة':['Abu Bakrah','Ebû Bekre']
+  'ابن عباس':['Ibn Abbas','İbn Abbâs'], 'ابن عمر':['Ibn Umar','İbn Ömer'], 'أبي بكرة':['Abu Bakrah','Ebû Bekre'],
+  'معاذ بن جبل':['Mu’adh ibn Jabal','Muâz b. Cebel'], 'أبي ذر':['Abu Dharr','Ebû Zer'],
+  'أم حبيبة':['Umm Habibah','Ümmü Habîbe'], 'عمر بن الخطاب':['Umar ibn al-Khattab','Ömer b. Hattâb'],
+  'أبي الدرداء':['Abu ad-Darda','Ebü’d-Derdâ'], 'ابن مسعود':['Ibn Mas’ud','İbn Mes’ûd'],
+  'عبد الله بن أبي أوفى':['Abdullah ibn Abi Awfa','Abdullah b. Ebî Evfâ'],
+  'عبد الله بن عمر':['Abdullah ibn Umar','Abdullah b. Ömer'],
+  'جابر بن عبد الله رضي الله عنهما':['Jabir ibn Abdullah','Câbir b. Abdullah'],
+  'أبي مالك الأشعري':['Abu Malik al-Ash’ari','Ebû Mâlik el-Eş’arî'],
+  'أبي سعيد الخدري':['Abu Sa’id al-Khudri','Ebû Saîd el-Hudrî']
+};
+// لواحق شائعة بعد الإسناد (— استفتاح قيام الليل)
+const ISNAD_SUFFIX = {
+  'استفتاح قيام الليل':['opening of the night prayer','teheccüdün açılışı'],
+  'بعد الوتر':['after Witr','vitirden sonra']
 };
 const ISNAD_FIXED = {
   'متفق عليه':['Agreed upon (Bukhari & Muslim)','Müttefekun aleyh (Buhârî ve Müslim)'],
@@ -366,14 +492,32 @@ const ISNAD_FIXED = {
   'أهل السنن':['The Sunan compilers','Sünen sahipleri']
 };
 function trIsnad(s, idx){
-  const t = s.trim();
+  let t = s.trim();
   if(ISNAD_FIXED[t]) return ISNAD_FIXED[t][idx];
+  // لاحقة بعد شرطة: «رواه مسلم — بعد الوتر»
+  let suffix = '';
+  const sm = t.match(/^(.+?)\s*—\s*(.+)$/);
+  if(sm){
+    const sfx = ISNAD_SUFFIX[sm[2].trim()];
+    if(!sfx) return null;                       // لاحقة غير معروفة => اتركه عربياً (أمان)
+    t = sm[1].trim(); suffix = ' — ' + sfx[idx];
+  }
+  // رقم الحديث بين قوسين: «رواه البخاري (١١٦٦) عن جابر»
+  let num = '';
+  const nm = t.match(/^(.+?)\s*\(([٠-٩0-9]+)\)\s*(.*)$/);
+  if(nm){
+    // حوّل الأرقام الهندية إلى عربية غربية في اللغات غير العربية
+    const digits = nm[2].replace(/[٠-٩]/g, function(d){ return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); });
+    num = ' (' + digits + ')';
+    t = (nm[1] + ' ' + nm[3]).replace(/\s+/g,' ').trim();
+  }
+
   // متفق عليه عن فلان
   let m = t.match(/^متفق عليه عن (.+)$/);
   if(m){
     const w = NARR[m[1].trim()];
     if(!w) return null;
-    return idx===0 ? ('Agreed upon — from ' + w[0]) : ('Müttefekun aleyh — ' + w[1] + "'den");
+    return (idx===0 ? ('Agreed upon — from ' + w[0]) : ('Müttefekun aleyh — ' + w[1] + "'den")) + num + suffix;
   }
   // رواه/أخرجه [مصادر] [عن فلان]
   m = t.match(/^(?:رواه|أخرجه)\s+(.+?)(?:\s+عن\s+(.+?))?\.?$/);
@@ -381,15 +525,39 @@ function trIsnad(s, idx){
   const srcs = m[1].split(/\s+و\s*|\s+و/).map(x=>x.trim()).filter(Boolean);
   const outSrc = [];
   for(const sname of srcs){
-    const w = NARR[sname] || NARR[sname.replace(/^ال/,'ال')];
+    const w = NARR[sname];
     if(!w) return null;                       // مصدر غير معروف => لا تُترجم (أمان)
     outSrc.push(w[idx]);
   }
   const joined = idx===0 ? outSrc.join(' & ') : outSrc.join(' ve ');
   const who = m[2] ? NARR[m[2].trim()] : null;
   if(m[2] && !who) return null;
-  if(idx===0) return 'Narrated by ' + joined + (who ? (' — from ' + who[0]) : '');
-  return joined + (who ? (' — ' + who[1] + "'den") : '') + ' rivayet etti';
+  if(idx===0) return 'Narrated by ' + joined + (who ? (' — from ' + who[0]) : '') + num + suffix;
+  return joined + (who ? (' — ' + who[1] + "'den") : '') + ' rivayet etti' + num + suffix;
+}
+
+// ——— أنماط مركّبة (نصّ + رقم) لا تصلح فيها المطابقة التامّة ———
+//  آمنة: تشترط رقماً وكلمة واجهة محدّدة، ولا تطابق نصّاً قرآنياً أبداً.
+const D = '[٠-٩0-9]+';
+const PATTERNS = [
+  { re: new RegExp('^صفحة\\s+(' + D + ')\\s+من\\s+(' + D + ')$'), en:'Page $1 of $2', tr:'Sayfa $1 / $2' },
+  { re: new RegExp('^صفحة\\s+(' + D + ')$'),                       en:'Page $1',        tr:'Sayfa $1' },
+  { re: new RegExp('^(' + D + ')\\s+(?:آيات|آية)$'),               en:'$1 ayahs',       tr:'$1 âyet' },
+  { re: new RegExp('^(' + D + ')\\s+يوم$'),                        en:'$1 days',        tr:'$1 gün' },
+  { re: new RegExp('^(' + D + ')\\s+من\\s+(' + D + ')\\s+اليوم$'), en:'$1 of $2 today', tr:'Bugün $1 / $2' },
+  { re: new RegExp('^(' + D + ')\\s+من\\s+(' + D + ')\\s+مرات$'),  en:'$1 of $2 ×',     tr:'$1 / $2 kez' },
+  { re: new RegExp('^الجزء\\s+(' + D + ')$'),                      en:'Juz $1',         tr:'Cüz $1' },
+  { re: new RegExp('^(' + D + ')\\s+مرات?$'),                      en:'$1 ×',           tr:'$1 kez' },
+  { re: new RegExp('^باقٍ\\s+(' + D + ')\\s+دقيقة على الأذان$'),   en:'$1 min to adhan', tr:'Ezana $1 dk' },
+  { re: new RegExp('^(' + D + ')°\\s*\\(تقريبي\\)$'),              en:'$1° (approx.)',  tr:'$1° (yaklaşık)' },
+  { re: new RegExp('^(' + D + ')°\\s*✓$'),                          en:'$1° ✓',          tr:'$1° ✓' }
+];
+function trPattern(key, idx){
+  for(let i=0;i<PATTERNS.length;i++){
+    const p = PATTERNS[i];
+    if(p.re.test(key)) return key.replace(p.re, idx===0 ? p.en : p.tr);
+  }
+  return null;
 }
 
 // حاويات المحتوى الشرعي — لا تُمسّ إطلاقاً
@@ -404,13 +572,18 @@ function translateNode(node, idx){
   // بين لغتين غير عربيتين (إنجليزي → تركي) لأن النص صار إنجليزياً ولا يطابق المفتاح.
   const raw = (node.__arOrig !== undefined) ? node.__arOrig : node.nodeValue;
   if(!raw) return;
+  // حماية إضافية وقت التشغيل: أي نصّ فيه حركات أو علامات مصحفية = محتوى شرعي، لا يُمسّ
+  if(/[ً-ْٰ]|[﴿﴾ۖۗۘۙۚۛۜ۝]/.test(raw)) return;
   const key = raw.trim();
   if(!key || key.length < 2) return;
   let out = null;
-  const hit = UIT[key];
+  const hit = UIT[key] || (window.UIT_AUTO && UIT_AUTO[key]);  // اليدوي أولاً ثم المُولَّد
   if(hit) out = hit[idx];                                     // مطابقة تامّة
   else if(/^(رواه|أخرجه|متفق عليه|صحيح الجامع|أهل السنن)/.test(key)) out = trIsnad(key, idx);
+  else out = trPattern(key, idx);                             // نمط مركّب (نصّ + رقم)
   if(!out) return;
+  // الأرقام الهندية (٠-٩) تُعرض غربية في الإنجليزية والتركية
+  out = out.replace(/[٠-٩]/g, function(d){ return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); });
   if(node.__arOrig === undefined) node.__arOrig = raw;
   node.nodeValue = raw.replace(key, out);                     // يحافظ على المسافات المحيطة
 }

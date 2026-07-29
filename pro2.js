@@ -824,10 +824,12 @@ window.AY = {
         if(navigator.vibrate) navigator.vibrate(25);
     },
     close:function(){ const m=$('ayah-menu'); if(m) m.classList.remove('on'); },
-    copy:function(withT){ const t=(withT?this._full:this._plain)+'\n(سورة '+(typeof nameOf2==='function'?nameOf2(this._s):this._s)+' — '+this._a+')';
-        try{ navigator.clipboard.writeText(t); _ayToast('نُسخت الآية'); }catch(e){} this.close(); },
-    share:async function(){ const t=this._full+'\n(سورة '+(typeof nameOf2==='function'?nameOf2(this._s):this._s)+' — '+this._a+')';
-        try{ if(navigator.share){ await navigator.share({ text:t }); } else { await navigator.clipboard.writeText(t); _ayToast('نُسخت للمشاركة'); } }catch(e){} this.close(); },
+    _ref:function(){ const n=(typeof nameOf2==='function')?nameOf2(this._s):this._s;
+        return '\n(' + tr('سورة','Surah') + ' ' + n + ' — ' + this._a + ')'; },
+    copy:function(withT){ const t=(withT?this._full:this._plain)+this._ref();
+        try{ navigator.clipboard.writeText(t); _ayToast(tr('نُسخت الآية','Ayah copied')); }catch(e){} this.close(); },
+    share:async function(){ const t=this._full+this._ref();
+        try{ if(navigator.share){ await navigator.share({ text:t }); } else { await navigator.clipboard.writeText(t); _ayToast(tr('نُسخت للمشاركة','Copied to share')); } }catch(e){} this.close(); },
     card:function(){ this.close(); if(window.PRO2&&PRO2.openStory) PRO2.openStory(); },
     tafsir:function(){ this.close(); if(window.onAyahTap) onAyahTap(this._s,this._a,this._g); }
 };
