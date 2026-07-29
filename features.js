@@ -964,15 +964,46 @@ function rebuildAthkarCategories(){
 }
 QA.switchAthkarSection = function(sec){ _athkarSection = sec; rebuildAthkarCategories(); };
 
+// ---- حفظ تقدّم الأذكار ليومه: يبقى "تم" عند الخروج والعودة، ويتجدّد تلقائياً غداً ----
+const HISN_KEY = 'athkar_progress_v1';
+function _today(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function _hisnAll(){
+    let o={}; try{ o=JSON.parse(localStorage.getItem(HISN_KEY)||'{}')||{}; }catch(e){}
+    if(o.day !== _today()) o = { day:_today(), cats:{} };   // يوم جديد => تصفير تلقائي
+    if(!o.cats) o.cats={};
+    return o;
+}
+function _hisnLoad(sec, catKey, items){
+    const o=_hisnAll(); const saved=o.cats[sec+'/'+catKey];
+    return items.map((it,i)=>({ ...it, current: (saved && typeof saved[i]==='number') ? Math.min(saved[i], it.max) : 0 }));
+}
+function _hisnSave(){
+    if(!_curCatId) return;
+    const o=_hisnAll();
+    o.cats[_curCatId] = _hisnState.map(t=>t.current);
+    try{ localStorage.setItem(HISN_KEY, JSON.stringify(o)); }catch(e){}
+}
+// هل اكتملت كل أذكار القسم؟ سجّلها في إنجازات اليوم (الصباح/المساء)
+function _hisnCheckDone(){
+    if(!_hisnState.length || !_hisnState.every(t=>t.current>=t.max)) return;
+    try{
+        if(typeof updateAchievementState!=='function') return;
+        if(_curCatKey==='morning') updateAchievementState('morning');
+        else if(_curCatKey==='evening') updateAchievementState('evening');
+    }catch(e){}
+}
+let _curCatKey='', _curCatId='';
 QA.openCat = function(sec, catKey){
     const c = ATHKAR_LIB[sec] && ATHKAR_LIB[sec].cats[catKey]; if(!c) return;
     _curCatTitle = L()==='en'?c.en:c.ar;
+    _curCatKey = catKey; _curCatId = sec+'/'+catKey;
     $('athkar-categories-list').style.display='none';
     if ($('athkar-sections')) $('athkar-sections').style.display='none';
     $('athkar-reading-view').style.display='block';
     $('current-athkar-title').innerText = _curCatTitle;
-    _hisnState = c.items.map(it => ({...it, current:0}));
+    _hisnState = _hisnLoad(sec, catKey, c.items);   // استعادة تقدّم اليوم
     renderHisn();
+    _hisnCheckDone();
 };
 // عند الرجوع من قارئ الأذكار، أعد إظهار شريط الأقسام
 const _origCloseAth = window.closeAthkarCategory;
@@ -992,7 +1023,15 @@ function renderHisn(){
             </div></div>`;
     }).join('');
 }
-QA.incHisn = function(i){ if (_hisnState[i].current < _hisnState[i].max){ _hisnState[i].current++; renderHisn(); if(navigator.vibrate) navigator.vibrate(20); } };
+QA.incHisn = function(i){
+    if (_hisnState[i].current < _hisnState[i].max){
+        _hisnState[i].current++;
+        renderHisn();
+        _hisnSave();          // احفظ فوراً — يبقى "تم" عند الخروج والعودة
+        _hisnCheckDone();     // اكتمل القسم؟ سجّله في إنجازات اليوم
+        if(navigator.vibrate) navigator.vibrate(20);
+    }
+};
 QA.showSrc = function(i){ const th=_hisnState[i]; if(th&&th.src&&typeof showBadgeToast==='function') showBadgeToast({emoji:'📜', name:tr('المصدر','Source'), desc:th.src}); };
 
 // بحث في الأذكار والأدعية (مع تطبيع التشكيل)

@@ -757,27 +757,49 @@ window.shareAyahOfDay = function() {
 // =====================================
 // 10. الإنجاز اليومي (UI)
 // =====================================
+// تاريخ اليوم بالتوقيت المحلي — toISOString يعطي UTC فكان اليوم يتجدّد الساعة ٣ فجراً
+// بتوقيت تركيا بدل منتصف الليل، فتُمسح إنجازات المستخدم في غير وقتها.
+function _achToday(){
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
 function updateAchievementState(type) {
-    let s = JSON.parse(localStorage.getItem('achievements')) || { morning:0, evening:0, quran:0, tasbeeh:0, today: new Date().toISOString().slice(0,10) };
-    if(s.today !== new Date().toISOString().slice(0,10)) s = { morning:0, evening:0, quran:0, tasbeeh:0, today: new Date().toISOString().slice(0,10) };
+    const today = _achToday();
+    let s = null; try{ s = JSON.parse(localStorage.getItem('achievements')); }catch(e){}
+    if(!s || s.today !== today) s = { morning:0, evening:0, quran:0, tasbeeh:0, today };
     if(type==='morning') s.morning = 100;
     if(type==='evening') s.evening = 100;
-    if(type==='quran') s.quran = Math.min(100, s.quran + 10); 
+    if(type==='quran') s.quran = Math.min(100, (s.quran||0) + 10);
     if(type==='tasbeeh') s.tasbeeh = Math.min(100, (tasbeehCount / 100) * 100);
     localStorage.setItem('achievements', JSON.stringify(s));
     updateAchievementUI();
 }
+window.updateAchievementState = updateAchievementState;   // تناديها features.js/mushaf.js
 function updateAchievementUI() {
-    let s = JSON.parse(localStorage.getItem('achievements'));
-    if(!s || s.today !== new Date().toISOString().slice(0,10)) return;
+    let s = null; try{ s = JSON.parse(localStorage.getItem('achievements')); }catch(e){}
+    const today = _achToday();
+    // يوم جديد (أو لا سجل) => اعرض أصفاراً بدل إبقاء أرقام الأمس على الشاشة
+    if(!s || s.today !== today) s = { morning:0, evening:0, quran:0, tasbeeh:0, today };
     const upd = (id, val) => {
-        let r = document.getElementById(`ring-${id}`); let p = document.getElementById(`pct-${id}`);
-        if(r) { r.style.setProperty('--pct', val); p.innerText = Math.round(val)+'%'; if(val>=100) r.classList.add('complete'); }
+        const r = document.getElementById(`ring-${id}`), p = document.getElementById(`pct-${id}`);
+        if(!r) return;
+        const v = Math.max(0, Math.min(100, Math.round(val||0)));
+        r.style.setProperty('--pct', v);                 // يملأ القوس فعلياً عبر CSS
+        if(p) p.innerText = v + '%';
+        r.classList.toggle('complete', v >= 100);        // toggle لا add — ليرجع ذهبياً إن نقص
+        const item = r.closest('.ring-item'); if(item) item.classList.toggle('done', v >= 100);
     };
     upd('morning', s.morning); upd('evening', s.evening); upd('quran', s.quran); upd('tasbeeh', s.tasbeeh);
-    let total = (s.morning + s.evening + s.quran + s.tasbeeh) / 4;
-    document.getElementById('total-bar').style.width = total + '%';
-    if(total === 100) document.getElementById('total-label').innerText = 'يوم مثالي! 🏆';
+    const total = (s.morning + s.evening + s.quran + s.tasbeeh) / 4;
+    const bar = document.getElementById('total-bar');
+    if(bar){ bar.style.width = total + '%'; bar.classList.toggle('full', total >= 100); }
+    const lbl = document.getElementById('total-label');
+    if(lbl){
+        const en = (typeof currentLang!=='undefined' && currentLang==='en');
+        lbl.innerText = total >= 100 ? (en?'A perfect day! 🏆':'يوم مثالي! 🏆')
+                      : total > 0    ? (en?'Keep going 🌿':'واصِل، بارك الله فيك 🌿')
+                                     : (en?'Start your spiritual day 🌿':'ابدأ يومك الروحي 🌿');
+    }
 }
 
 function showBadgeToast(badge) {

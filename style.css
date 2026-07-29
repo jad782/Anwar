@@ -217,14 +217,24 @@ body.light-mode .ayah-number { background-image: url('data:image/svg+xml;utf8,<s
 .ring-wrapper { position: relative; width: 72px; height: 72px; transition: transform 0.2s; }
 .ring-svg { width: 72px; height: 72px; transform: rotate(-90deg); }
 .ring-bg { fill: none; stroke: var(--border-color); stroke-width: 7; }
-.ring-progress { fill: none; stroke: var(--primary-color); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 201; stroke-dashoffset: 201; transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1); }
-.ring-progress.complete { stroke: #22c55e; }
+/* القوس يمتلئ بمقدار --pct (٠..١٠٠). المحيط = 2πr، r=32 → 201.06 */
+.ring-progress {
+    fill: none; stroke: var(--accent-color, #C9A227); stroke-width: 7; stroke-linecap: round;
+    --pct: 0;
+    stroke-dasharray: 201.06;
+    stroke-dashoffset: calc(201.06 - (201.06 * var(--pct) / 100));
+    transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1), stroke .4s ease;
+}
+.ring-progress.complete { stroke: #22c55e; filter: drop-shadow(0 0 6px rgba(34,197,94,0.45)); }
+.ring-item.done .ring-icon { color: #22c55e; }
+.ring-item.done .ring-pct { color: #22c55e; }
 .ring-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.25rem; color: var(--primary-color); }
 .ring-label { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-align: center; }
 .ring-pct { font-size: 0.78rem; font-weight: 700; color: var(--primary-color); }
 .daily-summary { display: flex; align-items: center; gap: 12px; }
 .summary-bar-wrap { flex: 1; height: 8px; background: var(--border-color); border-radius: 10px; overflow: hidden; }
-.summary-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); }
+.summary-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); transition: width 1s cubic-bezier(0.4,0,0.2,1), background .4s ease; }
+.summary-bar-fill.full { background: linear-gradient(90deg, #16a34a, #22c55e); }
 .summary-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; min-width: 140px; }
 
 .qibla-overlay, .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 999; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.4s ease; }
