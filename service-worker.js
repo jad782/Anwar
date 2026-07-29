@@ -1,5 +1,5 @@
 // Update Version 5
-const CACHE_NAME = 'anwar-cache-v145';
+const CACHE_NAME = 'anwar-cache-v146';
 
 const urlsToCache = [
   './',
@@ -45,7 +45,7 @@ const urlsToCache = [
   './salah-track.js?v=1',
   './onboarding.js?v=1',
   './backup-rate.js?v=3',
-  './update.js?v=8',
+  './update.js?v=9',
   './sunan.js?v=1',
   './zakat.js?v=2',
   './mushaf.js?v=14',

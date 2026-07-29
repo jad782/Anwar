@@ -9,7 +9,7 @@
 // =======================================================
 (function(){
 'use strict';
-var APP_VERSION = '1.8.8';
+var APP_VERSION = '1.8.9';
 var STORE_URL   = 'https://apps.apple.com/app/id6782741099';
 function L(){ return (window.currentLang)||localStorage.getItem('lang')||'ar'; }
 function tr(a,e){ var l=L(); if(l==='ar') return a; if(l==='tr' && window.TR && TR[e]) return TR[e]; return e; }
