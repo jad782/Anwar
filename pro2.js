@@ -738,9 +738,10 @@ PRO2.applyHomeSections = function(){
         const show = pref[s.key] !== false; // افتراضياً ظاهر
         s.sel.forEach(q => { document.querySelectorAll(q).forEach(el => { el.style.display = show ? '' : 'none'; }); });
     });
-    // إعادة الترتيب: ننقل عناصر كل قسم لتسبق بطاقة التبرّع (تبقى في الأسفل والهيرو في الأعلى)
+    // إعادة الترتيب: ننقل عناصر كل قسم لتسبق المرساة السفلية (والهيرو يبقى في الأعلى).
+    // كانت المرساة بطاقة التبرّع وقد أُزيلت، فصار البديل #khatma-view وهو في موضعها نفسه.
     const home = document.getElementById('tab-home'); if(!home) return;
-    const anchor = home.querySelector('.donate-card') || home.querySelector('#khatma-view');
+    const anchor = home.querySelector('#khatma-view') || home.querySelector('.donate-card');
     if(!anchor) return;
     homeOrder().forEach(key => {
         const s = HOME_SECTIONS.find(x=>x.key===key); if(!s) return;
