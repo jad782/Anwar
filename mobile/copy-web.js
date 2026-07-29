@@ -10,6 +10,7 @@ const DEST = path.resolve(__dirname, 'www');   // وجهة Capacitor
 const INCLUDE = [
   'index.html',
   'i18n-tr.js',
+  'i18n-ui.js',
   'persist.js',
   'quran-data.js',
   'firebase.js',
