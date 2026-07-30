@@ -555,6 +555,9 @@ function renderQiblaRoute(lat, lng, bearing){
 
 window.openQibla = function() {
     document.getElementById('qibla-overlay').classList.add('active');
+    // ثبّت رأس الشعاع على مركز البوصلة بعد أن تُرسم الشاشة
+    requestAnimationFrame(function(){ try{ _syncBeamOrigin(); }catch(e){} });
+    setTimeout(function(){ try{ _syncBeamOrigin(); }catch(e){} }, 350);
     const hint = document.getElementById('qibla-hint');
     const permBtn = document.getElementById('qibla-permission-btn');
     // 1) احسب اتجاه القبلة من الموقع
@@ -598,6 +601,22 @@ let _lastQiblaPos = null;
 window.refreshQiblaPlace = function(){
     if(_lastQiblaPos) _fillQiblaPlace(_lastQiblaPos[0], _lastQiblaPos[1], _lastQiblaPos[2]);
 };
+// يثبّت رأس شعاع نطاق الرؤية على مركز البوصلة.
+// الطبقة تغطّي الشاشة (position:fixed) فنحسب المركز بالبكسل ونمرّره كمتغيّر CSS،
+// وإلا دار الشعاع حول منتصف الشاشة لا حول البوصلة.
+function _syncBeamOrigin(){
+    const stage = document.querySelector('.qb-stage');
+    const layer = document.querySelector('.qb-beamlayer');
+    if(!stage || !layer) return;
+    const b = stage.getBoundingClientRect();
+    if(!b.height) return;
+    layer.style.setProperty('--qb-origin-y', (b.top + b.height / 2) + 'px');
+}
+window.addEventListener('resize', function(){ try{ _syncBeamOrigin(); }catch(e){} });
+// أعِد الضبط عند تمرير محتوى الشاشة (المركز يتحرّك مع التمرير)
+document.addEventListener('scroll', function(e){ if(e.target && e.target.id==='qb-screen'){ try{ _syncBeamOrigin(); }catch(x){} } }, true);
+window.addEventListener('orientationchange', function(){ setTimeout(function(){ try{ _syncBeamOrigin(); }catch(e){} }, 250); });
+
 // شريط مواقيت الصلاة داخل شاشة القبلة + التاريخ الهجري والميلادي
 function _fillQiblaPrayers(){
     const box = document.getElementById('qb-prayers'); if(!box) return;

@@ -2069,9 +2069,18 @@ body.light-mode .qb-close { background:rgba(0,0,0,0.05); color:#8A6410; }
 .qb-screen.aligned .qb-arc { stroke:#22c55e; }
 body.light-mode .qb-track { stroke:rgba(138,100,16,0.2); }
 
-/* شعاع نطاق الرؤية */
-.qb-beam { position:absolute; inset:0; z-index:1; transform-origin:50% 50%; transition:transform .16s linear; }
-.qb-beam svg { width:100%; height:100%; }
+/* شعاع نطاق الرؤية: طبقة تغطّي الشاشة كاملةً، ورأس الشعاع على مركز البوصلة،
+   فيمسح الشعاع الصفحة بأكملها مع حركة الجهاز لا داخل الحلقة فقط. */
+.qb-beamlayer { position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
+.qb-beam {
+    position:absolute; left:50%; top:var(--qb-origin-y, 44%);
+    width:280vmax; height:280vmax;
+    transform:translate(-50%,-50%) rotate(0deg); transform-origin:50% 50%;
+    transition:transform .16s linear; will-change:transform;
+}
+.qb-beam svg { width:100%; height:100%; display:block; }
+/* المحتوى يبقى فوق الشعاع */
+.qb-screen > *:not(.qb-beamlayer) { position:relative; z-index:1; }
 
 /* علامة واجهة الهاتف: ثابتة أعلى الحلقة */
 .qb-notch {

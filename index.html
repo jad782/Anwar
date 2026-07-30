@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Al-Anwar">
     <title>تطبيق الأنوار الإسلامي</title>
-    <link rel="stylesheet" href="style.css?v=95">
+    <link rel="stylesheet" href="style.css?v=96">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="fa.css?v=1">
     <link rel="stylesheet" href="fonts.css?v=1">
@@ -337,6 +337,24 @@
         <div class="qb-screen" id="qb-screen">
             <button class="qb-close" onclick="closeQibla()"><i class="fa-solid fa-xmark"></i></button>
 
+            <!-- طبقة شعاع نطاق الرؤية: تغطّي الشاشة كاملةً فيمسح الشعاع الصفحة كلها
+                 مع حركة الجهاز. position:fixed كي لا يقصّها تمرير .qb-screen. -->
+            <div class="qb-beamlayer" aria-hidden="true">
+                <div class="qb-beam" id="qb-beam">
+                    <svg viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+                        <defs>
+                            <radialGradient id="qbBeam" cx="50%" cy="50%" r="47%">
+                                <stop offset="0%"   stop-color="var(--qb-beam-1)"/>
+                                <stop offset="45%"  stop-color="var(--qb-beam-2)"/>
+                                <stop offset="100%" stop-color="var(--qb-beam-3)"/>
+                            </radialGradient>
+                        </defs>
+                        <!-- قطاع ±26° رأسه في المركز ويمتدّ إلى ما بعد حدود الشاشة -->
+                        <path d="M130,130 L73.6,20.6 A123,123 0 0,1 186.4,20.6 Z" fill="url(#qbBeam)"/>
+                    </svg>
+                </div>
+            </div>
+
             <div class="qb-place">
                 <!-- يُملأ باسم أقرب مدينة؛ بلا data-i18n كي لا تمسحه applyTranslations عند تبديل اللغة
                      (طبقة i18n-ui تترجم اسم المدينة نفسه) -->
@@ -347,21 +365,6 @@
             <div class="qb-stage">
                 <!-- علامة اتجاه واجهة الهاتف: ثابتة أعلى الحلقة -->
                 <div class="qb-notch" id="qb-notch"></div>
-
-                <!-- شعاع نطاق الرؤية: يدور نحو القبلة فيمسح مع حركة الجهاز -->
-                <div class="qb-beam" id="qb-beam">
-                    <svg viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <radialGradient id="qbBeam" cx="50%" cy="100%" r="100%">
-                                <stop offset="0%"  stop-color="var(--qb-beam-1)"/>
-                                <stop offset="55%" stop-color="var(--qb-beam-2)"/>
-                                <stop offset="100%" stop-color="var(--qb-beam-3)"/>
-                            </radialGradient>
-                        </defs>
-                        <!-- قطاع ±26° يمتدّ من المركز إلى الحافة -->
-                        <path d="M130,130 L73.6,20.6 A123,123 0 0,1 186.4,20.6 Z" fill="url(#qbBeam)"/>
-                    </svg>
-                </div>
 
                 <svg class="qb-ring" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
                     <circle class="qb-track" cx="130" cy="130" r="120"/>
@@ -465,7 +468,7 @@
     <script src="quran-data.js?v=1"></script>
     <script src="prayers.js?v=14"></script>
     <script src="haptics.js?v=1"></script>
-    <script src="app.js?v=38"></script>
+    <script src="app.js?v=39"></script>
     <script src="features.js?v=26"></script>
     <script src="pro.js?v=33"></script>
     <script src="pro2.js?v=24"></script>
