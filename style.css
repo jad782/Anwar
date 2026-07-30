@@ -752,6 +752,10 @@ body.light-mode .tj-madd { color: #c0392b; } body.light-mode .tj-ghunnah { color
 /* ===== نقاط الأنوار + المحفظة الروحانية ===== */
 .pt-toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(20px); background: linear-gradient(135deg,var(--accent-color,#C5A059),var(--accent-light,#F2D27A)); color:#14110B; font-weight:800; padding:11px 22px; border-radius:30px; box-shadow:0 8px 24px rgba(0,0,0,0.4); z-index:2000; opacity:0; transition:.35s; pointer-events:none; font-family:'Tajawal','Cairo',sans-serif; }
 .pt-toast.show { opacity:1; transform: translateX(-50%) translateY(0); }
+/* توست بأيقونة (بديل alert في تخصيص الواجهة). فوق الطبقات المنبثقة:
+   ‎.qibla-overlay‎ عند 999 و‎.pt-toast‎ عند 2000، فيظهر داخل النموذج. */
+.pt-toast.pt-ico { display:flex; align-items:center; gap:9px; max-width:82vw; text-align:right; line-height:1.5; }
+.pt-toast.pt-ico i { font-size:1rem; flex-shrink:0; opacity:0.85; }
 .sp-portfolio { position:relative; overflow:hidden; background:linear-gradient(135deg, rgba(46,37,21,0.92), rgba(20,17,11,0.97)); border:1px solid rgba(var(--accent-rgb),0.4); border-radius:22px; padding:18px; margin:18px 0 14px; box-shadow:0 8px 28px rgba(0,0,0,0.4), inset 0 1px 0 rgba(var(--accent-light-rgb),0.2); }
 .sp-glow { position:absolute; top:-50%; left:-30%; width:55%; height:200%; background:linear-gradient(115deg,transparent,rgba(var(--accent-light-rgb),0.12),transparent); transform:skewX(-18deg); animation:ghcShine 5s ease-in-out infinite; pointer-events:none; }
 .sp-top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
@@ -2207,6 +2211,7 @@ body.hs-off-prayer   #tab-home .prayer-grid,
 body.hs-off-ayah     #ayah-of-day-card,
 body.hs-off-daily    #daily-extra,
 body.hs-off-continue #pro-home,
+body.hs-off-continue #daily-card-host,
 body.hs-off-khatma   #tab-home .khatma-manager-card,
 body.hs-off-achieve  #tab-home .achievement-rings-card,
 body.hs-off-tasks    #tab-home .daily-tasks-card,

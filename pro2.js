@@ -717,7 +717,9 @@ const HOME_SECTIONS = [
     { key:'prayer',   ar:'أوقات الصلاة', en:'Prayer times', sel:['#tab-home .section-header:has(h3[data-i18n="prayer_times"])', '#tab-home .prayer-grid'] },
     { key:'ayah',     ar:'آية اليوم', en:'Ayah of the day', sel:['#ayah-of-day-card'] },
     { key:'daily',    ar:'حديث ودعاء اليوم', en:'Hadith & Du’a', sel:['#daily-extra'] },
-    { key:'continue', ar:'متابعة القراءة والورد', en:'Continue & Wird', sel:['#pro-home'] },
+    // القسم شقّان: بطاقة «تابع القراءة» انتقلت إلى daily.js‏ (#daily-card-host)
+    // وبقي #pro-home لبطاقة ورد الختمة — فكان الزر يخفي نصف القسم فقط.
+    { key:'continue', ar:'متابعة القراءة والورد', en:'Continue & Wird', sel:['#pro-home','#daily-card-host'] },
     { key:'khatma',   ar:'ختماتي القرآنية', en:'My Khatmas', sel:['#tab-home .khatma-manager-card'] },
     { key:'achieve',  ar:'إنجازات اليوم', en:'Today’s goals', sel:['#tab-home .section-header:has(h3[data-i18n="today_achievements"])', '#tab-home .achievement-rings-card'] },
     { key:'tasks',    ar:'مهماتي اليومية', en:'Daily tasks', sel:['#tab-home .section-header:has(h3[data-i18n="daily_tasks"])', '#tab-home .daily-tasks-card'] },
@@ -777,10 +779,32 @@ PRO2.openCustomizeHome = function(){
     $('customize-home-modal').classList.add('active');
 };
 PRO2.closeCustomizeHome = function(){ const m=$('customize-home-modal'); if(m) m.classList.remove('active'); };
+// توست بديل alert: مستقلّ عن ترتيب تحميل points.js، ويعيد استخدام صنف
+// ‎.pt-toast‎ نفسه كي يبقى شكل التنبيهات واحداً في التطبيق كله.
+PRO2.toast = function(msg, icon){
+    let t = $('pt-toast');
+    if(!t){ t = document.createElement('div'); t.id = 'pt-toast'; document.body.appendChild(t); }
+    t.className = 'pt-toast pt-ico';
+    t.innerHTML = '<i class="fa-solid ' + (icon || 'fa-circle-info') + '"></i><span></span>';
+    t.querySelector('span').textContent = msg;   // نصّ لا HTML: أأمن
+    void t.offsetWidth;                          // إجبار إعادة تخطيط ليعمل الانتقال
+    t.classList.add('show');
+    clearTimeout(t._tm); t._tm = setTimeout(() => t.classList.remove('show'), 2600);
+    try{ if(navigator.vibrate) navigator.vibrate(18); }catch(e){}
+};
 PRO2.toggleHomeSection = function(key, on){
     const pref = homePrefs();
     // حدّ أدنى 3 أقسام ظاهرة
-    if (!on){ const visible = HOME_SECTIONS.filter(s => (pref[s.key]!==false)).length; if (visible <= 3){ alert(tr('يجب إبقاء 3 أقسام على الأقل.','Keep at least 3 sections.')); PRO2.openCustomizeHome(); return; } }
+    if (!on){
+        const visible = HOME_SECTIONS.filter(s => (pref[s.key]!==false)).length;
+        if (visible <= 3){
+            PRO2.toast(tr('يجب إبقاء 3 أقسام على الأقل.','Keep at least 3 sections.'), 'fa-circle-exclamation');
+            // أعِد الزر لموضعه فقط، بلا إعادة بناء القائمة كلها (أنعم وأسرع)
+            const cb = document.querySelector('#ch-body input[data-key="' + key + '"]');
+            if (cb) cb.checked = true; else PRO2.openCustomizeHome();
+            return;
+        }
+    }
     pref[key] = on; localStorage.setItem('home_sections', JSON.stringify(pref)); PRO2.applyHomeSections();
 };
 PRO2.moveHomeSection = function(key, dir){
