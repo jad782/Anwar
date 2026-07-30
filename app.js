@@ -541,15 +541,16 @@ function renderQiblaRoute(lat, lng, bearing){
     const kx = cx + R*Math.cos(rad), ky = cy + R*Math.sin(rad);
     const en = (typeof currentLang!=='undefined' && currentLang==='en');
     const kmTxt = (window.fmtDigits?fmtDigits(km.toLocaleString('en-US')):km.toLocaleString('en-US')) + (en?' km':' كم');
+    // الألوان من رموز الثيم لا قيماً ذهبية محفورة، فتتبع الخريطة مظهر المستخدم
     box.innerHTML = `<svg viewBox="0 0 180 148" width="100%" style="max-width:230px">
-        <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="rgba(212,168,67,0.25)" stroke-width="1"/>
-        <circle cx="${cx}" cy="${cy}" r="${R*0.6}" fill="none" stroke="rgba(212,168,67,0.12)" stroke-width="1"/>
+        <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="rgba(var(--accent-rgb),0.25)" stroke-width="1"/>
+        <circle cx="${cx}" cy="${cy}" r="${R*0.6}" fill="none" stroke="rgba(var(--accent-rgb),0.12)" stroke-width="1"/>
         <line x1="${cx}" y1="${cy}" x2="${kx.toFixed(1)}" y2="${ky.toFixed(1)}" stroke="url(#rg)" stroke-width="2.5" stroke-dasharray="4 3"/>
-        <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#C5A059"/><stop offset="1" stop-color="#F2D27A"/></linearGradient></defs>
-        <circle cx="${cx}" cy="${cy}" r="4.5" fill="#F2D27A"/>
-        <text x="${cx}" y="${cy+16}" text-anchor="middle" fill="#A1917A" font-size="8">${en?'You':'موقعك'}</text>
+        <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="var(--accent-color)"/><stop offset="1" stop-color="var(--accent-light)"/></linearGradient></defs>
+        <circle cx="${cx}" cy="${cy}" r="4.5" fill="var(--accent-light)"/>
+        <text x="${cx}" y="${cy+16}" text-anchor="middle" fill="var(--text-muted)" font-size="8">${en?'You':'موقعك'}</text>
         <text x="${kx.toFixed(1)}" y="${(ky-8).toFixed(1)}" text-anchor="middle" font-size="12">🕋</text>
-        <text x="90" y="140" text-anchor="middle" fill="#D4A843" font-size="10" font-weight="bold">${en?'Kaaba • ':'الكعبة • '}${kmTxt}</text>
+        <text x="90" y="140" text-anchor="middle" fill="var(--accent-color)" font-size="10" font-weight="bold">${en?'Kaaba • ':'الكعبة • '}${kmTxt}</text>
     </svg>`;
 }
 
