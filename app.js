@@ -598,8 +598,34 @@ let _lastQiblaPos = null;
 window.refreshQiblaPlace = function(){
     if(_lastQiblaPos) _fillQiblaPlace(_lastQiblaPos[0], _lastQiblaPos[1], _lastQiblaPos[2]);
 };
+// شريط مواقيت الصلاة داخل شاشة القبلة + التاريخ الهجري والميلادي
+function _fillQiblaPrayers(){
+    const box = document.getElementById('qb-prayers'); if(!box) return;
+    let pt = null; try{ pt = (typeof prayerTimings !== 'undefined') ? prayerTimings : null; }catch(e){}
+    if(!pt || !pt.Fajr){ box.innerHTML = ''; return; }
+    const keys = ['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'];
+    const now = new Date(), cur = now.getHours()*60 + now.getMinutes();
+    const mins = k => { const w=String(pt[k]||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).split(':');
+                        const h=+w[0], m=+w[1]; return isNaN(h)?null:(h*60+m); };
+    // القادمة: أول وقت لم يحن بعد (وإلا فجر الغد)
+    let nextK = keys.find(k => { const m=mins(k); return m!=null && cur < m; }) || keys[0];
+    box.innerHTML = keys.map(k => `<div class="qb-p ${k===nextK?'on':''}">
+        <span class="qb-p-n">${t('p_'+k.toLowerCase()) || k}</span>
+        <strong class="qb-p-t">${pt[k] || '--:--'}</strong></div>`).join('');
+    // التاريخ: نأخذه من عناصر الرئيسية المحسوبة أصلاً (هجري + ميلادي)
+    const d = document.getElementById('qb-dates');
+    if(d){
+        const g = el => (document.getElementById(el)||{}).innerText || '';
+        const hij = [g('hijri-day'), g('hijri-month'), g('hijri-year')].filter(Boolean).join(' ');
+        const grg = [g('greg-day'), g('greg-month'), g('greg-year')].filter(Boolean).join(' ');
+        d.innerHTML = (hij? `<span>${hij}</span>` : '') + (hij&&grg? '<i>·</i>' : '') + (grg? `<span>${grg}</span>` : '');
+    }
+}
+window.refreshQiblaPrayers = _fillQiblaPrayers;
+
 function _fillQiblaPlace(lat, lng, altitude){
     _lastQiblaPos = [lat, lng, altitude];
+    _fillQiblaPrayers();
     const en = (currentLang==='en'), tk = (currentLang==='tr');
     // أقرب مدينة معروفة — بلا أي خدمة خارجية
     try{
@@ -733,46 +759,48 @@ function applyHeading(heading, acc) {
     const h = _smoothHeading;
     // زاوية القبلة على الشاشة (موضع الكعبة بالنسبة لأعلى الهاتف)
     const target = (qiblaBearing - h + 360) % 360;
-    const aligned = (target < 6 || target > 354);
+    const delta  = ((target + 180) % 360) - 180;   // [-180,180] موجب = القبلة يميناً
+    const aligned = Math.abs(delta) <= 2;          // هامش ±٢ درجة
 
-    // المؤشّر المركزي يدور ليشير نحو القبلة (الكعبة ثابتة أعلى الحلقة كهدف)
+    // السهم المركزي والشعاع والكعبة: كلها تدور نحو زاوية القبلة، فتمسح مع حركة الجهاز
     const arrow = document.getElementById('compass-arrow');
     if (arrow){ arrow.style.transform = `translate(-50%, -50%) rotate(${target}deg)`; arrow.classList.toggle('al', aligned); }
-    const topPtr = document.getElementById('qibla-top-pointer');
-    if (topPtr) topPtr.classList.toggle('al', aligned);
+    const beam = document.getElementById('qb-beam');
+    if (beam){ beam.style.transform = `rotate(${target}deg)`; beam.classList.toggle('al', aligned); }
+    // الكعبة تثبت على زاوية القبلة على الحلقة وتبقى منتصبة
+    const kaaba = document.getElementById('qibla-top-pointer');
+    if (kaaba){
+        kaaba.style.transform = `translate(-50%,-50%) rotate(${target}deg) translateY(-120px) rotate(${-target}deg)`;
+        kaaba.classList.toggle('al', aligned);
+    }
+    // علامة واجهة الهاتف (ثابتة أعلى الحلقة) تتوهّج عند التطابق
+    const notch = document.getElementById('qb-notch');
+    if (notch) notch.classList.toggle('al', aligned);
     const screen_ = document.getElementById('qb-screen');
     if (screen_) screen_.classList.toggle('aligned', aligned);
 
-    // نقطة موضعك الحالي على الحلقة: تتحرّك حتى تلتقي بالكعبة في الأعلى
-    const dot = document.getElementById('qb-dot');
-    if (dot){
-        dot.style.transform = `translate(-50%, -50%) rotate(${target}deg) translateY(-120px)`;
-        dot.classList.toggle('al', aligned);
-        // اللون مضبوط هنا لا في CSS: بعض المحرّكات لا تطبّق قاعدة .qb-dot.al رغم صحّتها
-        dot.style.background = aligned ? '#16a34a' : '#E0930F';
-    }
-    // قوس يمتدّ من الأعلى إلى النقطة (كم بقي من الدوران)
+    // قوس يمثّل الفرق الزاوي المتبقّي (بأقصر مسار) من الأعلى إلى الكعبة
     const arc = document.getElementById('qb-arc');
     if (arc){
-        const C = 2 * Math.PI * 120;                 // محيط الحلقة (r=120)
-        const span = Math.min(target, 360 - target); // أقصر مسار
+        const C = 2 * Math.PI * 120;                  // محيط الحلقة (r=120)
+        const span = Math.abs(delta);
         arc.style.strokeDasharray = C;
         arc.style.strokeDashoffset = C - (C * span / 360);
-        arc.style.transform = (target <= 180) ? 'rotate(-90deg)' : `rotate(${-90 - span}deg)`;
+        arc.style.transform = (delta >= 0) ? 'rotate(-90deg)' : `rotate(${-90 - span}deg)`;
     }
-    // إرشاد الالتفاف
+    // إرشاد الالتفاف حسب إشارة الفرق الزاوي
     const turn = document.getElementById('qb-turn');
     if (turn){
         const en = (currentLang === 'en'), tk = (currentLang === 'tr');
-        if (aligned) turn.innerText = en ? 'You are facing the Qibla ✓' : tk ? 'Kıbleye dönüksün ✓' : 'أنت تواجه القبلة ✓';
-        else if (target <= 180) turn.innerText = en ? 'Turn right' : tk ? 'Sağa dön' : 'انعطف يميناً';
-        else turn.innerText = en ? 'Turn left' : tk ? 'Sola dön' : 'انعطف يساراً';
+        if (aligned)      turn.innerText = en ? 'Facing the Qibla' : tk ? 'Kıbleye dönüksün' : 'استقبال القبلة';
+        else if (delta > 0) turn.innerText = en ? 'Turn right' : tk ? 'Sağa dön' : 'انعطف يميناً';
+        else                turn.innerText = en ? 'Turn left'  : tk ? 'Sola dön' : 'انعطف يساراً';
         turn.classList.toggle('al', aligned);
     }
 
-    // توجيه بالاهتزاز اللمسي: نبضات تتسارع كلما اقتربت، ونبضة قوية عند المحاذاة
+    // توجيه بالاهتزاز اللمسي: نبضات تتسارع كلما اقتربت، ونبضة قوية عند التطابق
     if (window.HAP){
-        const angDist = Math.min(target, 360 - target);
+        const angDist = Math.abs(delta);
         if (aligned && !_wasAligned) HAP.success();
         else if (!aligned && angDist < 45){
             const now = Date.now();
@@ -938,6 +966,7 @@ window.setLang = function(lang){
     applyTranslations();
     renderDailyTasks();
     try{ refreshQiblaPlace(); }catch(e){}   // نصوص القبلة المركّبة تُبنى بالجافاسكربت
+    try{ refreshQiblaPrayers(); }catch(e){}
     document.querySelectorAll('.lang-btn[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
     pageTitle.innerText = titles[[...tabSections].findIndex(s => s.style.display === 'block')] || t('nav_home');
 };

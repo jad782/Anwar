@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Al-Anwar">
     <title>تطبيق الأنوار الإسلامي</title>
-    <link rel="stylesheet" href="style.css?v=94">
+    <link rel="stylesheet" href="style.css?v=95">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="fa.css?v=1">
     <link rel="stylesheet" href="fonts.css?v=1">
@@ -345,23 +345,39 @@
             </div>
 
             <div class="qb-stage">
-                <!-- الكعبة: علامة الهدف أعلى الحلقة -->
-                <div class="qb-kaaba" id="qibla-top-pointer"><i class="fa-solid fa-kaaba"></i></div>
+                <!-- علامة اتجاه واجهة الهاتف: ثابتة أعلى الحلقة -->
+                <div class="qb-notch" id="qb-notch"></div>
+
+                <!-- شعاع نطاق الرؤية: يدور نحو القبلة فيمسح مع حركة الجهاز -->
+                <div class="qb-beam" id="qb-beam">
+                    <svg viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <radialGradient id="qbBeam" cx="50%" cy="100%" r="100%">
+                                <stop offset="0%"  stop-color="var(--qb-beam-1)"/>
+                                <stop offset="55%" stop-color="var(--qb-beam-2)"/>
+                                <stop offset="100%" stop-color="var(--qb-beam-3)"/>
+                            </radialGradient>
+                        </defs>
+                        <!-- قطاع ±26° يمتدّ من المركز إلى الحافة -->
+                        <path d="M130,130 L73.6,20.6 A123,123 0 0,1 186.4,20.6 Z" fill="url(#qbBeam)"/>
+                    </svg>
+                </div>
 
                 <svg class="qb-ring" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
                     <circle class="qb-track" cx="130" cy="130" r="120"/>
                     <circle class="qb-arc" id="qb-arc" cx="130" cy="130" r="120"/>
                 </svg>
 
-                <!-- نقطة اتجاهك الحالي على الحلقة -->
-                <div class="qb-dot" id="qb-dot"></div>
+                <!-- الكعبة: تثبت على زاوية القبلة الصحيحة وتدور على الحلقة -->
+                <div class="qb-kaaba" id="qibla-top-pointer"><i class="fa-solid fa-kaaba"></i></div>
 
-                <!-- المؤشّر: يدور ليشير للقبلة -->
+                <!-- السهم المركزي: يشير دائماً نحو الكعبة -->
                 <div class="qb-pointer" id="compass-arrow">
                     <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-                        <polygon points="30,6 52,50 30,39 8,50"/>
+                        <polygon points="30,5 51,51 30,40 9,51"/>
                     </svg>
                 </div>
+                <div class="qb-hub"></div>
 
                 <span class="qb-side qb-left"  id="qb-dist"></span>
                 <span class="qb-side qb-right" id="qb-alt"></span>
@@ -372,6 +388,10 @@
                 <p id="qibla-degree" class="qb-deg">--°</p>
                 <span class="qb-degcap" data-i18n="qibla_from_north">درجة من الشمال</span>
             </div>
+
+            <!-- مواقيت الصلاة مع إبراز القادمة + التاريخ الهجري والميلادي -->
+            <div class="qb-prayers" id="qb-prayers"></div>
+            <div class="qb-dates" id="qb-dates"></div>
 
             <p id="qibla-hint" class="qb-hint" data-i18n="qibla_hint">امسك الهاتف بشكل مسطح ووجّهه حتى تنطبق الكعبة على السهم.</p>
             <div id="qibla-magwarn" class="qibla-magwarn" style="display:none;"><i class="fa-solid fa-triangle-exclamation"></i> <span>توجد أجهزة مغناطيسية قريبة تؤثّر على الدقّة. حرّك الهاتف على شكل الرقم 8 للمعايرة.</span></div>
@@ -437,7 +457,7 @@
 
     <script src="i18n-tr.js?v=1"></script>
     <script src="i18n-auto.js?v=1"></script>
-    <script src="i18n-ui.js?v=14"></script>
+    <script src="i18n-ui.js?v=15"></script>
     <script src="persist.js?v=4"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -445,7 +465,7 @@
     <script src="quran-data.js?v=1"></script>
     <script src="prayers.js?v=14"></script>
     <script src="haptics.js?v=1"></script>
-    <script src="app.js?v=37"></script>
+    <script src="app.js?v=38"></script>
     <script src="features.js?v=26"></script>
     <script src="pro.js?v=33"></script>
     <script src="pro2.js?v=24"></script>
