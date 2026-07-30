@@ -2001,108 +2001,92 @@ body.light-mode .zk-note { background:rgba(0,0,0,0.03); }
 
 
 /* ==========================================================================
-   شاشة القبلة — هوية ليل الأنوار: ليلٌ فحمي وتوهّج ذهبي (تتبع ثيم التطبيق)
+   شاشة القبلة — نظام ألوان مرن يتبع ثيم المستخدم بالكامل.
+   لا لون مصمت ولا لون ثابت: كل شيء مشتقّ من متغيّرات الثيم
+   (--light-bg, --pill-bg, --border-color, --accent-color, --accent-light,
+    --text-main, --text-muted) فينسجم مع الأخضر الزمردي والبنفسجي والذهبي وغيرها.
+   الشفافية تُنجز عبر opacity على العنصر لا عبر رموز rgba ثابتة، فتصحّ في كل ثيم.
    ========================================================================== */
 .qibla-overlay.qb-pro { padding:0; align-items:stretch; justify-content:stretch; }
 .qb-screen {
-    --qb-gold:var(--accent-light, #F2D27A);
-    --qb-gold-2:var(--accent-color, #C9A227);
-    --qb-beam-1:rgba(242,210,122,0.34);
-    --qb-beam-2:rgba(212,168,67,0.13);
-    --qb-beam-3:rgba(212,168,67,0);
     position:relative; width:100%; min-height:100%; display:flex; flex-direction:column;
     align-items:center; justify-content:flex-start; text-align:center; overflow-y:auto;
     overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
     padding:calc(env(safe-area-inset-top,0px) + 52px) 20px calc(env(safe-area-inset-bottom,0px) + 26px);
+    /* تدرّج ناعم من ألوان الثيم: هالة بلون التمييز فوق سطح الثيم فوق خلفيته */
     background:
-        radial-gradient(120% 70% at 50% 0%, rgba(212,168,67,0.16), transparent 62%),
-        radial-gradient(90% 60% at 50% 38%, rgba(212,168,67,0.07), transparent 70%),
-        linear-gradient(180deg, #171309 0%, #12100B 45%, #0C0A06 100%);
-    transition:background 1s ease;
-}
-/* حالة التطابق: يتحوّل التوهّج من الذهبي إلى الزمردي بلا خروج عن الهوية */
-.qb-screen.aligned {
-    --qb-beam-1:rgba(52,211,153,0.30);
-    --qb-beam-2:rgba(16,163,74,0.12);
-    --qb-beam-3:rgba(16,163,74,0);
-    background:
-        radial-gradient(120% 70% at 50% 0%, rgba(34,197,94,0.17), transparent 62%),
-        radial-gradient(90% 60% at 50% 38%, rgba(34,197,94,0.07), transparent 70%),
-        linear-gradient(180deg, #0C160F 0%, #0B120C 45%, #070B07 100%);
-}
-body.light-mode .qb-screen {
-    background:
-        radial-gradient(120% 70% at 50% 0%, rgba(184,134,11,0.16), transparent 60%),
-        linear-gradient(180deg, #FBF7EF 0%, #F4EEE1 60%, #EFE7D6 100%);
-}
-body.light-mode .qb-screen.aligned {
-    background:
-        radial-gradient(120% 70% at 50% 0%, rgba(22,163,74,0.16), transparent 60%),
-        linear-gradient(180deg, #F2FBF5 0%, #E9F6EE 60%, #E1F2E8 100%);
+        radial-gradient(105% 62% at 50% 0%,  var(--border-color), transparent 68%),
+        radial-gradient(135% 82% at 50% 0%,  var(--pill-bg),      transparent 64%),
+        var(--light-bg);
 }
 
 .qb-close {
     position:absolute; top:calc(env(safe-area-inset-top,0px) + 14px); inset-inline-end:18px;
     width:40px; height:40px; border-radius:50%; cursor:pointer; z-index:5;
-    background:rgba(255,255,255,0.08); border:1px solid rgba(242,210,122,0.28);
-    color:var(--qb-gold); font-size:1rem;
+    background:var(--pill-bg); border:1px solid var(--border-color);
+    color:var(--accent-light); font-size:1rem;
     backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
 }
 .qb-close:active { transform:scale(0.93); }
-body.light-mode .qb-close { background:rgba(0,0,0,0.05); color:#8A6410; }
 
 .qb-place { margin-bottom:20px; }
 .qb-place h2 {
     font-size:1.5rem; font-weight:800; letter-spacing:normal; margin:0 0 3px;
-    background:linear-gradient(135deg, var(--qb-gold) 0%, var(--qb-gold-2) 70%);
+    background:linear-gradient(135deg, var(--accent-light) 0%, var(--accent-color) 72%);
     -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
-    color:var(--qb-gold-2);
+    color:var(--accent-color);
 }
 .qb-place span { color:var(--text-muted); font-size:0.8rem; font-weight:600; }
 
 /* ساحة البوصلة */
 .qb-stage { position:relative; width:min(84vw, 300px); aspect-ratio:1/1; margin:0 auto 4px; }
 .qb-ring { position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); z-index:2; }
-.qb-track { fill:none; stroke:rgba(242,210,122,0.16); stroke-width:2; }
-.qb-arc   { fill:none; stroke:var(--qb-gold-2); stroke-width:3; stroke-linecap:round;
-    transform-origin:50% 50%; transition:stroke-dashoffset .45s ease, stroke .5s ease; opacity:0.9; }
-.qb-screen.aligned .qb-arc { stroke:#22c55e; }
-body.light-mode .qb-track { stroke:rgba(138,100,16,0.2); }
+.qb-track { fill:none; stroke:var(--accent-color); stroke-width:2; opacity:0.28; }
+.qb-arc {
+    fill:none; stroke:var(--accent-color); stroke-width:3; stroke-linecap:round;
+    transform-origin:50% 50%; transition:stroke-dashoffset .45s ease, stroke .5s ease, opacity .5s ease;
+    opacity:0.95;
+}
+.qb-screen.aligned .qb-track { stroke:var(--accent-light); opacity:0.75; }
+.qb-screen.aligned .qb-arc   { stroke:var(--accent-light); }
 
-/* شعاع نطاق الرؤية: طبقة تغطّي الشاشة كاملةً، ورأس الشعاع على مركز البوصلة،
-   فيمسح الشعاع الصفحة بأكملها مع حركة الجهاز لا داخل الحلقة فقط. */
+/* شعاع نطاق الرؤية: يغطّي الصفحة كلها ولونه من الثيم (الشفافية بالـopacity) */
 .qb-beamlayer { position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
+/* المقاس ثابت 600px ويُكبَّر بـscale من الجافاسكربت (--qb-beam-k) ليغطّي الصفحة كاملة.
+   عنصرٌ بعرض 280vmax يعني على الآيفون سطح رسم بمئات الميغابايت؛ والتكبير يمنح
+   الغطاء نفسه بذاكرة ثابتة — والتدرّج ناعم أصلاً فلا يبين أي تشوّش من التكبير. */
 .qb-beam {
     position:absolute; left:50%; top:var(--qb-origin-y, 44%);
-    width:280vmax; height:280vmax;
-    transform:translate(-50%,-50%) rotate(0deg); transform-origin:50% 50%;
-    transition:transform .16s linear; will-change:transform;
+    width:600px; height:600px;
+    transform:translate(-50%,-50%) rotate(0deg) scale(var(--qb-beam-k, 3)); transform-origin:50% 50%;
+    transition:transform .16s linear, opacity .5s ease;
+    opacity:0.20;
 }
 .qb-beam svg { width:100%; height:100%; display:block; }
-/* المحتوى يبقى فوق الشعاع — بلا المساس بالعناصر المطلقة (زرّ الإغلاق) */
+.qb-screen.aligned .qb-beam { opacity:0.34; }
+/* المحتوى فوق الشعاع — بلا المساس بالعناصر المطلقة (زرّ الإغلاق) */
 .qb-screen > *:not(.qb-beamlayer):not(.qb-close) { position:relative; z-index:1; }
 
 /* علامة واجهة الهاتف: ثابتة أعلى الحلقة */
 .qb-notch {
     position:absolute; top:-5px; left:50%; transform:translateX(-50%); z-index:4;
     width:0; height:0; border-inline-start:8px solid transparent; border-inline-end:8px solid transparent;
-    border-top:13px solid var(--qb-gold);
-    filter:drop-shadow(0 2px 5px rgba(0,0,0,0.45)); transition:border-top-color .4s ease;
+    border-top:13px solid var(--accent-color);
+    filter:drop-shadow(0 2px 5px rgba(0,0,0,0.45)); transition:border-top-color .4s ease, transform .3s ease;
 }
-.qb-notch.al { border-top-color:#22c55e; }
+.qb-notch.al { border-top-color:var(--accent-light); transform:translateX(-50%) scale(1.18); }
 
 /* الكعبة على زاوية القبلة */
 .qb-kaaba {
     position:absolute; top:50%; left:50%; z-index:4;
     width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    background:radial-gradient(circle at 40% 35%, #2A2008, #14110B 78%);
-    border:1.5px solid rgba(242,210,122,0.55); color:var(--qb-gold); font-size:1.1rem;
-    box-shadow:0 4px 16px rgba(0,0,0,0.5), 0 0 0 4px rgba(212,168,67,0.08);
+    background:var(--pill-bg); border:1.5px solid var(--accent-color);
+    color:var(--accent-light); font-size:1.1rem;
+    box-shadow:0 4px 16px rgba(0,0,0,0.45);
     transform:translate(-50%,-50%) translateY(-120px);
     transition:box-shadow .35s ease, border-color .35s ease, color .35s ease;
 }
-.qb-kaaba.al { border-color:#22c55e; color:#4ade80; box-shadow:0 0 22px rgba(34,197,94,0.5), 0 0 0 5px rgba(34,197,94,0.12); }
-body.light-mode .qb-kaaba { background:radial-gradient(circle at 40% 35%, #FFFDF7, #F3EADA 78%); border-color:rgba(138,100,16,0.45); color:#8A6410; }
+.qb-kaaba.al { border-color:var(--accent-light); box-shadow:0 0 24px var(--glow, rgba(255,255,255,0.25)), 0 0 0 5px var(--border-color); }
 
 /* السهم المركزي */
 .qb-pointer {
@@ -2111,15 +2095,14 @@ body.light-mode .qb-kaaba { background:radial-gradient(circle at 40% 35%, #FFFDF
     filter:drop-shadow(0 4px 12px rgba(0,0,0,0.45));
 }
 .qb-pointer svg { width:100%; height:100%; }
-.qb-pointer polygon { fill:var(--qb-gold); transition:fill .4s ease; }
-.qb-screen.aligned .qb-pointer polygon { fill:#34d399; }
+.qb-pointer polygon { fill:var(--accent-color); transition:fill .4s ease; }
+.qb-screen.aligned .qb-pointer polygon { fill:var(--accent-light); }
 .qb-hub {
     position:absolute; top:50%; left:50%; width:12px; height:12px; border-radius:50%; z-index:4;
     transform:translate(-50%,-50%);
-    background:radial-gradient(circle, var(--qb-gold), var(--qb-gold-2));
-    box-shadow:0 0 10px rgba(212,168,67,0.6);
+    background:radial-gradient(circle, var(--accent-light), var(--accent-color));
+    box-shadow:0 0 10px var(--glow, rgba(0,0,0,0.3));
 }
-.qb-screen.aligned .qb-hub { background:radial-gradient(circle,#6ee7b7,#16a34a); box-shadow:0 0 10px rgba(34,197,94,0.6); }
 
 /* بيانات الجانبين */
 .qb-side {
@@ -2131,64 +2114,56 @@ body.light-mode .qb-kaaba { background:radial-gradient(circle at 40% 35%, #FFFDF
 
 .qb-turn {
     position:absolute; bottom:7%; left:50%; transform:translateX(-50%); z-index:4;
-    font-size:0.92rem; font-weight:800; color:var(--qb-gold); white-space:nowrap;
+    font-size:0.92rem; font-weight:800; color:var(--accent-color); white-space:nowrap;
     letter-spacing:normal; transition:color .4s ease;
-    text-shadow:0 2px 8px rgba(0,0,0,0.5);
 }
-.qb-turn.al { color:#4ade80; }
-body.light-mode .qb-turn { color:#8A6410; text-shadow:none; }
-body.light-mode .qb-turn.al { color:#15803d; }
+.qb-turn.al { color:var(--accent-light); }
 
 /* القراءة */
 .qb-readout { margin-top:12px; display:flex; flex-direction:column; align-items:center; gap:1px; }
 .qb-deg {
     margin:0; font-size:2.2rem; font-weight:800; line-height:1; letter-spacing:-1px;
     font-variant-numeric:tabular-nums;
-    background:linear-gradient(135deg, var(--qb-gold) 0%, var(--qb-gold-2) 65%);
+    background:linear-gradient(135deg, var(--accent-light) 0%, var(--accent-color) 68%);
     -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
-    color:var(--qb-gold-2);
+    color:var(--accent-color);
 }
 .qb-degcap { font-size:0.72rem; font-weight:700; color:var(--text-muted); letter-spacing:normal; }
 
-/* شريط المواقيت */
+/* شريط المواقيت — الإبراز بلون الثيم */
 .qb-prayers {
     display:grid; grid-template-columns:repeat(6, minmax(0,1fr)); gap:6px;
     width:100%; max-width:380px; margin-top:18px;
 }
 .qb-p {
     display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 2px;
-    border-radius:13px; background:rgba(255,255,255,0.05); border:1px solid rgba(242,210,122,0.14);
-    transition:background .3s ease, border-color .3s ease;
+    border-radius:13px; background:var(--pill-bg); border:1px solid var(--border-color);
+    transition:border-color .3s ease, box-shadow .3s ease;
 }
 .qb-p-n { font-size:0.62rem; font-weight:700; color:var(--text-muted); letter-spacing:normal; }
 .qb-p-t { font-size:0.76rem; font-weight:800; color:var(--text-main); font-variant-numeric:tabular-nums; }
 .qb-p.on {
-    background:linear-gradient(180deg, rgba(212,168,67,0.24), rgba(212,168,67,0.08));
-    border-color:rgba(242,210,122,0.6);
-    box-shadow:0 4px 14px rgba(212,168,67,0.16);
+    border-color:var(--accent-color);
+    box-shadow:0 0 0 1px var(--accent-color), 0 4px 14px var(--glow, rgba(0,0,0,0.2));
 }
-.qb-p.on .qb-p-n { color:var(--qb-gold); }
-.qb-p.on .qb-p-t { color:var(--qb-gold); }
-body.light-mode .qb-p { background:rgba(0,0,0,0.035); border-color:rgba(138,100,16,0.16); }
-body.light-mode .qb-p.on { background:linear-gradient(180deg, rgba(184,134,11,0.16), rgba(184,134,11,0.05)); border-color:rgba(138,100,16,0.5); }
-body.light-mode .qb-p.on .qb-p-n, body.light-mode .qb-p.on .qb-p-t { color:#8A6410; }
+.qb-p.on .qb-p-n, .qb-p.on .qb-p-t { color:var(--accent-light); }
 
 .qb-dates {
     display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px;
     font-size:0.74rem; font-weight:700; color:var(--text-muted); letter-spacing:normal;
 }
-.qb-dates i { color:var(--qb-gold-2); font-style:normal; opacity:0.6; }
+.qb-dates i { color:var(--accent-color); font-style:normal; opacity:0.7; }
 
 .qb-hint { margin-top:14px; max-width:330px; font-size:0.79rem; line-height:1.75; color:var(--text-muted); }
 .qb-screen .qibla-magwarn { margin-top:12px; max-width:340px; }
 .qb-enable {
     margin-top:16px; border:none; border-radius:26px; padding:13px 30px; cursor:pointer;
-    font-family:inherit; font-weight:800; font-size:0.9rem; color:#14110B;
-    background:linear-gradient(135deg, var(--qb-gold-2), var(--qb-gold));
-    box-shadow:0 8px 22px rgba(0,0,0,0.4);
+    font-family:inherit; font-weight:800; font-size:0.9rem; color:var(--light-bg);
+    background:linear-gradient(135deg, var(--accent-color), var(--accent-light));
+    box-shadow:0 8px 22px rgba(0,0,0,0.35);
 }
 .qb-enable:active { transform:scale(0.96); }
 
 @media (prefers-reduced-motion: reduce) {
-    .qb-beam, .qb-pointer, .qb-kaaba, .qb-arc, .qb-screen { transition:none; }
+    .qb-beam, .qb-pointer, .qb-kaaba, .qb-arc, .qb-notch { transition:none; }
 }

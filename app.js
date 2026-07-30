@@ -627,18 +627,76 @@ window.refreshQiblaPlace = function(){
 // يثبّت رأس شعاع نطاق الرؤية على مركز البوصلة.
 // الطبقة تغطّي الشاشة (position:fixed) فنحسب المركز بالبكسل ونمرّره كمتغيّر CSS،
 // وإلا دار الشعاع حول منتصف الشاشة لا حول البوصلة.
+// مقاس الشعاع الأساسي بالبكسل كما في style.css — نُكبّره بـscale بدل تكبير العنصر نفسه،
+// لأنّ عنصراً بعرض 280vmax يعني على الآيفون طبقة رسم بمئات الميغابايت (خطر ذاكرة حقيقي).
+const QB_BEAM_BASE = 600;
+let _qbBeamK = 3;
 function _syncBeamOrigin(){
     const stage = document.querySelector('.qb-stage');
     const layer = document.querySelector('.qb-beamlayer');
     if(!stage || !layer) return;
     const b = stage.getBoundingClientRect();
     if(!b.height) return;
-    layer.style.setProperty('--qb-origin-y', (b.top + b.height / 2) + 'px');
+    const oy = b.top + b.height / 2;
+    layer.style.setProperty('--qb-origin-y', oy + 'px');
+    // نصف القطر اللازم = المسافة من مركز البوصلة إلى أبعد زاوية في الصفحة
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const far = Math.sqrt(Math.pow(vw / 2, 2) + Math.pow(Math.max(oy, vh - oy), 2));
+    // هامش 8% يغطّي اللحظات الانتقالية (دوران الشاشة، انزلاق شريط العنوان) قبل وصول حدث resize.
+    // التكبير مجّاني بالذاكرة لأنّ العنصر يبقى 600px، فالسخاء هنا لا يكلّف شيئاً.
+    let k = Math.ceil((far * 1.08 / (QB_BEAM_BASE / 2)) * 20) / 20; // تقريب لأعلى يمنع أي فراغ
+    if (!(k > 0)) k = 1;
+    _qbBeamK = k;
+    layer.style.setProperty('--qb-beam-k', k.toFixed(2));
+    // أعِد كتابة تحويل الشعاع فوراً كي يأخذ التكبير الجديد دون انتظار حركة البوصلة
+    const bm = document.getElementById('qb-beam');
+    if (bm && bm.style.transform) bm.style.transform = _qbBeamTransform(_qbBeamA);
+}
+// تحويل الشعاع كاملاً في مكان واحد: الإزاحة للتمركز على البوصلة، ثم الدوران، ثم التكبير.
+// كتابة rotate() وحدها من applyHeading كانت تُلغي translate فيقفز رأس الشعاع بعيداً عن المركز.
+let _qbBeamA = 0;
+function _qbBeamTransform(angle){
+    return 'translate(-50%,-50%) rotate(' + angle + 'deg) scale(' + _qbBeamK.toFixed(2) + ')';
 }
 window.addEventListener('resize', function(){ try{ _syncBeamOrigin(); }catch(e){} });
 // أعِد الضبط عند تمرير محتوى الشاشة (المركز يتحرّك مع التمرير)
 document.addEventListener('scroll', function(e){ if(e.target && e.target.id==='qb-screen'){ try{ _syncBeamOrigin(); }catch(x){} } }, true);
-window.addEventListener('orientationchange', function(){ setTimeout(function(){ try{ _syncBeamOrigin(); }catch(e){} }, 250); });
+window.addEventListener('orientationchange', function(){
+    try{ _syncBeamOrigin(); }catch(e){}                                    // فوراً كي لا يبين طرف الشعاع
+    setTimeout(function(){ try{ _syncBeamOrigin(); }catch(e){} }, 250);    // وبعد استقرار التخطيط
+});
+
+// يطلي عناصر شاشة القبلة بلون الثيم الحالي صراحةً.
+// السبب: بعض المحرّكات لا تُحدّث القيم المحسوبة لـ var(--accent-color) على عناصر
+// أُنشئت قبل تبديل الثيم، فيبقى الإبراز بلون الثيم القديم. الضبط المباشر يحسم الأمر.
+function _paintQiblaTheme(){
+    const host = document.getElementById('qb-screen'); if(!host) return;
+    const cs = getComputedStyle(document.body);
+    const acc  = (cs.getPropertyValue('--accent-color') || '').trim();
+    const accL = (cs.getPropertyValue('--accent-light') || '').trim();
+    if(!acc) return;
+    // إبراز الصلاة القادمة
+    const on = host.querySelector('.qb-p.on');
+    if(on){
+        on.style.borderColor = acc;
+        on.style.boxShadow = '0 0 0 1px ' + acc;
+        on.querySelectorAll('.qb-p-n, .qb-p-t').forEach(function(e){ e.style.color = accL || acc; });
+    }
+    host.querySelectorAll('.qb-p:not(.on)').forEach(function(e){
+        e.style.borderColor = ''; e.style.boxShadow = '';
+        e.querySelectorAll('.qb-p-n, .qb-p-t').forEach(function(x){ x.style.color = ''; });
+    });
+    // الحلقة والعلامة والكعبة والسهم
+    const aligned = host.classList.contains('aligned');
+    const main = aligned ? (accL || acc) : acc;
+    const tr = host.querySelector('.qb-track'); if(tr) tr.style.stroke = acc;
+    const ar = host.querySelector('.qb-arc');   if(ar) ar.style.stroke = main;
+    const nt = host.querySelector('.qb-notch'); if(nt) nt.style.borderTopColor = main;
+    const kb = host.querySelector('.qb-kaaba'); if(kb){ kb.style.borderColor = main; kb.style.color = accL || acc; }
+    const po = host.querySelector('.qb-pointer polygon'); if(po) po.style.fill = main;
+    const tu = host.querySelector('.qb-turn');  if(tu) tu.style.color = main;
+}
+window.refreshQiblaColors = _paintQiblaTheme;
 
 // شريط مواقيت الصلاة داخل شاشة القبلة + التاريخ الهجري والميلادي
 function _fillQiblaPrayers(){
@@ -654,6 +712,7 @@ function _fillQiblaPrayers(){
     box.innerHTML = keys.map(k => `<div class="qb-p ${k===nextK?'on':''}">
         <span class="qb-p-n">${t('p_'+k.toLowerCase()) || k}</span>
         <strong class="qb-p-t">${pt[k] || '--:--'}</strong></div>`).join('');
+    _paintQiblaTheme();   // لون الإبراز من الثيم صراحةً
     // التاريخ: نأخذه من عناصر الرئيسية المحسوبة أصلاً (هجري + ميلادي)
     const d = document.getElementById('qb-dates');
     if(d){
@@ -809,12 +868,17 @@ function applyHeading(heading, acc) {
     if (arrow){
         arrow.style.transform = `translate(-50%, -50%) rotate(${target}deg)`;
         arrow.classList.toggle('al', aligned);
-        // اللون بالجافاسكربت: بعض المحرّكات لا تطبّق قاعدة .aligned المتوارثة على polygon
+        // اللون بالجافاسكربت من متغيّرات الثيم: بعض المحرّكات لا تطبّق قاعدة .aligned
+        // المتوارثة على polygon داخل SVG. النبرة الفاتحة للتطابق والأساسية لغيره.
         const poly = arrow.querySelector('polygon');
-        if (poly) poly.style.fill = aligned ? '#34d399' : '';
+        if (poly){
+            const cs = getComputedStyle(document.getElementById('qb-screen') || document.body);
+            const c = (aligned ? cs.getPropertyValue('--accent-light') : cs.getPropertyValue('--accent-color')).trim();
+            if (c) poly.style.fill = c;
+        }
     }
     const beam = document.getElementById('qb-beam');
-    if (beam){ beam.style.transform = `rotate(${target}deg)`; beam.classList.toggle('al', aligned); }
+    if (beam){ _qbBeamA = target; beam.style.transform = _qbBeamTransform(target); beam.classList.toggle('al', aligned); }
     // الكعبة تثبت على زاوية القبلة على الحلقة وتبقى منتصبة
     const kaaba = document.getElementById('qibla-top-pointer');
     if (kaaba){
@@ -826,6 +890,8 @@ function applyHeading(heading, acc) {
     if (notch) notch.classList.toggle('al', aligned);
     const screen_ = document.getElementById('qb-screen');
     if (screen_) screen_.classList.toggle('aligned', aligned);
+    // عند تغيّر حالة التطابق: أعِد طلاء العناصر بنبرة الثيم المناسبة (فاتحة/أساسية)
+    if (_wasAligned !== aligned) { try{ _paintQiblaTheme(); }catch(e){} }
 
     // قوس يمثّل الفرق الزاوي المتبقّي (بأقصر مسار) من الأعلى إلى الكعبة
     const arc = document.getElementById('qb-arc');

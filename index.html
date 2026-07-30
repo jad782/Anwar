@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Al-Anwar">
     <title>تطبيق الأنوار الإسلامي</title>
-    <link rel="stylesheet" href="style.css?v=97">
+    <link rel="stylesheet" href="style.css?v=99">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="fa.css?v=1">
     <link rel="stylesheet" href="fonts.css?v=1">
@@ -343,10 +343,11 @@
                 <div class="qb-beam" id="qb-beam">
                     <svg viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
                         <defs>
+                            <!-- ألوان الشعاع من ثيم المستخدم؛ الشفافية عبر opacity على .qb-beam -->
                             <radialGradient id="qbBeam" cx="50%" cy="50%" r="47%">
-                                <stop offset="0%"   stop-color="var(--qb-beam-1)"/>
-                                <stop offset="45%"  stop-color="var(--qb-beam-2)"/>
-                                <stop offset="100%" stop-color="var(--qb-beam-3)"/>
+                                <stop offset="0%"   stop-color="var(--accent-light, #F2D27A)"/>
+                                <stop offset="42%"  stop-color="var(--accent-color, #C9A227)"/>
+                                <stop offset="100%" stop-color="var(--accent-color, #C9A227)" stop-opacity="0"/>
                             </radialGradient>
                         </defs>
                         <!-- قطاع ±26° رأسه في المركز ويمتدّ إلى ما بعد حدود الشاشة -->
@@ -468,11 +469,11 @@
     <script src="quran-data.js?v=1"></script>
     <script src="prayers.js?v=14"></script>
     <script src="haptics.js?v=1"></script>
-    <script src="app.js?v=41"></script>
+    <script src="app.js?v=44"></script>
     <script src="features.js?v=26"></script>
     <script src="pro.js?v=33"></script>
     <script src="pro2.js?v=24"></script>
-    <script src="points.js?v=16"></script>
+    <script src="points.js?v=17"></script>
     <script src="keys.js?v=8"></script>
     <script src="premium.js?v=20"></script>
     <script src="hajj.js?v=3"></script>

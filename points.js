@@ -129,6 +129,7 @@ function applyAppTheme(){
     else if(t==='navy') document.body.classList.add('theme-navy');
     else if(t==='purple') document.body.classList.add('theme-purple');
     else if(t==='rosewood') document.body.classList.add('theme-rosewood');
+    try{ if(window.refreshQiblaColors) refreshQiblaColors(); }catch(e){}
 }
 window.applyAppTheme = applyAppTheme;
 window.AnwarTheme2 = {
