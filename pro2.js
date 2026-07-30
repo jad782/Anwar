@@ -731,13 +731,22 @@ function homeOrder(){
     HOME_SECTIONS.forEach(s => { if(!valid.includes(s.key)) valid.push(s.key); });
     return valid;
 }
+// يضع أصناف الإخفاء على body فوراً — يُنادى مبكّراً قبل initPro2 كي لا يلمح
+// المستخدم الأقسام المُطفأة في أول ٧٠٠ مللي ثانية من كل إقلاع.
+PRO2.syncHomeClasses = function(){
+    if(!document.body) return;
+    const pref = homePrefs();
+    HOME_SECTIONS.forEach(s => {
+        document.body.classList.toggle('hs-off-' + s.key, pref[s.key] === false);
+    });
+};
 PRO2.applyHomeSections = function(){
     const pref = homePrefs();
-    // إظهار/إخفاء
-    HOME_SECTIONS.forEach(s => {
-        const show = pref[s.key] !== false; // افتراضياً ظاهر
-        s.sel.forEach(q => { document.querySelectorAll(q).forEach(el => { el.style.display = show ? '' : 'none'; }); });
-    });
+    // الإخفاء عبر أصناف body والـCSS: لا أنماط سطرية، فلا يستطيع closeKhatma
+    // ولا أي إعادة رسم أن ينقضها (كان هذا سبب رجوع الأقسام عند تنقّل التبويبات).
+    // لا نلمس أنماط display السطرية إطلاقاً: الإظهار والإخفاء صنفٌ على body فقط.
+    // لو صفّرناها لأظهرنا أقساماً أخفاها منطقٌ آخر (كعرض الختمة أو قسم مدفوع).
+    PRO2.syncHomeClasses();
     // إعادة الترتيب: ننقل عناصر كل قسم لتسبق المرساة السفلية (والهيرو يبقى في الأعلى).
     // كانت المرساة بطاقة التبرّع وقد أُزيلت، فصار البديل #khatma-view وهو في موضعها نفسه.
     const home = document.getElementById('tab-home'); if(!home) return;
@@ -853,6 +862,10 @@ function injectCustomizeHomeSetting(){
     row.innerHTML = `<span class="set-ico"><i class="fa-solid fa-table-cells-large"></i></span><span class="set-label">${L()==='en'?'Customize home':'تخصيص عرض الواجهة'}</span><i class="fa-solid fa-chevron-left ath-chevron"></i>`;
     if (gen && gen.nextSibling) list.insertBefore(row, gen.nextSibling); else list.appendChild(row);
 }
+// طبّق أصناف الإخفاء في أسرع لحظة ممكنة (لا ننتظر 700 مللي ثانية) كي لا يلمح
+// المستخدم قسماً أطفأه. الترتيب وتنظيف الإرث يجريان لاحقاً في initPro2.
+try{ PRO2.syncHomeClasses(); }catch(e){}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ try{ PRO2.syncHomeClasses(); }catch(e){} });
 function initPro2(){ injectExtras(); injectCustomizeHomeSetting(); injectDailyCards(); PRO2.applyHomeSections(); PRO2.checkBadges(true); }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(initPro2, 700));
 else setTimeout(initPro2, 700);

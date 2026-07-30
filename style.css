@@ -2195,3 +2195,26 @@ body.light-mode .zk-note { background:rgba(0,0,0,0.03); }
 @media (prefers-reduced-motion: reduce) {
     .qb-beam, .qb-pointer, .qb-kaaba, .qb-arc, .qb-notch { transition:none; }
 }
+
+/* ==========================================================================
+   تخصيص الواجهة: الإخفاء يُقرَّر بالـCSS لا بأنماط سطرية.
+   السبب: closeKhatma() كان يصفّر style.display لأقسام الرئيسية، وgoToTab
+   ينادِيه في كل تنقّل بين التبويبات — فيرجع القسم المُطفأ ظاهراً.
+   الآن الحالة صنفٌ على body، و!important يمنع أي كود من نقضها،
+   وتصمد أمام إعادة بناء العناصر وإعادة الرسم.
+   ========================================================================== */
+body.hs-off-prayer   #tab-home .prayer-grid,
+body.hs-off-ayah     #ayah-of-day-card,
+body.hs-off-daily    #daily-extra,
+body.hs-off-continue #pro-home,
+body.hs-off-khatma   #tab-home .khatma-manager-card,
+body.hs-off-achieve  #tab-home .achievement-rings-card,
+body.hs-off-tasks    #tab-home .daily-tasks-card,
+body.hs-off-apps     #tab-home .apps-scroll { display: none !important; }
+
+/* عناوين الأقسام في قاعدة منفصلة: لو لم يدعم متصفّح قديم ‎:has()‎ سقطت هذه
+   وحدها وبقي إخفاء البطاقات أعلاه سليماً. */
+body.hs-off-prayer  #tab-home .section-header:has(h3[data-i18n="prayer_times"]),
+body.hs-off-achieve #tab-home .section-header:has(h3[data-i18n="today_achievements"]),
+body.hs-off-tasks   #tab-home .section-header:has(h3[data-i18n="daily_tasks"]),
+body.hs-off-apps    #tab-home .section-header:has(h3[data-i18n="your_apps"]) { display: none !important; }
