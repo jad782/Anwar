@@ -553,6 +553,19 @@ function renderQiblaRoute(lat, lng, bearing){
     </svg>`;
 }
 
+// إحداثيات احتياطية عند تعذّر الـGPS: مدينة إعدادات المواقيت المختارة، وإلا إسطنبول
+function _qiblaFallbackCoords(){
+    try{
+        const cfg = window.PRAYERS && PRAYERS.getConfig ? PRAYERS.getConfig() : null;
+        if(cfg){
+            if(typeof cfg.lat === 'number' && typeof cfg.lng === 'number') return [cfg.lat, cfg.lng];
+            const c = (PRAYERS.CITIES || [])[cfg.cityIdx];
+            if(c) return [c.lat, c.lng];
+        }
+    }catch(e){}
+    return [41.0082, 28.9784];
+}
+
 window.openQibla = function() {
     document.getElementById('qibla-overlay').classList.add('active');
     // ثبّت رأس الشعاع على مركز البوصلة بعد أن تُرسم الشاشة
@@ -578,12 +591,22 @@ window.openQibla = function() {
             _fillQiblaPlace(pos.coords.latitude, pos.coords.longitude, pos.coords.altitude);
             // الاتجاه (الرقم) والخريطة صحيحان دائماً حتى لو تعذّرت البوصلة الحيّة
         }, () => {
-            // بدون موقع: استخدم إسطنبول كافتراضي
-            qiblaBearing = computeQiblaBearing(41.0082, 28.9784);
+            // بدون موقع: استخدم مدينة الإعدادات (أو إسطنبول) — ومع ذلك تُعرض المسافة والمواقيت
+            const c = _qiblaFallbackCoords();
+            qiblaBearing = computeQiblaBearing(c[0], c[1]);
             document.getElementById('qibla-degree').innerText = Math.round(qiblaBearing) + (currentLang==='en'?'° (approx)':'° (تقريبي)');
-            renderQiblaRoute(41.0082, 28.9784, qiblaBearing);
+            renderQiblaRoute(c[0], c[1], qiblaBearing);
+            _fillQiblaPlace(c[0], c[1], null);
         }, { timeout: 8000, maximumAge: 600000, enableHighAccuracy: false });
-    } else { qiblaBearing = computeQiblaBearing(41.0082, 28.9784); document.getElementById('qibla-degree').innerText = Math.round(qiblaBearing) + '°'; renderQiblaRoute(41.0082, 28.9784, qiblaBearing); }
+    } else {
+        const c = _qiblaFallbackCoords();
+        qiblaBearing = computeQiblaBearing(c[0], c[1]);
+        document.getElementById('qibla-degree').innerText = Math.round(qiblaBearing) + '°';
+        renderQiblaRoute(c[0], c[1], qiblaBearing);
+        _fillQiblaPlace(c[0], c[1], null);
+    }
+    // المواقيت والتواريخ تُعرض فوراً بلا انتظار الموقع
+    try{ _fillQiblaPrayers(); }catch(e){}
 
     // 2) تشغيل البوصلة:
     //    - لو توفّرت بوصلة أصليّة (إضافة الجهاز) نشغّلها مباشرة بلا زر إذن (تستعمل إذن الموقع الممنوح أصلاً).
@@ -783,7 +806,13 @@ function applyHeading(heading, acc) {
 
     // السهم المركزي والشعاع والكعبة: كلها تدور نحو زاوية القبلة، فتمسح مع حركة الجهاز
     const arrow = document.getElementById('compass-arrow');
-    if (arrow){ arrow.style.transform = `translate(-50%, -50%) rotate(${target}deg)`; arrow.classList.toggle('al', aligned); }
+    if (arrow){
+        arrow.style.transform = `translate(-50%, -50%) rotate(${target}deg)`;
+        arrow.classList.toggle('al', aligned);
+        // اللون بالجافاسكربت: بعض المحرّكات لا تطبّق قاعدة .aligned المتوارثة على polygon
+        const poly = arrow.querySelector('polygon');
+        if (poly) poly.style.fill = aligned ? '#34d399' : '';
+    }
     const beam = document.getElementById('qb-beam');
     if (beam){ beam.style.transform = `rotate(${target}deg)`; beam.classList.toggle('al', aligned); }
     // الكعبة تثبت على زاوية القبلة على الحلقة وتبقى منتصبة

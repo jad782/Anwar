@@ -2079,8 +2079,8 @@ body.light-mode .qb-track { stroke:rgba(138,100,16,0.2); }
     transition:transform .16s linear; will-change:transform;
 }
 .qb-beam svg { width:100%; height:100%; display:block; }
-/* المحتوى يبقى فوق الشعاع */
-.qb-screen > *:not(.qb-beamlayer) { position:relative; z-index:1; }
+/* المحتوى يبقى فوق الشعاع — بلا المساس بالعناصر المطلقة (زرّ الإغلاق) */
+.qb-screen > *:not(.qb-beamlayer):not(.qb-close) { position:relative; z-index:1; }
 
 /* علامة واجهة الهاتف: ثابتة أعلى الحلقة */
 .qb-notch {
