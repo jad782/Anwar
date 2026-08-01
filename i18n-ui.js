@@ -435,7 +435,7 @@ const UIT = {
   'الاهتزاز اللمسي':['Haptic feedback','Dokunsal titreşim'],
   'تعديل يدوي للأوقات (دقائق)':['Manual time adjustment (minutes)','Vakitleri elle ayarla (dakika)'],
   'استعادة الإعدادات الافتراضية':['Restore default settings','Varsayılan ayarları geri yükle'],
-  'تطبيق الأنوار · الإصدار 1.8.9':['Al-Anwar · Version 1.8.9','El-Envar · Sürüm 1.8.9'],
+  'تطبيق الأنوار · الإصدار 1.9.0':['Al-Anwar · Version 1.9.0','El-Envar · Sürüm 1.9.0'],
   'تذكير بسورة الكهف، والصلاة على النبي ﷺ، وسنن الجمعة.':['A reminder for Surah Al-Kahf, salah upon the Prophet ﷺ, and the Friday sunnahs.','Kehf sûresi, Peygamber’e ﷺ salât ve cuma sünnetleri için hatırlatma.'],
 
   // ——— قائمة السنن ———

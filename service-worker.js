@@ -1,5 +1,5 @@
 // Update Version 5
-const CACHE_NAME = 'anwar-cache-v182';
+const CACHE_NAME = 'anwar-cache-v184';
 
 const urlsToCache = [
   './',
