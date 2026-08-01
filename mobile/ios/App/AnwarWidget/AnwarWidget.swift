@@ -1,12 +1,17 @@
+// =======================================================
+//  AnwarWidget.swift — ودجت المحتوى اليومي + حزمة الودجتات
+//
+//  APP_GROUP والألوان انتقلت إلى AnwarTheme.swift (تُعرَّف مرّة واحدة).
+//  هذا الملف يحوي: بيانات المحتوى اليومي، وودجت الآية/الحديث،
+//  ونقطة الدخول @main التي تسجّل كل الودجتات.
+// =======================================================
+
 import WidgetKit
 import SwiftUI
 
-// ===== App Group + قراءة البيانات =====
-let APP_GROUP = "group.com.alanwar.quran.jad"
+// MARK: - المحتوى اليومي القادم من التطبيق عبر App Group
 
 struct AnwarData {
-    var nextPrayer = "—"
-    var nextPrayerTime = "--:--"
     var ayah = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
     var ayahRef = ""
     var hadith = ""
@@ -15,109 +20,109 @@ struct AnwarData {
 
 func loadAnwarData() -> AnwarData {
     var data = AnwarData()
-    let d = UserDefaults(suiteName: APP_GROUP)
-    guard let s = d?.string(forKey: "widgetData"),
+    guard let d = UserDefaults(suiteName: APP_GROUP),
+          let s = d.string(forKey: "widgetData"),
           let jd = s.data(using: .utf8),
-          let obj = try? JSONSerialization.jsonObject(with: jd) as? [String: Any] else { return data }
-    data.nextPrayer     = obj["nextPrayer"] as? String ?? data.nextPrayer
-    data.nextPrayerTime = obj["nextPrayerTime"] as? String ?? data.nextPrayerTime
-    data.ayah           = obj["ayah"] as? String ?? data.ayah
-    data.ayahRef        = obj["ayahRef"] as? String ?? data.ayahRef
-    data.hadith         = obj["hadith"] as? String ?? data.hadith
-    data.location       = obj["location"] as? String ?? data.location
+          let obj = (try? JSONSerialization.jsonObject(with: jd)) as? [String: Any]
+    else { return data }
+    if let v = obj["ayah"] as? String, !v.isEmpty { data.ayah = v }
+    if let v = obj["ayahRef"] as? String { data.ayahRef = v }
+    if let v = obj["hadith"] as? String { data.hadith = v }
+    if let v = obj["location"] as? String { data.location = v }
     return data
 }
 
-// ===== Timeline =====
-struct AnwarEntry: TimelineEntry { let date: Date; let data: AnwarData }
+// MARK: - ودجت الآية والحديث
+
+struct AnwarEntry: TimelineEntry {
+    let date: Date
+    let data: AnwarData
+}
 
 struct AnwarProvider: TimelineProvider {
-    func placeholder(in context: Context) -> AnwarEntry { AnwarEntry(date: Date(), data: AnwarData()) }
+    func placeholder(in context: Context) -> AnwarEntry {
+        AnwarEntry(date: Date(), data: AnwarData())
+    }
     func getSnapshot(in context: Context, completion: @escaping (AnwarEntry) -> Void) {
         completion(AnwarEntry(date: Date(), data: loadAnwarData()))
     }
     func getTimeline(in context: Context, completion: @escaping (Timeline<AnwarEntry>) -> Void) {
         let entry = AnwarEntry(date: Date(), data: loadAnwarData())
-        // حدّث كل ساعة
-        let next = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date().addingTimeInterval(3600)
+        // المحتوى يومي: أعد البناء عند منتصف الليل بدل كل ساعة
+        let cal = Calendar.current
+        let next = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: Date()))
+            ?? Date().addingTimeInterval(3600)
         completion(Timeline(entries: [entry], policy: .after(next)))
     }
 }
 
-// ===== ألوان الهوية (رملي ذهبي فخم على داكن) =====
-let GOLD = Color(red: 0.83, green: 0.66, blue: 0.26)
-let GOLD_LIGHT = Color(red: 0.95, green: 0.82, blue: 0.48)
-let DARK_BG = Color(red: 0.08, green: 0.07, blue: 0.04)
-let CREAM = Color(red: 0.95, green: 0.91, blue: 0.84)
-
-// ===== الواجهات حسب الحجم =====
-struct AnwarWidgetEntryView: View {
-    var entry: AnwarEntry
-    @Environment(\.widgetFamily) var family
+struct DailyContentView: View {
+    @Environment(\.colorScheme) private var scheme
+    @Environment(\.widgetFamily) private var family
+    let entry: AnwarEntry
 
     var body: some View {
-        ZStack {
-            LinearGradient(colors: [Color(red:0.14,green:0.11,blue:0.06), DARK_BG],
-                           startPoint: .topLeading, endPoint: .bottomTrailing)
-            switch family {
-            case .systemSmall:  smallView
-            default:            mediumView
+        VStack(alignment: .trailing, spacing: family == .systemSmall ? 5 : 8) {
+            HStack {
+                AnwarBadge(title: "آية اليوم")
+                Spacer()
             }
-        }
-    }
 
-    var smallView: some View {
-        VStack(alignment: .trailing, spacing: 6) {
-            HStack { Spacer(); Text("الأنوار").font(.caption2).foregroundColor(GOLD) }
-            Spacer()
-            Text("🕌 \(entry.data.nextPrayer)").font(.subheadline).bold().foregroundColor(CREAM)
-            Text(entry.data.nextPrayerTime).font(.title2).bold().foregroundColor(GOLD_LIGHT)
-            Spacer()
-            Text(entry.data.ayahRef).font(.caption2).foregroundColor(GOLD).lineLimit(1)
-        }
-        .padding(12).environment(\.layoutDirection, .rightToLeft)
-    }
+            Text(entry.data.ayah)
+                .font(.system(size: family == .systemSmall ? 13 : (family == .systemLarge ? 21 : 16),
+                              weight: .medium, design: .serif))
+                .foregroundStyle(T.text.c(scheme))
+                .multilineTextAlignment(.trailing)
+                .lineLimit(family == .systemSmall ? 4 : (family == .systemLarge ? 8 : 3))
+                .minimumScaleFactor(0.6)
+                .frame(maxWidth: .infinity, alignment: .trailing)
 
-    var mediumView: some View {
-        HStack(spacing: 12) {
-            // يسار: الصلاة القادمة
-            VStack(spacing: 4) {
-                Text("الصلاة القادمة").font(.caption2).foregroundColor(.secondary)
-                Text(entry.data.nextPrayer).font(.headline).foregroundColor(CREAM)
-                Text(entry.data.nextPrayerTime).font(.title).bold().foregroundColor(GOLD_LIGHT)
-                if !entry.data.location.isEmpty {
-                    Text("📍 \(entry.data.location)").font(.caption2).foregroundColor(.secondary).lineLimit(1)
-                }
-            }.frame(maxWidth: 120)
-            Rectangle().fill(GOLD.opacity(0.25)).frame(width: 1)
-            // يمين: آية اليوم
-            VStack(alignment: .trailing, spacing: 6) {
-                Text("✦ آية اليوم").font(.caption2).foregroundColor(GOLD)
-                Text(entry.data.ayah).font(.system(size: 16, weight: .medium, design: .serif))
-                    .foregroundColor(CREAM).multilineTextAlignment(.trailing).lineLimit(3).minimumScaleFactor(0.7)
-                Text(entry.data.ayahRef).font(.caption2).foregroundColor(GOLD)
-            }.frame(maxWidth: .infinity, alignment: .trailing)
+            if !entry.data.ayahRef.isEmpty {
+                Text(entry.data.ayahRef)
+                    .font(.system(size: family == .systemSmall ? 10 : 11, weight: .semibold))
+                    .foregroundStyle(T.accent.c(scheme))
+            }
+
+            if family == .systemLarge, !entry.data.hadith.isEmpty {
+                Divider().background(T.hair.c(scheme)).padding(.vertical, 2)
+                Text("حديث اليوم")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(T.accent.c(scheme))
+                Text(entry.data.hadith)
+                    .font(.system(size: 15, design: .serif))
+                    .foregroundStyle(T.soft.c(scheme))
+                    .multilineTextAlignment(.trailing)
+                    .lineLimit(6)
+                    .minimumScaleFactor(0.7)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+
+            Spacer(minLength: 0)
         }
-        .padding(14).environment(\.layoutDirection, .rightToLeft)
     }
 }
 
 struct AnwarWidget: Widget {
-    let kind = "AnwarWidget"
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: AnwarProvider()) { entry in
-            AnwarWidgetEntryView(entry: entry)
+        StaticConfiguration(kind: "AnwarWidget", provider: AnwarProvider()) { entry in
+            DailyContentView(entry: entry).anwarContainer()
         }
-        .configurationDisplayName("الأنوار")
-        .description("أوقات الصلاة وآية اليوم")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .configurationDisplayName("آية اليوم")
+        .description("آية وحديث يتجدّدان كل يوم.")
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
 
-// ===== حزمة الودجت (نقطة الدخول الوحيدة @main) =====
+// MARK: - نقطة الدخول الوحيدة
+
 @main
 struct AnwarWidgetBundle: WidgetBundle {
     var body: some Widget {
+        PrayerRingWidget()
+        PrayerTableWidget()
+        PrayerTimelineWidget()
+        TasbeehWidget()
+        AthkarWidget()
         AnwarWidget()
         AnwarWidgetLiveActivity()
     }
