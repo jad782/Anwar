@@ -82,7 +82,7 @@ MUSHAF.renderJuzList = function(){
 // =======================================================
 // قارئ الصفحة (سحب صفحة-صفحة)
 // =======================================================
-let curPage = 1, tajOn = false, _turnDir = 0, _scrollToSurah = null;
+let curPage = 1, tajOn = false, _scrollToSurah = null;
 const _origScroll = window.openFreeReading;     // القارئ التفصيلي القديم (للمزايا)
 window.openFreeReadingScroll = _origScroll;
 
@@ -126,6 +126,31 @@ window.openKhatmaPage = function(id, pageNum){
     MUSHAF.openPage(parseInt(pageNum)||1);
 };
 
+// يبني محتوى صفحةٍ ما بلا أي أثر جانبي — يُستعمل للصفحة المعروضة
+// وللصفحة المجاورة التي تنزلق أثناء السحب.
+function buildPage(page, tajMap){
+    const ayahs = QD().ayahs.filter(a=>a.p===page); if(!ayahs.length) return null;
+    // السورة الغالبة على الصفحة (الأكثر آيات) لعنوانها — يتجنّب إظهار اسم السورة السابقة
+    const _counts={}; ayahs.forEach(a=>_counts[a.s]=(_counts[a.s]||0)+1);
+    let mainS=ayahs[0].s, _best=0;
+    for(const s in _counts){ if(_counts[s]>_best){ _best=_counts[s]; mainS=+s; } }
+    let html=''; let curS=0;
+    ayahs.forEach(a=>{
+        // البانر والبسملة يظهران فقط عند بداية السورة فعلياً (آية ١)، لا عند استكمال سورة من صفحة سابقة
+        if (a.s !== curS){ curS=a.s; if (a.a===1){ html += banner(a.s); if(a.s!==1 && a.s!==9) html += `<div class="basmalah">${BAS}</div>`; } }
+        let raw = (tajMap && tajMap[a.g]!==undefined) ? parseTaj(tajMap[a.g]) : a.t;
+        // البسملة مضمّنة في نص أول آية بالبيانات، وهي معروضة كسطر مستقل — أزِلها من الآية لتجنّب التكرار
+        if (a.a===1 && a.s!==1 && a.s!==9) raw = stripBasmalah(raw);
+        html += `<div class="ayah" data-surah="${a.s}" data-ayah="${a.a}" data-global="${a.g}" onclick="onAyahTap(${a.s},${a.a},${a.g})" style="font-size:${cf()}px;">${raw} <span class="ayah-number">${toArabic(a.a)}</span></div>`;
+    });
+    const legend = (tajMap) ? `<div class="tajweed-legend"><span><b class="tj-madd">المدّ</b></span><span><b class="tj-ghunnah">الغنّة</b></span><span><b class="tj-qalqalah">القلقلة</b></span><span><b class="tj-ikhfa">الإخفاء</b></span><span><b class="tj-idgham">الإدغام</b></span><span><b class="tj-iqlab">الإقلاب</b></span></div>` : '';
+    return {
+        mainS, mainName: nameOf(mainS),
+        inner: `${legend}<div class="mushaf-page">${html}</div>`
+             + `<div class="mushaf-foot"><div class="mushaf-pageno">${toArabic(page)} · ${toArabic(604)}</div></div>`
+    };
+}
+
 async function renderPage(page){
     const cont = $('ayahs-container'); if(!cont) return;
     try{ if(window.AnwarFollow) AnwarFollow.stop(); }catch(e){}
@@ -136,26 +161,17 @@ async function renderPage(page){
         try { const d = await fetchOffline(`https://api.alquran.cloud/v1/page/${page}/quran-tajweed`); tajMap={}; (d.data.ayahs||[]).forEach(a=>tajMap[a.number]=a.text); }
         catch(e){ tajOn=false; const tb=$('msf-taj'); if(tb)tb.classList.remove('active'); }
     }
-    // السورة الغالبة على الصفحة (الأكثر آيات) لعنوان الصفحة — يتجنّب إظهار اسم السورة السابقة
-    const _counts={}; ayahs.forEach(a=>_counts[a.s]=(_counts[a.s]||0)+1);
-    let mainS=ayahs[0].s, _best=0;
-    for(const s in _counts){ if(_counts[s]>_best){ _best=_counts[s]; mainS=+s; } }
-    const mainName = nameOf(mainS);
+    const built = buildPage(page, tajMap);
+    if (!built) return;
+    const mainS = built.mainS, mainName = built.mainName;
     document.getElementById('current-surah-name').innerText = 'سورة ' + mainName;
-    let html=''; let curS=0;
-    ayahs.forEach(a=>{
-        // البانر والبسملة يظهران فقط عند بداية السورة فعلياً (آية ١)، لا عند استكمال سورة من صفحة سابقة
-        if (a.s !== curS){ curS=a.s; if (a.a===1){ html += banner(a.s); if(a.s!==1 && a.s!==9) html += `<div class="basmalah">${BAS}</div>`; } }
-        let raw = (tajMap && tajMap[a.g]!==undefined) ? parseTaj(tajMap[a.g]) : a.t;
-        // البسملة مضمّنة في نص أول آية بالبيانات، وهي معروضة كسطر مستقل — أزِلها من الآية لتجنّب التكرار
-        if (a.a===1 && a.s!==1 && a.s!==9) raw = stripBasmalah(raw);
-        html += `<div class="ayah" data-surah="${a.s}" data-ayah="${a.a}" data-global="${a.g}" onclick="onAyahTap(${a.s},${a.a},${a.g})" style="font-size:${cf()}px;">${raw} <span class="ayah-number">${toArabic(a.a)}</span></div>`;
-    });
-    const legend = tajOn ? `<div class="tajweed-legend"><span><b class="tj-madd">المدّ</b></span><span><b class="tj-ghunnah">الغنّة</b></span><span><b class="tj-qalqalah">القلقلة</b></span><span><b class="tj-ikhfa">الإخفاء</b></span><span><b class="tj-idgham">الإدغام</b></span><span><b class="tj-iqlab">الإقلاب</b></span></div>` : '';
-    cont.innerHTML = `${legend}<div class="mushaf-page">${html}</div>
-        <div class="mushaf-foot"><div class="mushaf-pageno">${toArabic(page)} · ${toArabic(604)}</div></div>`;
+    // الصفحة داخل مسار قابل للإزاحة كي تنزلق مع الإصبع (انظر initPager)
+    cont.innerHTML = `<div class="msf-track"><div class="msf-slide msf-cur">${built.inner}</div></div>`;
     if (typeof applyReadingBg==='function') applyReadingBg();
-    document.querySelector('.content-area').scrollTop = 0;
+    // المُمرِّر في وضع القراءة هو ‎#reading-view‎؛ تصفير ‎.content-area‎ وحدها
+    // كان بلا أثر، فتُقلَب الصفحة ويبقى القارئ نازلاً في وسطها.
+    try{ const rv=$('reading-view'); if(rv) rv.scrollTop = 0; }catch(e){}
+    const _ca=document.querySelector('.content-area'); if(_ca) _ca.scrollTop = 0;
     // عند فتح سورة تبدأ في وسط الصفحة (بعد نهاية السورة السابقة): انزل لبداية السورة المطلوبة وثبّت عنوانها
     if (_scrollToSurah){ const _ts=_scrollToSurah; _scrollToSurah=null;
         try{ const tEl=$('current-surah-name'); if(tEl) tEl.innerText='سورة '+nameOf(_ts); }catch(e){}
@@ -168,10 +184,9 @@ async function renderPage(page){
             rv.scrollTop += (br.top - rr.top) - off;
         }catch(e){} }, 60);
     }
-    const _pg = cont.querySelector('.mushaf-page');
-    if (_pg && _turnDir){ _pg.classList.add(_turnDir>0?'pg-turn-next':'pg-turn-prev'); _turnDir=0; }
+    // لا حركة إضافية هنا: الانزلاق نفسه هو الانتقال (كان pg-turn يتضاعف معه)
     window.CUR_READ = { type:'surah', num: mainS, name: mainName, page };
-    bindSwipe(cont);
+    initPager(cont);
     // تقدّم حلقة "إنجازات اليوم" عند القراءة
     try{ if(typeof updateAchievementState==='function') updateAchievementState('quran'); }catch(e){}
     // حفظ تقدّم الختمة النشطة عند تغيير الصفحة
@@ -180,9 +195,10 @@ async function renderPage(page){
     try{ if(window.AnwarDaily && AnwarDaily.markRead) AnwarDaily.markRead(); }catch(e){}
     if (window.PRO2 && PRO2.checkBadges) setTimeout(()=>PRO2.checkBadges(), 50);
 }
-// في المصحف: الصفحة التالية على اليسار (سحب لليسار)، والسابقة على اليمين
-MUSHAF.next = function(){ if(curPage<604){ _turnDir=1; curPage++; renderPage(curPage); if(window.HAP)HAP.light(); } };
-MUSHAF.prev = function(){ if(curPage>1){ _turnDir=-1; curPage--; renderPage(curPage); if(window.HAP)HAP.light(); } };
+// ترتيب المصحف عربيّ: الصفحة التالية تقع يسار الحالية، والسابقة يمينها.
+// فسحب الإصبع من اليسار إلى اليمين يجرّ التالية إلى الشاشة، والعكس بالعكس.
+MUSHAF.next = function(){ if(curPage<604) slideTo(curPage+1, +1); };
+MUSHAF.prev = function(){ if(curPage>1)   slideTo(curPage-1, -1); };
 MUSHAF.toggleTajweed = function(){ tajOn=!tajOn; const b=$('msf-taj'); if(b)b.classList.toggle('active',tajOn); renderPage(curPage); };
 MUSHAF.detailed = function(){ // افتح القارئ التفصيلي (صوت/ترجمة/تسجيل) للسورة الحالية
     const n = (window.CUR_READ&&window.CUR_READ.num)||1;
@@ -197,27 +213,163 @@ function banner(n){
     return `<div class="mushaf-banner" data-s="${n}"><span class="mb-orn">۞</span><div class="mb-mid"><h2>${m.name}</h2><span class="mb-sub">${type} · ${toArabic(m.count)} آية</span></div><span class="mb-orn">۞</span></div>`;
 }
 
-// السحب الأفقي (لمس + ماوس) + لمسة لإظهار/إخفاء القوائم
-let _sx=0, _sy=0, _st=0, _moved=false, _bound=null;
-function _endSwipe(cx,cy){
-    const dx=cx-_sx, dy=cy-_sy, dt=Date.now()-_st;
-    if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.4){ _moved=true; if(dx<0) MUSHAF.next(); else MUSHAF.prev(); return; }
-    // نقرة خفيفة على فراغ الصفحة (ليست على آية) → إظهار/إخفاء القوائم للقراءة الغامرة
-    if(dt<300 && Math.abs(dx)<12 && Math.abs(dy)<12){
-        const t=document.elementFromPoint(cx,cy);
-        if(t && !t.closest('.ayah') && !t.closest('button') && !t.closest('.mushaf-banner')){
-            document.body.classList.toggle('reading-immersive'); if(window.HAP)HAP.light();
+// =======================================================
+//  المُقلِّب: انزلاق أفقي مسطّح يتبع الإصبع ثم ينجذب للصفحة
+//
+//  المسار (.msf-track) هو ما يُزاح بـtranslate3d، والصفحة المجاورة
+//  توضع مطلقةً على يساره أو يمينه فتدخل معه. ارتفاع المسار يبقى ارتفاع
+//  الصفحة الحالية (المجاورة مطلقة) فلا يقفز الطول أثناء السحب.
+//
+//  الاتجاه عربيّ: التالية يسار الحالية. فسحبٌ من اليسار لليمين (dx>0)
+//  يزيح المحتوى يميناً فتدخل التالية من اليسار.
+//
+//  التمرير العمودي يبقى للـ.content-area: لا نعترض إلا بعد أن يتبيّن
+//  أن الإيماءة أفقية، وtouch-action:pan-y يترك العمودي للنظام.
+// =======================================================
+const SNAP_MS = 260, SNAP_EASE = 'cubic-bezier(0.22,0.61,0.36,1)';
+let _pagerEl=null, _track=null, _inc=null;
+let _px=0, _py=0, _pt=0, _dx=0, _axis=null, _dragging=false, _panned=false, _animating=false;
+
+function _vw(){ return (_pagerEl && _pagerEl.clientWidth) || window.innerWidth || 360; }
+function _canGo(dir){ return dir>0 ? curPage<604 : curPage>1; }
+
+function _setX(x, ms){
+    if(!_track) return;
+    _track.style.transition = ms ? `transform ${ms}ms ${SNAP_EASE}` : 'none';
+    _track.style.transform  = `translate3d(${x}px,0,0)`;
+}
+
+// يجهّز الصفحة المجاورة في الاتجاه المطلوب (تُبنى مرّة واحدة لكل إيماءة)
+function _mountIncoming(dir){
+    if(_inc && _inc._dir===dir) return;
+    if(_inc){ _inc.remove(); _inc=null; }
+    const p = curPage + (dir>0 ? 1 : -1);
+    const built = buildPage(p, null);           // بلا تجويد: يُطبَّق عند الاستقرار
+    if(!built) return;
+    _inc = document.createElement('div');
+    _inc.className = 'msf-slide msf-inc';
+    _inc.style.left = (dir>0 ? '-100%' : '100%');
+    // حاذِ رأس الجارة مع أعلى الشاشة لا مع أعلى المسار: لو كان القارئ
+    // نازلاً في وسط الصفحة لظهرت الجارة من وسطها أيضاً، وهي تبدأ من أوّلها
+    // بعد الاستقرار (renderPage يعيد التمرير للأعلى) فيحدث قفز.
+    // المُمرِّر في وضع القراءة هو ‎#reading-view‎ لا ‎.content-area‎
+    try{
+        const sc = $('reading-view');
+        if(sc){
+            const off = sc.getBoundingClientRect().top - _track.getBoundingClientRect().top;
+            _inc.style.top = Math.max(0, off) + 'px';
         }
+    }catch(e){}
+    _inc._dir = dir; _inc._page = p;
+    _inc.innerHTML = built.inner;
+    _track.appendChild(_inc);
+}
+
+function _release(){
+    _dragging=false; _axis=null;
+    if(!_track) return;
+    const w=_vw(), dir=_dx>0?1:-1, dist=Math.abs(_dx), dt=Math.max(1, Date.now()-_pt);
+    const speed = dist/dt;                       // بكسل/مللي ثانية
+    const commit = _canGo(dir) && _dx!==0 && (dist > w*0.25 || (speed > 0.45 && dist > 36));
+    if(commit){
+        _animating = true;
+        _setX(dir*w, SNAP_MS);
+        const target = curPage + dir;
+        setTimeout(()=>{ _animating=false; curPage=target; renderPage(target); if(window.HAP)HAP.light(); }, SNAP_MS);
+    } else {
+        _setX(0, SNAP_MS);
+        setTimeout(()=>{ if(_inc){ _inc.remove(); _inc=null; } }, SNAP_MS);
+    }
+    _dx=0;
+}
+
+function _move(cx, cy, ev){
+    if(!_dragging) return;
+    const dx=cx-_px, dy=cy-_py;
+    if(!_axis){
+        if(Math.abs(dx)<6 && Math.abs(dy)<6) return;       // لم تتبيّن الإيماءة بعد
+        _axis = Math.abs(dx) > Math.abs(dy)*1.2 ? 'x' : 'y';
+        if(_axis==='y'){ _dragging=false; return; }        // عمودي: اتركه للتمرير
+    }
+    if(ev && ev.cancelable) ev.preventDefault();           // أفقي: نحن نتولّاه
+    _panned = true;
+    const dir = dx>0 ? 1 : -1;
+    // مقاومة مطاطية عند الطرفين بدل التوقّف الميّت
+    _dx = _canGo(dir) ? dx : dx*0.28;
+    if(_canGo(dir)) _mountIncoming(dir);
+    _setX(_dx, 0);
+}
+
+function _tap(cx, cy, dt){
+    // نقرة خفيفة على فراغ الصفحة → إظهار/إخفاء القوائم للقراءة الغامرة
+    if(dt>=300) return;
+    const t=document.elementFromPoint(cx,cy);
+    if(t && !t.closest('.ayah') && !t.closest('button') && !t.closest('.mushaf-banner')){
+        document.body.classList.toggle('reading-immersive'); if(window.HAP)HAP.light();
     }
 }
-function bindSwipe(el){
-    if (_bound===el) return; _bound=el;
-    el.addEventListener('touchstart', e=>{ _sx=e.changedTouches[0].clientX; _sy=e.changedTouches[0].clientY; _st=Date.now(); }, {passive:true});
-    el.addEventListener('touchend', e=>{ _endSwipe(e.changedTouches[0].clientX, e.changedTouches[0].clientY); }, {passive:true});
+
+// انتقال مبرمَج (أزرار الشريط) بنفس حركة السحب.
+// لا نستعمل requestAnimationFrame هنا: قد لا تُطلَق في تبويب خامل أو
+// وضع توفير الطاقة، فيعلق _animating ويتوقّف التقليب نهائياً. قراءة
+// offsetWidth تفرض إعادة تخطيط فوريّة وهي كافية لتسجيل الجارة قبل الحركة.
+function slideTo(page, dir){
+    if(_animating || !_track) return;
+    _mountIncoming(dir);
+    if(!_inc) return;                 // لا صفحة في ذلك الاتجاه
+    _animating = true;
+    void _track.offsetWidth;
+    _setX(dir*_vw(), SNAP_MS);
+    setTimeout(()=>{ _animating=false; curPage=page; renderPage(page); if(window.HAP)HAP.light(); }, SNAP_MS);
+}
+
+function initPager(el){
+    _pagerEl = el;
+    _track = el.querySelector('.msf-track');
+    _inc = null; _dx=0; _axis=null; _dragging=false; _animating=false;
+    if(_track){ _track.style.transition='none'; _track.style.transform='translate3d(0,0,0)'; }
+    if(el._pagerBound) return; el._pagerBound = true;
+
+    el.addEventListener('touchstart', e=>{
+        if(_animating) return;
+        const t=e.changedTouches[0];
+        _px=t.clientX; _py=t.clientY; _pt=Date.now(); _dx=0; _axis=null; _dragging=true; _panned=false;
+    }, {passive:true});
+    el.addEventListener('touchmove', e=>{
+        const t=e.changedTouches[0]; _move(t.clientX, t.clientY, e);
+    }, {passive:false});
+    el.addEventListener('touchend', e=>{
+        const t=e.changedTouches[0], dt=Date.now()-_pt;
+        if(_axis==='x'){
+            // اعتمد موضع الإفلات نفسه: لو رجع الإصبع أدراجه قبل الرفع
+            // لكان آخر touchmove مضلّلاً فينتقل رغم عدوله.
+            const dx=t.clientX-_px, dir=dx>0?1:-1;
+            _dx = _canGo(dir) ? dx : dx*0.28;
+            _release();
+        }
+        else if(!_panned){ _tap(t.clientX, t.clientY, dt); }
+        _dragging=false; _axis=null;
+    }, {passive:true});
+    el.addEventListener('touchcancel', ()=>{ if(_axis==='x') _release(); _dragging=false; _axis=null; }, {passive:true});
+
     // دعم الماوس (للتجربة على سطح المكتب)
     let md=false;
-    el.addEventListener('mousedown', e=>{ md=true; _sx=e.clientX; _sy=e.clientY; _st=Date.now(); });
-    window.addEventListener('mouseup', e=>{ if(!md)return; md=false; _endSwipe(e.clientX, e.clientY); });
+    el.addEventListener('mousedown', e=>{
+        if(_animating) return;
+        md=true; _px=e.clientX; _py=e.clientY; _pt=Date.now(); _dx=0; _axis=null; _dragging=true; _panned=false;
+    });
+    window.addEventListener('mousemove', e=>{ if(md) _move(e.clientX, e.clientY, null); });
+    window.addEventListener('mouseup', e=>{
+        if(!md) return; md=false;
+        const dt=Date.now()-_pt;
+        if(_axis==='x'){ _release(); } else if(!_panned){ _tap(e.clientX, e.clientY, dt); }
+        _dragging=false; _axis=null;
+    });
+
+    // امنع فتح تفسير الآية إذا كانت الإيماءة سحباً لا نقرة
+    el.addEventListener('click', e=>{
+        if(_panned){ e.stopPropagation(); e.preventDefault(); _panned=false; }
+    }, true);
 }
 
 // استبدال فتح القراءة: السور والأجزاء تفتح وضع الصفحة

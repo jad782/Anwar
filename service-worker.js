@@ -1,5 +1,5 @@
 // Update Version 5
-const CACHE_NAME = 'anwar-cache-v184';
+const CACHE_NAME = 'anwar-cache-v186';
 
 const urlsToCache = [
   './',
@@ -21,7 +21,7 @@ const urlsToCache = [
   './f-tajawal-latin-500.woff2',
   './f-tajawal-latin-700.woff2',
   './f-tajawal-latin-800.woff2',
-  './style.css?v=104',
+  './style.css?v=105',
   './i18n-tr.js?v=1',
   './i18n-auto.js?v=1',
   './i18n-ui.js?v=15',
@@ -50,7 +50,7 @@ const urlsToCache = [
   './update.js?v=9',
   './sunan.js?v=1',
   './zakat.js?v=4',
-  './mushaf.js?v=14',
+  './mushaf.js?v=16',
   './daily.js?v=2',
   './guide.js?v=2',
   './ambient.js?v=1',

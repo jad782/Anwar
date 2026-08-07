@@ -2223,3 +2223,19 @@ body.hs-off-prayer  #tab-home .section-header:has(h3[data-i18n="prayer_times"]),
 body.hs-off-achieve #tab-home .section-header:has(h3[data-i18n="today_achievements"]),
 body.hs-off-tasks   #tab-home .section-header:has(h3[data-i18n="daily_tasks"]),
 body.hs-off-apps    #tab-home .section-header:has(h3[data-i18n="your_apps"]) { display: none !important; }
+
+/* ==========================================================================
+   مُقلِّب المصحف: انزلاق أفقي مسطّح يتبع الإصبع
+   المسار وحده يُزاح، والصفحة المجاورة مطلقةٌ بجانبه فلا يتغيّر ارتفاع
+   الحاوية أثناء السحب. pan-y يترك التمرير العمودي للنظام كي يبقى ناعماً.
+   ========================================================================== */
+#ayahs-container { overflow-x: clip; touch-action: pan-y; }
+.msf-track { position: relative; will-change: transform; transform: translate3d(0,0,0); }
+.msf-slide { width: 100%; }
+.msf-slide.msf-inc { position: absolute; top: 0; width: 100%; }
+
+/* الحركة القديمة (قفزة عند تغيّر الصفحة) لم تعد تُستعمل: الانزلاق بديلها.
+   تُركت القواعد لأن keyframes نفسها يستعملها غير المصحف. */
+@media (prefers-reduced-motion: reduce) {
+    .msf-track { transition: none !important; }
+}
