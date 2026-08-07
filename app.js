@@ -671,6 +671,7 @@ window.addEventListener('orientationchange', function(){
 // السبب: بعض المحرّكات لا تُحدّث القيم المحسوبة لـ var(--accent-color) على عناصر
 // أُنشئت قبل تبديل الثيم، فيبقى الإبراز بلون الثيم القديم. الضبط المباشر يحسم الأمر.
 function _paintQiblaTheme(){
+    _qbCol = null;      // أبطِل الألوان المخزّنة: الثيم قد يكون تبدّل
     const host = document.getElementById('qb-screen'); if(!host) return;
     const cs = getComputedStyle(document.body);
     const acc  = (cs.getPropertyValue('--accent-color') || '').trim();
@@ -784,7 +785,8 @@ let _absCompass = false;   // هل مصدر بوصلة الويب منسوب ل�
 let _compassWatch = null;  // معرّف مراقبة البوصلة الأصليّة (cordova-plugin-device-orientation)
 let _webCompassBound = false;
 function startCompass() {
-    _smoothHeading = null;
+    _smoothHeading = null; _rawHeading = null; _rawAcc = null; _qbCol = null; _lastFrameWall = 0;
+    _lastPaint = { target:null, aligned:null, turn:'', deg:'', arc:null, mag:null };
     if (_orientationBound) return;
     _orientationBound = true;
     // (1) الأفضل: بوصلة أصليّة (نفس مصدر التطبيقات النظاميّة) — trueHeading من CoreLocation مباشرة.
@@ -814,6 +816,7 @@ window.closeQibla = function() {
     window.removeEventListener('deviceorientation', handleOrientation, true);
     if (_compassWatch !== null && navigator.compass && navigator.compass.clearWatch) { try{ navigator.compass.clearWatch(_compassWatch); }catch(e){} }
     _compassWatch = null; _webCompassBound = false; _orientationBound = false;
+    _stopCompassLoop(); _rawHeading = null;      // لا تُبقِ حلقة رسم بعد إغلاق الشاشة
 }
 
 let _smoothHeading = null, _headVel = 0, _wasAligned = false, _lastPulse = 0; // حركة نابضة + توجيه لمسي
@@ -842,75 +845,189 @@ function handleOrientation(e) {
     applyHeading(heading, e.webkitCompassAccuracy);
 }
 
-// يطبّق اتجاه البوصلة (من أي مصدر: أصليّ أو ويب) على الإبرة والقرص — القلب المشترك
+// =====================================
+//  البوصلة: الحسّاس معزول عن الرسم
+//
+//  كان التنعيم يجري داخل حدث الحسّاس نفسه، وحدث deviceorientation يصل
+//  بمعدّل غير منتظم (دفعات، ثم تباطؤ). فكانت الخطوة الزاويّة ثابتة لكل
+//  حدث لا لكل وحدة زمن، فتتذبذب السرعة المرئيّة = تقطيع. وقد تصل عدّة
+//  أحداث داخل إطار عرض واحد فتُهدر كتاباتٌ على DOM، أو يمرّ إطار بلا حدث
+//  فتتجمّد الحركة.
+//
+//  الآن: الحسّاس يُرشَّح ويُخزَّن فقط (بلا لمس DOM)، وحلقة rAF تُقرّب
+//  الزاوية المعروضة نحوه بثابت زمنيّ مستقلّ عن معدّل الإطارات، وتكتب
+//  على DOM مرّةً واحدة في الإطار وعند التغيّر فقط.
+// =====================================
+// ثابتان يضبطان الإحساس. المرشّحان متتاليان فيتجمّع أثرهما:
+//   _LP_ALPHA أصغر = تنعيم أكثر وتأخّر أكثر.
+//   _TAU      أكبر  = حركة أكسل وأنعم.
+// القيم الحالية: ~63% من المسافة خلال 100ms و~86% خلال 200ms.
+const _LP_ALPHA = 0.40;   // شدّة الترشيح المنخفض على القراءة الخام
+const _LP_DEAD  = 0.30;   // منطقة ميتة (درجات) تبتلع رعشة اليد
+const _TAU      = 0.065;  // ثابت زمنيّ للتقريب الأسّي
+
+let _rawHeading = null, _rawAcc = null;
+let _compassRAF = null, _lastFrameT = 0, _idleFrames = 0, _lastFrameWall = 0;
+let _qbCol = null;                                   // ألوان الثيم مُخزّنة
+let _lastPaint = { target:null, aligned:null, turn:'', deg:'', arc:null, mag:null };
+
+function _qbColors(){
+    if (_qbCol) return _qbCol;
+    const cs = getComputedStyle(document.getElementById('qb-screen') || document.body);
+    _qbCol = {
+        acc:  (cs.getPropertyValue('--accent-color') || '').trim(),
+        accL: (cs.getPropertyValue('--accent-light') || '').trim()
+    };
+    return _qbCol;
+}
+// يُستدعى عند تبديل الثيم كي تُقرأ الألوان من جديد بدل قراءتها كل إطار
+window._qbInvalidateColors = function(){ _qbCol = null; };
+
+// مدخل القراءات: يرشّح ويخزّن فقط. لا DOM هنا إطلاقاً.
 function applyHeading(heading, acc) {
     if (qiblaBearing === null) return;
+    if (typeof acc === 'number') _rawAcc = acc;
+
+    if (_rawHeading === null) { _rawHeading = heading; _smoothHeading = heading; }
+    else {
+        // ترشيح منخفض التمرير بأقصر مسار زاوي
+        let d = ((heading - _rawHeading + 540) % 360) - 180;
+        if (Math.abs(d) < _LP_DEAD) d = 0;               // تشويش لا حركة
+        _rawHeading = (_rawHeading + d * _LP_ALPHA + 360) % 360;
+    }
+    _idleFrames = 0;
+    _startCompassLoop();
+
+    // شبكة أمان: rAF لا تُطلَق إن لم يركّب المتصفّح إطارات. لو تدفّقت
+    // القراءات ولم يصل إطارٌ خلال 400ms لتجمّدت البوصلة تماماً — وهو أسوأ
+    // من التقطيع. نرسم عندئذٍ من الحدث مباشرةً كما كان سابقاً.
+    const now = Date.now();
+    if (!_lastFrameWall) _lastFrameWall = now;
+    else if (now - _lastFrameWall > 400){
+        _smoothHeading = _rawHeading;
+        _renderCompass(_smoothHeading);
+        _lastFrameWall = now;
+    }
+}
+
+function _startCompassLoop(){
+    if (_compassRAF !== null) return;
+    _lastFrameT = 0;
+    _compassRAF = requestAnimationFrame(_compassFrame);
+}
+function _stopCompassLoop(){
+    if (_compassRAF !== null) cancelAnimationFrame(_compassRAF);
+    _compassRAF = null;
+}
+
+function _compassFrame(ts){
+    if (_rawHeading === null || qiblaBearing === null){ _compassRAF = null; return; }
+    const dt = _lastFrameT ? Math.min(0.05, (ts - _lastFrameT) / 1000) : 0.016;
+    _lastFrameT = ts; _lastFrameWall = Date.now();
+
+    // تقريب أسّي نحو الهدف: مستقلّ عن معدّل الإطارات ولا يتجاوز الهدف
+    // (الزنبرك النابض يتجاوز ثم يعود، وهو إحساس خاطئ في بوصلة).
+    let diff = ((_rawHeading - _smoothHeading + 540) % 360) - 180;
+    const k = 1 - Math.exp(-dt / _TAU);
+    if (Math.abs(diff) < 0.02) _smoothHeading = _rawHeading;
+    else _smoothHeading = (_smoothHeading + diff * k + 360) % 360;
+
+    const moved = Math.abs(diff) >= 0.02;
+    const changed = _renderCompass(_smoothHeading);
+
+    // أوقف الحلقة بعد سكونٍ قصير: البوصلة الساكنة لا تستحقّ إيقاظ الرسم
+    _idleFrames = (moved || changed) ? 0 : _idleFrames + 1;
+    if (_idleFrames > 40){ _compassRAF = null; return; }
+    _compassRAF = requestAnimationFrame(_compassFrame);
+}
+
+// يكتب على DOM: مرّة في الإطار، وعند التغيّر فقط. يُرجع true إن كتب شيئاً.
+function _renderCompass(h) {
+    let wrote = false;
 
     // كاشف التشويش المغناطيسي: دقّة سالبة أو عالية = تداخل
     const magWarn = document.getElementById('qibla-magwarn');
-    if (magWarn && typeof acc === 'number') magWarn.style.display = (acc < 0 || acc > 25) ? 'flex' : 'none';
-
-    // حركة نابضة (Spring) بأقصر مسار زاوي — سلاسة بلا رجّة
-    if (_smoothHeading === null){ _smoothHeading = heading; _headVel = 0; }
-    else {
-        let diff = ((heading - _smoothHeading + 540) % 360) - 180; // [-180,180]
-        _headVel = _headVel * 0.62 + diff * 0.22;                  // زنبرك مخمّد
-        if (Math.abs(diff) < 0.25 && Math.abs(_headVel) < 0.05) _headVel = 0;
-        _smoothHeading = (_smoothHeading + _headVel + 360) % 360;
+    if (magWarn && typeof _rawAcc === 'number'){
+        const show = (_rawAcc < 0 || _rawAcc > 25) ? 'flex' : 'none';
+        if (_lastPaint.mag !== show){ magWarn.style.display = show; _lastPaint.mag = show; wrote = true; }
     }
-    const h = _smoothHeading;
     // زاوية القبلة على الشاشة (موضع الكعبة بالنسبة لأعلى الهاتف)
     const target = (qiblaBearing - h + 360) % 360;
     const delta  = ((target + 180) % 360) - 180;   // [-180,180] موجب = القبلة يميناً
-    const aligned = Math.abs(delta) <= 2;          // هامش ±٢ درجة
+    // تخلّف (Hysteresis): يدخل التطابق عند ٢° ولا يخرج إلا بعد ٣°.
+    // بعتبة واحدة كانت الحالة تتذبذب على الحافة فيُعاد الطلاء مراراً —
+    // وهذا يقع بالضبط لحظة محاولة المستخدم الاصطفاف.
+    const ad = Math.abs(delta);
+    const aligned = _wasAligned ? (ad <= 3) : (ad <= 2);
 
-    // السهم المركزي والشعاع والكعبة: كلها تدور نحو زاوية القبلة، فتمسح مع حركة الجهاز
-    const arrow = document.getElementById('compass-arrow');
-    if (arrow){
-        arrow.style.transform = `translate(-50%, -50%) rotate(${target}deg)`;
-        arrow.classList.toggle('al', aligned);
-        // اللون بالجافاسكربت من متغيّرات الثيم: بعض المحرّكات لا تطبّق قاعدة .aligned
-        // المتوارثة على polygon داخل SVG. النبرة الفاتحة للتطابق والأساسية لغيره.
-        const poly = arrow.querySelector('polygon');
-        if (poly){
-            const cs = getComputedStyle(document.getElementById('qb-screen') || document.body);
-            const c = (aligned ? cs.getPropertyValue('--accent-light') : cs.getPropertyValue('--accent-color')).trim();
-            if (c) poly.style.fill = c;
+    // اكتب التحويلات عند تغيّر محسوس فقط (عُشر درجة)
+    const tq = Math.round(target * 10) / 10;
+    const angMoved = (_lastPaint.target === null) || Math.abs(tq - _lastPaint.target) >= 0.1;
+    const alChanged = (_lastPaint.aligned !== aligned);
+
+    if (angMoved || alChanged){
+        wrote = true;
+        // السهم المركزي والشعاع والكعبة: كلها تدور نحو زاوية القبلة فتمسح مع حركة الجهاز
+        const arrow = document.getElementById('compass-arrow');
+        if (arrow){
+            if (angMoved) arrow.style.transform = `translate(-50%, -50%) rotate(${target}deg)`;
+            if (alChanged){
+                arrow.classList.toggle('al', aligned);
+                // اللون من الثيم صراحةً: بعض المحرّكات لا تطبّق قاعدة .aligned
+                // المتوارثة على polygon داخل SVG. مُخزّن كي لا نقرأ الأنماط كل إطار.
+                const poly = arrow.querySelector('polygon');
+                if (poly){
+                    const c = aligned ? _qbColors().accL : _qbColors().acc;
+                    if (c) poly.style.fill = c;
+                }
+            }
         }
+        const beam = document.getElementById('qb-beam');
+        if (beam){
+            if (angMoved){ _qbBeamA = target; beam.style.transform = _qbBeamTransform(target); }
+            if (alChanged) beam.classList.toggle('al', aligned);
+        }
+        // الكعبة تثبت على زاوية القبلة على الحلقة وتبقى منتصبة
+        const kaaba = document.getElementById('qibla-top-pointer');
+        if (kaaba){
+            if (angMoved) kaaba.style.transform = `translate(-50%,-50%) rotate(${target}deg) translateY(-120px) rotate(${-target}deg)`;
+            if (alChanged) kaaba.classList.toggle('al', aligned);
+        }
+        _lastPaint.target = tq;
     }
-    const beam = document.getElementById('qb-beam');
-    if (beam){ _qbBeamA = target; beam.style.transform = _qbBeamTransform(target); beam.classList.toggle('al', aligned); }
-    // الكعبة تثبت على زاوية القبلة على الحلقة وتبقى منتصبة
-    const kaaba = document.getElementById('qibla-top-pointer');
-    if (kaaba){
-        kaaba.style.transform = `translate(-50%,-50%) rotate(${target}deg) translateY(-120px) rotate(${-target}deg)`;
-        kaaba.classList.toggle('al', aligned);
+
+    if (alChanged){
+        const notch = document.getElementById('qb-notch');
+        if (notch) notch.classList.toggle('al', aligned);
+        const screen_ = document.getElementById('qb-screen');
+        if (screen_) screen_.classList.toggle('aligned', aligned);
+        // أعِد طلاء العناصر بنبرة الثيم المناسبة — نادرٌ الآن بفضل التخلّف
+        try{ _paintQiblaTheme(); }catch(e){}
+        _lastPaint.aligned = aligned;
     }
-    // علامة واجهة الهاتف (ثابتة أعلى الحلقة) تتوهّج عند التطابق
-    const notch = document.getElementById('qb-notch');
-    if (notch) notch.classList.toggle('al', aligned);
-    const screen_ = document.getElementById('qb-screen');
-    if (screen_) screen_.classList.toggle('aligned', aligned);
-    // عند تغيّر حالة التطابق: أعِد طلاء العناصر بنبرة الثيم المناسبة (فاتحة/أساسية)
-    if (_wasAligned !== aligned) { try{ _paintQiblaTheme(); }catch(e){} }
 
     // قوس يمثّل الفرق الزاوي المتبقّي (بأقصر مسار) من الأعلى إلى الكعبة
     const arc = document.getElementById('qb-arc');
     if (arc){
-        const C = 2 * Math.PI * 120;                  // محيط الحلقة (r=120)
-        const span = Math.abs(delta);
-        arc.style.strokeDasharray = C;
-        arc.style.strokeDashoffset = C - (C * span / 360);
-        arc.style.transform = (delta >= 0) ? 'rotate(-90deg)' : `rotate(${-90 - span}deg)`;
+        const span = Math.round(Math.abs(delta) * 10) / 10;
+        if (_lastPaint.arc === null || Math.abs(span - _lastPaint.arc) >= 0.1 || alChanged){
+            const C = 2 * Math.PI * 120;              // محيط الحلقة (r=120)
+            arc.style.strokeDasharray = C;
+            arc.style.strokeDashoffset = C - (C * span / 360);
+            arc.style.transform = (delta >= 0) ? 'rotate(-90deg)' : `rotate(${-90 - span}deg)`;
+            _lastPaint.arc = span; wrote = true;
+        }
     }
     // إرشاد الالتفاف حسب إشارة الفرق الزاوي
     const turn = document.getElementById('qb-turn');
     if (turn){
         const en = (currentLang === 'en'), tk = (currentLang === 'tr');
-        if (aligned)      turn.innerText = en ? 'Facing the Qibla' : tk ? 'Kıbleye dönüksün' : 'استقبال القبلة';
-        else if (delta > 0) turn.innerText = en ? 'Turn right' : tk ? 'Sağa dön' : 'انعطف يميناً';
-        else                turn.innerText = en ? 'Turn left'  : tk ? 'Sola dön' : 'انعطف يساراً';
-        turn.classList.toggle('al', aligned);
+        let txt;
+        if (aligned)        txt = en ? 'Facing the Qibla' : tk ? 'Kıbleye dönüksün' : 'استقبال القبلة';
+        else if (delta > 0) txt = en ? 'Turn right' : tk ? 'Sağa dön' : 'انعطف يميناً';
+        else                txt = en ? 'Turn left'  : tk ? 'Sola dön' : 'انعطف يساراً';
+        if (_lastPaint.turn !== txt){ turn.innerText = txt; _lastPaint.turn = txt; wrote = true; }
+        if (alChanged) turn.classList.toggle('al', aligned);
     }
 
     // توجيه بالاهتزاز اللمسي: نبضات تتسارع كلما اقتربت، ونبضة قوية عند التطابق
@@ -925,13 +1042,25 @@ function applyHeading(heading, acc) {
     }
     _wasAligned = aligned;
 
-    const deg = document.getElementById('qibla-degree');
-    if (deg) deg.innerText = Math.round(qiblaBearing) + '°' + (aligned ? ' ✓' : '');
+    // رقم الاتجاه ثابت (زاوية القبلة لا تتغيّر مع دوران الجهاز)، فكتابته
+    // كل إطار كانت إعادة تخطيط بلا فائدة. يُكتب عند تغيّر النصّ فقط.
+    const degTxt = Math.round(qiblaBearing) + '°' + (aligned ? ' ✓' : '');
+    if (_lastPaint.deg !== degTxt){
+        const deg = document.getElementById('qibla-degree');
+        if (deg) deg.innerText = degTxt;
+        const arDeg = document.getElementById('ar-deg');
+        if (arDeg) arDeg.innerText = Math.round(qiblaBearing) + '° • ' + (aligned ? (currentLang==='en'?'Aligned ✓':'محاذاة ✓') : (currentLang==='en'?'Turn the phone':'أدر الهاتف'));
+        _lastPaint.deg = degTxt; wrote = true;
+    }
     // بوصلة الكاميرا (AR): السهم يشير لاتجاه القبلة
-    const arArrow = document.getElementById('ar-arrow');
-    if (arArrow){ arArrow.style.transform = `rotate(${target}deg)`; arArrow.style.filter = aligned ? 'drop-shadow(0 0 12px #22c55e)' : 'none'; }
-    const arDeg = document.getElementById('ar-deg');
-    if (arDeg) arDeg.innerText = Math.round(qiblaBearing) + '° • ' + (aligned ? (currentLang==='en'?'Aligned ✓':'محاذاة ✓') : (currentLang==='en'?'Turn the phone':'أدر الهاتف'));
+    if (angMoved || alChanged){
+        const arArrow = document.getElementById('ar-arrow');
+        if (arArrow){
+            if (angMoved) arArrow.style.transform = `rotate(${target}deg)`;
+            if (alChanged) arArrow.style.filter = aligned ? 'drop-shadow(0 0 12px #22c55e)' : 'none';
+        }
+    }
+    return wrote;
 }
 
 // =====================================
