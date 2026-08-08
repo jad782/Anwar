@@ -208,35 +208,48 @@ struct TasbeehWidget: Widget {
     }
 }
 
-// MARK: - ٢) الأذكار المتبدّلة
+// MARK: - ٢) الأدعية والأذكار — الضغط على الودجت يبدّل الدعاء
 
 struct Dhikr {
     let text: String
-    let source: String
+    let cat: String
+    let info: String
 }
 
 enum AthkarBank {
-    /// أذكار مختصرة ثابتة داخل الودجت كي يعمل بلا التطبيق وبلا شبكة
-    static let items: [Dhikr] = [
-        Dhikr(text: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ، سُبْحَانَ اللَّهِ الْعَظِيمِ", source: "متفق عليه"),
-        Dhikr(text: "لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ", source: "متفق عليه"),
-        Dhikr(text: "اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى نَبِيِّنَا مُحَمَّدٍ", source: "من السنّة"),
-        Dhikr(text: "أَسْتَغْفِرُ اللَّهَ الَّذِي لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ وَأَتُوبُ إِلَيْهِ", source: "أبو داود"),
-        Dhikr(text: "حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ", source: "أبو داود"),
-        Dhikr(text: "لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ", source: "متفق عليه"),
-        Dhikr(text: "رَبِّ اغْفِرْ لِي وَتُبْ عَلَيَّ إِنَّكَ أَنْتَ التَّوَّابُ الرَّحِيمُ", source: "أبو داود"),
-        Dhikr(text: "اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ", source: "أبو داود"),
-        Dhikr(text: "سُبْحَانَ اللَّهِ، وَالْحَمْدُ لِلَّهِ، وَلَا إِلَهَ إِلَّا اللَّهُ، وَاللَّهُ أَكْبَرُ", source: "مسلم"),
-        Dhikr(text: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ", source: "ابن ماجه"),
-        Dhikr(text: "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ", source: "الترمذي"),
-        Dhikr(text: "رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ ﷺ نَبِيًّا", source: "أبو داود")
+
+    /// تُقرأ من duas.json المُشتَقّ آلياً من مكتبة التطبيق (mobile/gen-duas.js).
+    /// النصّ الشرعي له مصدر واحد مُراجَع: لو كُتب في Swift مرّةً وفي الويب
+    /// مرّةً لتفرّقا مع الوقت، وخطأٌ في دعاء أو في نسبته ضررٌ حقيقيّ.
+    static let items: [Dhikr] = load()
+
+    private static func load() -> [Dhikr] {
+        guard let url = Bundle.main.url(forResource: "duas", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let arr = (try? JSONSerialization.jsonObject(with: data)) as? [[String: Any]]
+        else { return fallback }
+        let parsed = arr.compactMap { o -> Dhikr? in
+            guard let t = o["text"] as? String, !t.isEmpty else { return nil }
+            return Dhikr(text: t,
+                         cat:  (o["cat"]  as? String) ?? "",
+                         info: (o["info"] as? String) ?? "")
+        }
+        return parsed.isEmpty ? fallback : parsed
+    }
+
+    /// لا يُفترض أن يُستعمل — لكن ودجت فارغة أسوأ من ودجت بذكرٍ واحد
+    private static let fallback: [Dhikr] = [
+        Dhikr(text: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ، سُبْحَانَ اللَّهِ الْعَظِيمِ", cat: "", info: "متفق عليه")
     ]
 
-    /// يجمع دوران الوقت (كل ساعتين) مع تبديل المستخدم اليدوي
+    /// يجمع دوران الوقت (كل ساعتين) مع تبديل المستخدم اليدوي.
+    /// الخلط بمضاعف أوّليّ يجعل التتابع غير متوقّع فلا يبدو دورةً مكرّرة.
     static func current(at date: Date) -> Dhikr {
+        let n = items.count
+        guard n > 0 else { return fallback[0] }
         let manual = UserDefaults(suiteName: APP_GROUP)?.integer(forKey: "athkarIndex") ?? 0
         let slot = Int(date.timeIntervalSince1970 / 7200)
-        let i = ((slot + manual) % items.count + items.count) % items.count
+        let i = ((slot + manual * 7) % n + n) % n
         return items[i]
     }
 }
@@ -248,7 +261,7 @@ struct AthkarEntry: TimelineEntry {
 
 struct AthkarProvider: TimelineProvider {
     func placeholder(in context: Context) -> AthkarEntry {
-        AthkarEntry(date: Date(), dhikr: AthkarBank.items[0])
+        AthkarEntry(date: Date(), dhikr: AthkarBank.current(at: Date()))
     }
     func getSnapshot(in context: Context, completion: @escaping (AthkarEntry) -> Void) {
         completion(AthkarEntry(date: Date(), dhikr: AthkarBank.current(at: Date())))
@@ -267,37 +280,60 @@ struct AthkarProvider: TimelineProvider {
 
 struct AthkarView: View {
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.widgetFamily) private var family
     let entry: AthkarEntry
 
-    var body: some View {
-        VStack(alignment: .trailing, spacing: 8) {
-            HStack {
-                AnwarBadge(title: "ذكر")
-                Spacer()
-                Button(intent: AthkarNextIntent()) {
-                    Image(systemName: "arrow.triangle.2.circlepath")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(T.accent.c(scheme))
-                        .padding(7)
-                        .background(Circle().fill(T.accent.c(scheme).opacity(0.14)))
-                }
-                .buttonStyle(.plain)
-            }
-
-            Text(entry.dhikr.text)
-                .font(.system(size: 16, weight: .medium, design: .serif))
-                .foregroundStyle(T.text.c(scheme))
-                .multilineTextAlignment(.trailing)
-                .lineLimit(4)
-                .minimumScaleFactor(0.65)
-                .frame(maxWidth: .infinity, alignment: .trailing)
-
-            Spacer(minLength: 0)
-
-            Text(entry.dhikr.source)
-                .font(.system(size: 10))
-                .foregroundStyle(T.soft.c(scheme))
+    private var textSize: CGFloat {
+        switch family {
+        case .systemSmall:  return 12
+        case .systemLarge:  return 19
+        default:            return 15.5
         }
+    }
+    private var lines: Int {
+        switch family {
+        case .systemSmall:  return 5
+        case .systemLarge:  return 11
+        default:            return 4
+        }
+    }
+
+    var body: some View {
+        // الودجت كلّه زرّ واحد: ضغطةٌ في أي مكان تبدّل الدعاء بلا فتح التطبيق
+        Button(intent: AthkarNextIntent()) {
+            VStack(alignment: .trailing, spacing: 6) {
+                HStack(spacing: 5) {
+                    AnwarBadge(title: entry.dhikr.cat.isEmpty ? "ذكر" : entry.dhikr.cat)
+                    Spacer(minLength: 0)
+                    // إشارة إلى أن الودجت قابل للضغط
+                    Image(systemName: "hand.tap.fill")
+                        .font(.system(size: 10))
+                        .foregroundStyle(T.soft.c(scheme).opacity(0.55))
+                }
+
+                Text(entry.dhikr.text)
+                    .font(.system(size: textSize, weight: .medium, design: .serif))
+                    .foregroundStyle(T.text.c(scheme))
+                    .multilineTextAlignment(.trailing)
+                    .lineLimit(lines)
+                    .minimumScaleFactor(0.55)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+
+                Spacer(minLength: 0)
+
+                if !entry.dhikr.info.isEmpty && family != .systemSmall {
+                    Text(entry.dhikr.info)
+                        .font(.system(size: 9.5))
+                        .foregroundStyle(T.soft.c(scheme))
+                        .multilineTextAlignment(.trailing)
+                        .lineLimit(family == .systemLarge ? 3 : 1)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -306,8 +342,8 @@ struct AthkarWidget: Widget {
         StaticConfiguration(kind: "AnwarAthkar", provider: AthkarProvider()) { entry in
             AthkarView(entry: entry).anwarContainer()
         }
-        .configurationDisplayName("أذكار")
-        .description("ذكر يتبدّل تلقائياً، وزرّ لتبديله متى شئت.")
-        .supportedFamilies([.systemMedium])
+        .configurationDisplayName("أدعية وأذكار")
+        .description("اضغط الودجت ليتبدّل الدعاء — بلا فتح التطبيق.")
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }

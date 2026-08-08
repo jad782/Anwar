@@ -46,6 +46,9 @@ workflows:
         script: |
           cd mobile
           node gen-icons.js || true
+          # يُشتَقّ duas.json من مكتبة features.js كي لا تتفرّق نصوص الودجت
+          # عن نصوص التطبيق. ‎|| true‎ لأن الملف المُودَع يكفي لو تعذّر التوليد.
+          node gen-duas.js || true
           node copy-web.js
 
       - name: Sync Capacitor iOS project
@@ -154,7 +157,7 @@ workflows:
           BUILD_NUMBER=$((LATEST_BUILD + 1))
 
           $P -c "Set :CFBundleVersion $BUILD_NUMBER" "$PLIST" 2>/dev/null || $P -c "Add :CFBundleVersion string $BUILD_NUMBER" "$PLIST"
-          $P -c "Set :CFBundleShortVersionString 1.9.0" "$PLIST" 2>/dev/null || $P -c "Add :CFBundleShortVersionString string 1.9.0" "$PLIST"
+          $P -c "Set :CFBundleShortVersionString 1.9.1" "$PLIST" 2>/dev/null || $P -c "Add :CFBundleShortVersionString string 1.9.1" "$PLIST"
 
           echo "Build number: $BUILD_NUMBER"
 

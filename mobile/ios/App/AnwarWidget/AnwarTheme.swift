@@ -107,6 +107,7 @@ struct AnwarBadge: View {
             Image(systemName: "moon.stars.fill")
                 .font(.system(size: 9))
             Text(title).font(.system(size: 10, weight: .semibold))
+                .lineLimit(1).minimumScaleFactor(0.8)   // أسماء التصنيفات قد تطول
         }
         .foregroundStyle(T.accent.c(scheme))
     }
